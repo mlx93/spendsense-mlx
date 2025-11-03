@@ -1,7 +1,4 @@
 // Explicit health check endpoint for /api/health
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(_req: any, res: any) {
   res.json({ status: 'ok' });
 }
-
