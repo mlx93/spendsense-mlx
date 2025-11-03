@@ -21,39 +21,96 @@
 ## 🔧 Required Setup Before Implementation
 
 ### 1. Project Structure
-Create the folder structure as specified in Architecture PRD:
+Create the folder structure as specified in Architecture PRD (lines 103-207):
 
 ```
 backend/
   src/
-    server.ts              # Main Express server
-    routes/                # API routes
-    services/              # Business logic
-      signals/             # Signal detection
-      personas/             # Persona assignment
-      recommend/            # Recommendation engine
-      chat/                 # Chat/LLM integration
-    middleware/             # Auth, consent, validation
-    utils/                  # Helpers
+    server.ts              # Express app entry point
+    ingest/                # Data loading and validation (per spec)
+      csvLoader.ts
+      jsonLoader.ts
+      plaidValidator.ts
+      index.ts
+    features/              # Signal detection and feature engineering (per spec)
+      subscriptionDetector.ts
+      savingsAnalyzer.ts
+      creditAnalyzer.ts
+      incomeStabilityAnalyzer.ts
+      index.ts
+    personas/              # Persona assignment logic (per spec)
+      scoringEngine.ts
+      personaDefinitions.ts
+      index.ts
+    recommend/             # Recommendation engine (per spec)
+      contentMatcher.ts
+      offerMatcher.ts
+      rationaleGenerator.ts
+      agenticReview.ts
+      index.ts
+    guardrails/            # Consent, eligibility, tone checks (per spec)
+      consentManager.ts
+      eligibilityChecker.ts
+      toneValidator.ts
+      toneBlocklist.ts
+      index.ts
+    ui/                    # API routes and operator view (per spec)
+      routes/
+        auth.ts
+        users.ts
+        profile.ts
+        recommendations.ts
+        chat.ts
+        operator.ts
+      middleware/
+        auth.middleware.ts
+        consent.middleware.ts
+        errorHandler.middleware.ts
+      index.ts
+    eval/                  # Evaluation harness (per spec)
+      coverageMetrics.ts
+      explainabilityMetrics.ts
+      latencyMetrics.ts
+      auditabilityMetrics.ts
+      index.ts
+    shared/                # Shared utilities and types
+      types.ts
+      dateUtils.ts
+      constants.ts
   prisma/
     schema.prisma          # Database schema
     seed.ts                # Data generator
     migrations/            # Auto-generated
-  tests/
-    unit/
-    integration/
-  scripts/
+  tests/                   # Unit and integration tests
+    features/
+    personas/
+    recommend/
+    guardrails/
+  scripts/                 # Utility scripts (at backend root, not in src)
     export-csv.ts
     export-json.ts
     export-parquet.ts
     eval-harness.ts
 frontend/
   src/
-    components/
-    pages/
-    hooks/
-    services/              # API client
-    utils/
+    components/            # React components
+      Dashboard/
+      Chat/
+      Calculators/
+      Operator/            # Operator/Admin components
+      common/
+    pages/                 # Page-level components
+      DashboardPage.tsx
+      InsightsPage.tsx
+      LibraryPage.tsx
+      SettingsPage.tsx
+      OperatorPage.tsx     # Admin dashboard
+    hooks/                 # Custom React hooks
+    lib/                   # API client, utilities
+      apiClient.ts
+      authContext.tsx
+    styles/
+    App.tsx
   public/
   dist/                    # Build output
 ```
@@ -344,12 +401,18 @@ const DATA_SEED = process.env.DATA_SEED || '1337';
 async function main() {
   console.log(`Seeding with DATA_SEED=${DATA_SEED}`);
   
-  // TODO: Implement data generator per Reqs PRD Section 1
-  // - Generate 50-100 synthetic users
-  // - Create accounts (checking, savings, credit_card, etc.)
-  // - Generate transactions (30-90 days)
-  // - Create liabilities (credit cards, loans)
-  // - Use fixed seed for determinism
+  // TODO: Implement data generator per Reqs PRD Section 1 and Architecture PRD Phase 2-8
+  // Phase 1: Generate 100 users (20 per persona)
+  // Phase 2: Generate accounts (1-4 per user, ~250 total)
+  // Phase 3: Generate transactions (2 years history, ~50K total)
+  // Phase 4: Generate liabilities (credit cards, loans, ~150 total)
+  // Phase 5: Optional Parquet export (analytics only)
+  // Phase 6: Run signal detection for all users (use features/ services)
+  // Phase 7: Assign personas to all users (use personas/ services)
+  // Phase 8: Generate recommendations for all users (use recommend/ services)
+  // - Use fixed seed (DATA_SEED=1337) for determinism
+  // - Use faker.js for fake names (no real PII)
+  // - Generate Plaid-compatible data structure
   
   console.log('Seed completed');
 }
