@@ -28,7 +28,13 @@ app.use('/api/operator', operatorRoutes);
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// For Vercel serverless functions, export the app
+export default app;
+
+// For local development, start the server
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
 

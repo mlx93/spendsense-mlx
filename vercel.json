@@ -2,18 +2,14 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/src/server.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/$1"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ],
   "functions": {
-    "backend/src/server.ts": {
+    "api/**/*.ts": {
       "runtime": "@vercel/node",
       "maxDuration": 30
     }
