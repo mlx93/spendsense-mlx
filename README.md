@@ -520,7 +520,7 @@ vercel --prod
 
 1. Go to [vercel.com](https://vercel.com)
 2. Click "Add New Project"
-3. Import your GitHub repository: `mlx93/SpendSense`
+3. Import your GitHub repository: `mlx93/spendsense-mlx`
 4. Configure project settings:
    - **Framework Preset:** Other
    - **Root Directory:** `./` (root)
