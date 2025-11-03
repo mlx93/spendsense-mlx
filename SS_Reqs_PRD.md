@@ -960,12 +960,12 @@ Provide internal oversight interface for compliance, QA, and debugging. Operator
   - Relevance score = (persona_fit_match ? 1 : 0) * 0.7 + (signal_overlap_ratio) * 0.3
   - persona_fit_match: 1 if content `persona_fit` includes primary persona; else 0
   - signal_overlap_ratio: fraction of content `signals` present in user's detected signals (0-1)
- - **Calculation Example:**
+- **Calculation Example:**
   - User: Primary persona = High Utilization
   - Content: persona_fit = ["high_utilization"], signals = ["high_utilization", "interest_charges"]
   - User has both signals present
   - Relevance = (1 * 0.7) + (1.0 * 0.3) = 1.0 (perfect match)
- - **Target:** Average relevance score ≥ 0.7 across all recommendations
+- **Target:** Average relevance score ≥ 0.7 across all recommendations
 
 **Latency Measurement:**
 - Time from API request to response for GET /api/recommendations/{user_id}

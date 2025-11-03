@@ -1822,11 +1822,11 @@ For each generated recommendation:
 - [ ] Build operator API endpoints:
 - [ ] GET /api/operator/review (approval queue - matches prompt)
 - [ ] GET /api/operator/dashboard (full dashboard stats - additional)
-- [ ] GET /api/operator/users (with pagination)
-- [ ] GET /api/operator/user/:userId
-- [ ] POST /api/operator/recommendation/:id/hide
-- [ ] POST /api/operator/recommendation/:id/approve
-- [ ] POST /api/operator/user/:userId/persona-override
+  - [ ] GET /api/operator/users (with pagination)
+  - [ ] GET /api/operator/user/:userId
+  - [ ] POST /api/operator/recommendation/:id/hide
+  - [ ] POST /api/operator/recommendation/:id/approve
+  - [ ] POST /api/operator/user/:userId/persona-override
 - [ ] Implement audit trail logging for all operator actions
 - [ ] Write comprehensive test suite
   - [ ] Unit tests: signal detection (5 tests)
