@@ -1,0 +1,13 @@
+{
+  "id": "edu_budgeting_irregular_income",
+  "title": "How to Budget on Irregular Income",
+  "source": "CFPB",
+  "url": "https://www.consumerfinance.gov/consumer-tools/budgeting/irregular-income/",
+  "excerpt": "Budgeting strategies for freelancers, gig workers, and anyone with variable income streams.",
+  "tags": ["budgeting", "variable_income", "freelance", "emergency_fund"],
+  "persona_fit": ["variable_income"],
+  "signals": ["variable_income", "low_savings"],
+  "editorial_summary": "This guide from the Consumer Financial Protection Bureau provides practical budgeting strategies for people with irregular income. It covers calculating your average monthly income, creating a baseline budget, prioritizing expenses, building an emergency fund, and using percentage-based budgets. The content is designed for freelancers, gig workers, and seasonal employees who face income unpredictability. It emphasizes the importance of building a cash buffer to smooth out income fluctuations.",
+  "editorial_priority": 10
+}
+

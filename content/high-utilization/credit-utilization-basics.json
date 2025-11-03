@@ -1,0 +1,13 @@
+{
+  "id": "edu_credit_utilization_basics",
+  "title": "Understanding Credit Utilization",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/credit-scores/credit-utilization-rate-calculator",
+  "excerpt": "Credit utilization is the percentage of your available credit that you're using. It's a key factor in your credit score.",
+  "tags": ["credit", "utilization", "credit_score", "debt"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "interest_charges"],
+  "editorial_summary": "This article explains how credit utilization works and why keeping it below 30% can help improve your credit score. It covers how utilization is calculated, its impact on credit scores, and practical strategies to lower it. The content is written in plain language and includes examples of how paying down balances affects utilization ratios.",
+  "editorial_priority": 10
+}
+

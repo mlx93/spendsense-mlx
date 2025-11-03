@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Educational Content Metadata Schema",
+  "description": "Schema for pre-tagged educational content catalog entries",
+  "type": "object",
+  "required": ["id", "title", "source", "url", "tags", "persona_fit", "signals", "editorial_summary"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the content item",
+      "pattern": "^edu_[a-z0-9_]+$"
+    },
+    "title": {
+      "type": "string",
+      "description": "Article title",
+      "minLength": 5,
+      "maxLength": 200
+    },
+    "source": {
+      "type": "string",
+      "description": "Source publication (e.g., NerdWallet, Investopedia, CFPB)",
+      "enum": ["NerdWallet", "Investopedia", "CFPB", "Khan Academy", "Other"]
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "External URL to the full article"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short preview text (optional, for display)",
+      "maxLength": 300
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Relevant topic tags (e.g., credit, utilization, debt)",
+      "minItems": 1
+    },
+    "persona_fit": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["high_utilization", "variable_income", "subscription_heavy", "savings_builder", "net_worth_maximizer"]
+      },
+      "description": "Personas this content is relevant for",
+      "minItems": 1
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["high_utilization", "interest_charges", "is_overdue", "minimum_payment_only", "subscription_heavy", "low_savings", "variable_income", "savings_growth", "low_utilization"]
+      },
+      "description": "Behavioral signals this content addresses",
+      "minItems": 1
+    },
+    "editorial_summary": {
+      "type": "string",
+      "description": "Human-authored 100-word summary of the content",
+      "minLength": 50,
+      "maxLength": 500
+    },
+    "editorial_priority": {
+      "type": "integer",
+      "description": "Sorting priority (lower = higher priority, optional)",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 50
+    }
+  }
+}
+

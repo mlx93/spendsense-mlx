@@ -1,0 +1,13 @@
+{
+  "id": "edu_subscription_audit_guide",
+  "title": "How to Audit Your Subscriptions and Save Money",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/finance/how-to-cancel-subscriptions",
+  "excerpt": "A step-by-step guide to identifying, evaluating, and canceling unused subscriptions.",
+  "tags": ["subscriptions", "saving_money", "budgeting", "expenses"],
+  "persona_fit": ["subscription_heavy"],
+  "signals": ["subscription_heavy"],
+  "editorial_summary": "This article helps readers identify all their recurring subscriptions, evaluate which ones they actually use, and cancel the ones they don't need. It includes tips for finding hidden subscriptions, negotiating better rates, and using subscription management tools. The guide emphasizes that small monthly charges can add up to significant annual savings. It provides templates and checklists to make the audit process systematic and thorough.",
+  "editorial_priority": 10
+}
+

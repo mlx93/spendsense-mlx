@@ -1,0 +1,13 @@
+{
+  "id": "edu_high_yield_savings",
+  "title": "High-Yield Savings Accounts: What You Need to Know",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/banking/high-yield-savings-account",
+  "excerpt": "Learn how high-yield savings accounts can help your money grow faster than traditional savings.",
+  "tags": ["savings", "interest_rates", "investment", "financial_optimization"],
+  "persona_fit": ["savings_builder", "net_worth_maximizer"],
+  "signals": ["savings_growth", "low_utilization"],
+  "editorial_summary": "This article explains high-yield savings accounts (HYSAs) and how they differ from traditional savings accounts. It covers current APY rates, how to choose an HYSA, FDIC insurance, and when an HYSA makes sense vs. other savings vehicles. The content is designed for people who already have emergency funds and want to optimize their cash holdings. It emphasizes that HYSAs are low-risk ways to earn more interest on cash that might otherwise sit in a checking account.",
+  "editorial_priority": 15
+}
+

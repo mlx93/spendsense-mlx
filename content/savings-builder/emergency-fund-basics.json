@@ -1,0 +1,13 @@
+{
+  "id": "edu_emergency_fund_basics",
+  "title": "How to Build an Emergency Fund",
+  "source": "Investopedia",
+  "url": "https://www.investopedia.com/terms/e/emergency_fund.asp",
+  "excerpt": "Learn why emergency funds matter and how to build one step by step.",
+  "tags": ["emergency_fund", "savings", "financial_planning", "safety"],
+  "persona_fit": ["savings_builder", "variable_income"],
+  "signals": ["low_savings", "savings_growth"],
+  "editorial_summary": "This article explains the importance of emergency funds and provides a step-by-step guide to building one. It covers how much to save (typically 3-6 months of expenses), where to keep the money (high-yield savings accounts), and how to start small. The content addresses common questions like whether to prioritize emergency fund vs. debt payoff, and how to rebuild an emergency fund after using it. It emphasizes that emergency funds provide financial security and reduce stress during unexpected events.",
+  "editorial_priority": 10
+}
+

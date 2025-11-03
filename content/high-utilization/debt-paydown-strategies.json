@@ -1,0 +1,13 @@
+{
+  "id": "edu_debt_paydown_strategies",
+  "title": "How to Pay Off Credit Card Debt: 5 Strategies That Work",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/credit-cards/how-to-pay-off-credit-card-debt",
+  "excerpt": "Learn proven strategies for paying off credit card debt, including the debt avalanche and debt snowball methods.",
+  "tags": ["debt", "credit_cards", "payoff", "strategy"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "interest_charges", "minimum_payment_only"],
+  "editorial_summary": "This comprehensive guide covers five effective strategies for paying off credit card debt. It explains the debt avalanche method (paying highest interest first), the debt snowball method (paying smallest balance first), balance transfers, debt consolidation, and negotiating with creditors. Each strategy includes pros and cons, helping readers choose the approach that fits their situation. The article emphasizes the importance of stopping new charges while paying down debt.",
+  "editorial_priority": 15
+}
+
