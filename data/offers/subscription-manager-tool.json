@@ -1,0 +1,17 @@
+{
+  "id": "subscription_manager_tool",
+  "title": "Subscription Management Tool",
+  "description": "Track and cancel unused subscriptions automatically. Get alerts before charges and negotiate better rates. Save an average of $50/month.",
+  "category": "subscription_manager",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 25000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["subscription_heavy"],
+    "exclude_if_has_account": ["subscription_manager_tool"]
+  },
+  "persona_fit": ["subscription_heavy"],
+  "url": "https://partner.example.com/subscription-manager"
+}
+

@@ -1,0 +1,18 @@
+{
+  "id": "certificate_of_deposit",
+  "title": "High-Yield Certificate of Deposit",
+  "description": "Lock in competitive interest rates with a CD. Terms from 6 months to 5 years. FDIC insured. Minimum deposit $1,000.",
+  "category": "savings_account",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 50000},
+      {"field": "max_utilization", "operator": "<", "value": 0.2},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["savings_growth", "low_utilization"],
+    "exclude_if_has_account": ["certificate_of_deposit"]
+  },
+  "persona_fit": ["savings_builder", "net_worth_maximizer"],
+  "url": "https://partner.example.com/certificate-of-deposit"
+}
+

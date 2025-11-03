@@ -1,0 +1,17 @@
+{
+  "id": "round_up_savings_app",
+  "title": "Round-Up Savings App",
+  "description": "Automatically round up purchases to the nearest dollar and save the difference. Easy way to build savings without noticing.",
+  "category": "savings_app",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 25000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["low_savings"],
+    "exclude_if_has_account": ["round_up_savings_app"]
+  },
+  "persona_fit": ["variable_income", "savings_builder"],
+  "url": "https://partner.example.com/round-up-savings"
+}
+

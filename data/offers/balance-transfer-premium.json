@@ -1,0 +1,19 @@
+{
+  "id": "balance_transfer_premium",
+  "title": "0% APR Balance Transfer Card",
+  "description": "Transfer high-interest credit card balances and save on interest charges. 0% introductory APR for 18 months on balance transfers.",
+  "category": "credit_card",
+  "eligibility": {
+    "rules": [
+      {"field": "max_utilization", "operator": ">=", "value": 0.5},
+      {"field": "annual_income", "operator": ">=", "value": 40000},
+      {"field": "interest_charges_present", "operator": "==", "value": true},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["high_utilization"],
+    "exclude_if_has_account": ["balance_transfer_card"]
+  },
+  "persona_fit": ["high_utilization"],
+  "url": "https://partner.example.com/balance-transfer"
+}
+

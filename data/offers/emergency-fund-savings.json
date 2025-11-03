@@ -1,0 +1,18 @@
+{
+  "id": "emergency_fund_savings",
+  "title": "Emergency Fund Savings Account",
+  "description": "Dedicated savings account for your emergency fund with automatic transfers and goal tracking. Earn competitive interest.",
+  "category": "savings_account",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 30000},
+      {"field": "max_utilization", "operator": "<", "value": 0.4},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["low_savings", "savings_growth"],
+    "exclude_if_has_account": ["emergency_fund_savings"]
+  },
+  "persona_fit": ["variable_income", "savings_builder"],
+  "url": "https://partner.example.com/emergency-fund"
+}
+

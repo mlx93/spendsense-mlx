@@ -1,0 +1,17 @@
+{
+  "id": "bill_negotiation_service",
+  "title": "Bill Negotiation Service",
+  "description": "Automatically negotiate lower rates on your recurring bills (cable, internet, phone). Save an average of $300/year. Pay only if we save you money.",
+  "category": "financial_service",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 30000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["subscription_heavy"],
+    "exclude_if_has_account": ["bill_negotiation_service"]
+  },
+  "persona_fit": ["subscription_heavy"],
+  "url": "https://partner.example.com/bill-negotiation"
+}
+

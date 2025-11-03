@@ -1,0 +1,18 @@
+{
+  "id": "credit_builder_loan",
+  "title": "Credit Builder Loan",
+  "description": "Build or rebuild credit with a secured loan. Payments are held in savings account and released at end of term. Reports to all three credit bureaus.",
+  "category": "personal_loan",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 25000},
+      {"field": "max_utilization", "operator": ">=", "value": 0.5},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["high_utilization"],
+    "exclude_if_has_account": ["credit_builder_loan"]
+  },
+  "persona_fit": ["high_utilization"],
+  "url": "https://partner.example.com/credit-builder"
+}
+

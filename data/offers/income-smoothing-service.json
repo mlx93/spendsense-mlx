@@ -1,0 +1,17 @@
+{
+  "id": "income_smoothing_service",
+  "title": "Income Smoothing Service",
+  "description": "Automatically save a percentage of variable income during high months and distribute during low months. Free for first 3 months.",
+  "category": "financial_service",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 30000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["variable_income"],
+    "exclude_if_has_account": ["income_smoothing_service"]
+  },
+  "persona_fit": ["variable_income"],
+  "url": "https://partner.example.com/income-smoothing"
+}
+

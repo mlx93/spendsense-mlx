@@ -363,7 +363,7 @@ Example for Persona 1 (High Utilization):
 
 #### 4.2 Content Catalog
 
-**Educational Content (curated, ~3–5 vetted links per persona):**
+**Educational Content (curated, 6 vetted links per persona = 30 total):**
 
 **Content Storage Format (pre-tagged JSON, no scraping):**
 ```
@@ -383,7 +383,7 @@ Example for Persona 1 (High Utilization):
 **Content Catalog Policy:**
 - Hand-authored metadata only (tags, persona_fit, signals, summary). No web scraping.
 - No LLM analysis for ranking or persona affinity. Relevance is rules-based via tags/persona_fit/signals.
-- Keep a small, vetted catalog for the sprint; expand later.
+- 30 total articles (6 per persona) to match prompt requirement.
 
 **Partner Offers (15-20 total):**
 
@@ -694,7 +694,7 @@ When user first opens chat, display suggested questions:
 If user has not consented, show: "Enable personalized insights by allowing SpendSense to analyze your data."
 
 **Consent Enforcement (Gating):**
-- Consent is enforced on all compute and read paths: `GET /profile/:userId`, `GET /recommendations/:userId` (including `?refresh=true`).
+- Consent is enforced on all compute and read paths: `GET /api/profile/:userId`, `GET /api/recommendations/:userId` (including `?refresh=true`).
 - Revocation immediately halts processing and clears recommendations; recomputation is blocked until consent is re-enabled.
 - Operator-triggered generation or recomputation actions are blocked for users without consent.
 
@@ -968,7 +968,7 @@ Provide internal oversight interface for compliance, QA, and debugging. Operator
  - **Target:** Average relevance score ≥ 0.7 across all recommendations
 
 **Latency Measurement:**
-- Time from API request to response for GET /recommendations/{user_id}
+- Time from API request to response for GET /api/recommendations/{user_id}
 - Measure on laptop (not cloud VM)
 - Target: <5 seconds per user
 
@@ -1018,7 +1018,7 @@ JSON file per user containing:
 
 - Subscription cadence detection (recurring merchants, cadence tolerances)
 - Credit utilization flags and tiers; min-payment-only detection; interest presence
-- Consent gating on `/profile` and `/recommendations` (incl. `?refresh=true`)
+- Consent gating on `/api/profile` and `/api/recommendations` (incl. `?refresh=true`)
 - Offer eligibility rules (first-order signals only; existing-account filters)
 - Tone blocklist enforcement (unit test fails on prohibited phrases)
 - Rationale template variable substitution and shape

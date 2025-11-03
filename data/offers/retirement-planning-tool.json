@@ -1,0 +1,18 @@
+{
+  "id": "retirement_planning_tool",
+  "title": "Retirement Planning Calculator",
+  "description": "Calculate how much you need to save for retirement and track your progress. Includes investment recommendations and tax optimization strategies.",
+  "category": "financial_planning",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 50000},
+      {"field": "max_utilization", "operator": "<", "value": 0.2},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["savings_growth", "low_utilization"],
+    "exclude_if_has_account": ["retirement_planning_tool"]
+  },
+  "persona_fit": ["net_worth_maximizer"],
+  "url": "https://partner.example.com/retirement-planning"
+}
+

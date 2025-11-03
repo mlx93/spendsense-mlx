@@ -1,0 +1,17 @@
+{
+  "id": "credit_monitoring_service",
+  "title": "Credit Monitoring Service",
+  "description": "Monitor your credit score and get alerts for changes. Includes identity theft protection and credit report access.",
+  "category": "credit_monitoring",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 25000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["high_utilization"],
+    "exclude_if_has_account": ["credit_monitoring_service"]
+  },
+  "persona_fit": ["high_utilization"],
+  "url": "https://partner.example.com/credit-monitoring"
+}
+

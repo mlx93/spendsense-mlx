@@ -1,0 +1,18 @@
+{
+  "id": "high_yield_savings_account",
+  "title": "High-Yield Savings Account",
+  "description": "Earn competitive APY on your savings with no monthly fees and easy access to your funds. FDIC insured up to $250,000.",
+  "category": "savings_account",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 30000},
+      {"field": "max_utilization", "operator": "<", "value": 0.5},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["savings_growth", "low_utilization"],
+    "exclude_if_has_account": ["high_yield_savings_account"]
+  },
+  "persona_fit": ["savings_builder", "net_worth_maximizer"],
+  "url": "https://partner.example.com/high-yield-savings"
+}
+

@@ -1,0 +1,18 @@
+{
+  "id": "cash_back_credit_card",
+  "title": "Cash Back Rewards Credit Card",
+  "description": "Earn cash back on everyday purchases. No annual fee. Perfect for responsible credit card users who pay in full each month.",
+  "category": "credit_card",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 40000},
+      {"field": "max_utilization", "operator": "<", "value": 0.3},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["low_utilization"],
+    "exclude_if_has_account": ["cash_back_credit_card"]
+  },
+  "persona_fit": ["savings_builder", "net_worth_maximizer"],
+  "url": "https://partner.example.com/cash-back-card"
+}
+

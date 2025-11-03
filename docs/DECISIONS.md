@@ -144,8 +144,8 @@ const creditUtilizationTemplate =
 
 **Implementation:**
 - Consent middleware checks `consent_status` before:
-  - `GET /profile/:userId`
-  - `GET /recommendations/:userId` (including `?refresh=true`)
+  - `GET /api/profile/:userId`
+  - `GET /api/recommendations/:userId` (including `?refresh=true`)
   - Operator-triggered generation/recompute actions
 - If `consent_status=false`, return 403 with message: "Enable personalized insights by allowing SpendSense to analyze your data."
 
@@ -223,6 +223,92 @@ const creditUtilizationTemplate =
 - On refresh, compare current data with cached values.
 - Only recompute signals/personas that changed.
 - Avoid full recompute unless cache missing or schema version changed.
+
+---
+
+## Implementation Notes
+
+### Rationale Template Library
+
+**Status:** To be implemented during recommendation engine development
+
+**Action Required:**
+- Create template library in `/backend/src/recommend/rationaleTemplates.ts` during recommendation engine implementation.
+- Define templates for each recommendation type (education content, offers) with variable placeholders.
+- Templates should cite concrete data points (e.g., `{card_name}`, `{utilization}%`, `${balance}`, `${limit}`, `${interest_monthly}`).
+- Use string interpolation to fill templates with user-specific data from signals and account details.
+- Store `rationale_template_id` in recommendation's `decision_trace` for auditability.
+
+**Example Template Structure:**
+```typescript
+const templates = {
+  credit_utilization_v1: 
+    "We noticed your {card_name} ending in {last_four} is at {utilization}% utilization (${balance} of ${limit} limit). Bringing this below 30% could improve your credit score and reduce interest charges of ${interest_monthly}/month.",
+  // ... more templates
+};
+```
+
+---
+
+### Calculator Data Flow
+
+**Status:** To be implemented during frontend development
+
+**Action Required:**
+- Calculators (e.g., credit utilization calculator, emergency fund calculator) should fetch data from `GET /api/profile/:userId` endpoint.
+- The `/api/profile/:userId` endpoint returns user's behavioral profile including:
+  - Signals (credit, savings, income, subscriptions)
+  - Personas (primary and secondary)
+  - Account details (balances, limits, utilization)
+- Pre-fill calculator inputs with user's actual data from the profile response.
+- Ensure calculators are consent-gated (only show/function if user has consented).
+
+**Data Flow:**
+```
+User opens calculator → Frontend calls GET /api/profile/:userId → 
+Extract relevant data (e.g., credit utilization, savings balance) → 
+Pre-fill calculator inputs → User can modify values if desired
+```
+
+---
+
+### Decision Trace Export
+
+**Status:** To be implemented during evaluation harness development
+
+**Action Required:**
+- Evaluation harness must export per-user decision traces as specified in Reqs PRD Section 8.3 (Auditability).
+- Each recommendation includes a `decision_trace` JSON field with:
+  - `signals_snapshot`: Snapshot of signals used for recommendation
+  - `persona_scores`: Primary and secondary persona scores
+  - `rule_path`: Array of rules applied (e.g., `["content_filter:persona_fit", "eligibility:utilization>=0.5"]`)
+  - `eligibility_results`: Pass/fail status and failed rules
+  - `rationale_template_id`: Template used for rationale generation
+  - `generated_at`: Timestamp of recommendation generation
+- Export decision traces in evaluation harness output:
+  - JSON format: Include `decision_traces` array per user
+  - CSV format: Include decision trace summary columns
+- Ensure 100% of recommendations have complete decision traces (auditability target).
+
+**Export Format:**
+```json
+{
+  "user_id": "user_123",
+  "recommendations": [
+    {
+      "id": "rec_456",
+      "decision_trace": {
+        "signals_snapshot": {...},
+        "persona_scores": {...},
+        "rule_path": [...],
+        "eligibility_results": {...},
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-03T10:00:00Z"
+      }
+    }
+  ]
+}
+```
 
 ---
 

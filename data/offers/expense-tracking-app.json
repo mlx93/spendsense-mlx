@@ -1,0 +1,17 @@
+{
+  "id": "expense_tracking_app",
+  "title": "Expense Tracking App",
+  "description": "Track all your expenses in one place with automatic categorization and spending insights. Free for 6 months.",
+  "category": "budgeting_app",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 20000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["variable_income"],
+    "exclude_if_has_account": ["expense_tracking_app"]
+  },
+  "persona_fit": ["variable_income"],
+  "url": "https://partner.example.com/expense-tracking"
+}
+

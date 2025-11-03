@@ -401,28 +401,29 @@ npm run eval:report
 **Base URL:** `http://localhost:3000/api`
 
 ### Authentication
-- `POST /api/auth/register` - Create user account
-- `POST /api/auth/login` - Login with email/password
+- `POST /api/users` - Create user account (matches prompt `POST /users` with `/api` prefix)
+- `POST /api/auth/login` - Login with email/password (additional)
 
 ### User & Consent
-- `POST /api/consent` - Record or update consent
-- `GET /api/users/me` - Get current user profile
+- `POST /api/consent` - Record or update consent (matches prompt `POST /consent` with `/api` prefix)
+- `GET /api/users/me` - Get current user profile (additional)
 
 ### Profile & Recommendations
-- `GET /api/profile/:userId` - Get behavioral profile (signals, personas)
-- `GET /api/recommendations/:userId` - Get recommendations (with `?refresh=true` for recompute)
-- `POST /api/recommendations/:recommendationId/feedback` - Record user action
+- `GET /api/profile/:userId` - Get behavioral profile (signals, personas) - matches prompt `GET /profile/{user_id}` with `/api` prefix
+- `GET /api/recommendations/:userId` - Get recommendations (with `?refresh=true` for recompute) - matches prompt `GET /recommendations/{user_id}` with `/api` prefix
+- `POST /api/feedback` - Record user action on recommendation - matches prompt `POST /feedback` with `/api` prefix (pass `recommendation_id` in body)
 
 ### Chat
-- `POST /api/chat` - Send message to chat assistant
+- `POST /api/chat` - Send message to chat assistant (additional)
 
 ### Operator
-- `GET /api/operator/dashboard` - Operator dashboard overview
-- `GET /api/operator/users` - List all users
-- `GET /api/operator/user/:userId` - Get detailed user profile
-- `POST /api/operator/recommendation/:recommendationId/hide` - Hide recommendation
-- `POST /api/operator/recommendation/:recommendationId/approve` - Approve flagged recommendation
-- `POST /api/operator/user/:userId/persona-override` - Override persona assignment
+- `GET /api/operator/review` - Operator approval queue (flagged recommendations) - matches prompt `GET /operator/review` with `/api` prefix
+- `GET /api/operator/dashboard` - Operator dashboard overview (additional)
+- `GET /api/operator/users` - List all users (additional)
+- `GET /api/operator/user/:userId` - Get detailed user profile (additional)
+- `POST /api/operator/recommendation/:recommendationId/hide` - Hide recommendation (additional)
+- `POST /api/operator/recommendation/:recommendationId/approve` - Approve flagged recommendation (additional)
+- `POST /api/operator/user/:userId/persona-override` - Override persona assignment (additional)
 
 See `SS_Architecture_PRD.md` for complete API documentation.
 
@@ -517,35 +518,57 @@ vercel --prod
 
 **Option 2: Deploy via GitHub Integration**
 
-1. Go to [vercel.com](https://vercel.com)
-2. Click "Add New Project"
+1. Go to [vercel.com](https://vercel.com) and sign in
+2. Click **"Add New Project"**
 3. Import your GitHub repository: `mlx93/spendsense-mlx`
-4. Configure project settings:
-   - **Framework Preset:** Other
-   - **Root Directory:** `./` (root)
+4. **Configure Framework Preset (during import):**
+   - **Framework Preset:** Select "Other" (or "Other" if not listed)
+   - **Root Directory:** Leave as `./` (root)
    - **Build Command:** `npm run build`
    - **Output Directory:** `frontend/dist`
-5. Add environment variables in Vercel dashboard:
+   - **Install Command:** `npm install` (auto-detected)
+   
+   **Note:** If you need to change the Framework Preset after import:
+   - Go to **Project Settings** → **General** → **Framework Preset**
+   - Change to "Other" if needed
+
+5. **Add Environment Variables:**
+   - During import, click **"Environment Variables"** or
+   - After import, go to **Project Settings** → **Environment Variables**
+   - Add the following variables (click "Add" for each):
+   
+   **Required Variables:**
    ```
-   DATABASE_URL=file:./spendsense.db
-   JWT_SECRET=<generate-secure-random-string>
+   DATABASE_URL=/tmp/spendsense.db
+   JWT_SECRET=<generate-secure-random-string-here>
    JWT_EXPIRES_IN=24h
    USE_LLM_STUB=true
    DATA_SEED=1337
-   NODE_ENV=production
-   OPENAI_API_KEY=sk-... (if USE_LLM_STUB=false)
    ```
-6. Click "Deploy"
+   
+   **Optional (if using OpenAI API):**
+   ```
+   OPENAI_API_KEY=sk-... (only if USE_LLM_STUB=false)
+   ```
+   
+   **Note:** `NODE_ENV` is automatically set by Vercel to `production` - you don't need to add it manually.
+
+6. Click **"Deploy"**
 
 **Important Notes:**
-- **SQLite on Vercel:** SQLite files persist in `/tmp` directory on Vercel serverless functions, but they reset on redeploy. For production, consider migrating to Vercel Postgres or an external PostgreSQL database.
+- **SQLite on Vercel:** For Vercel serverless functions, use `DATABASE_URL=/tmp/spendsense.db` (not `file:./`). SQLite files in `/tmp` reset on redeploy. For production persistence, consider Vercel Postgres or an external PostgreSQL database.
+- **Generate JWT_SECRET:** Use a secure random string. You can generate one with:
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  ```
+  Or use an online generator: https://generate-secret.vercel.app/32
 - **Local Run Mode:** The assignment requires "run locally without external dependencies." Set `USE_LLM_STUB=true` to use deterministic mock responses.
-- **Custom Domain:** You can add a custom domain in Vercel Dashboard → Project → Settings → Domains.
+- **Custom Domain:** You can add a custom domain in **Project Settings** → **Domains**.
 
 **Environment Variables in Vercel:**
-- Go to Project → Settings → Environment Variables
-- Add all variables from `.env.example`
-- Set different values for Production, Preview, and Development if needed
+- **Location:** Project Settings → Environment Variables
+- **Scopes:** You can set different values for Production, Preview, and Development environments
+- **Add variables:** Click "Add" button, enter key and value, select environment(s), click "Save"
 
 **Deployment Status:**
 - Preview deployments: Created automatically for each push to feature branches

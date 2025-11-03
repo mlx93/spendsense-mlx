@@ -1,0 +1,18 @@
+{
+  "id": "roth_ira_account",
+  "title": "Roth IRA Investment Account",
+  "description": "Start investing for retirement with tax-free growth. Low minimum to open. Ideal for long-term wealth building.",
+  "category": "investment_account",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 60000},
+      {"field": "max_utilization", "operator": "<", "value": 0.1},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["savings_growth", "low_utilization"],
+    "exclude_if_has_account": ["roth_ira_account"]
+  },
+  "persona_fit": ["net_worth_maximizer"],
+  "url": "https://partner.example.com/roth-ira"
+}
+

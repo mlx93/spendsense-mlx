@@ -1,0 +1,19 @@
+{
+  "id": "debt_consolidation_loan",
+  "title": "Debt Consolidation Personal Loan",
+  "description": "Consolidate multiple credit card debts into one fixed-rate personal loan with lower interest and a single monthly payment.",
+  "category": "personal_loan",
+  "eligibility": {
+    "rules": [
+      {"field": "max_utilization", "operator": ">=", "value": 0.5},
+      {"field": "annual_income", "operator": ">=", "value": 45000},
+      {"field": "interest_charges_present", "operator": "==", "value": true},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["high_utilization"],
+    "exclude_if_has_account": ["debt_consolidation_loan"]
+  },
+  "persona_fit": ["high_utilization"],
+  "url": "https://partner.example.com/debt-consolidation"
+}
+

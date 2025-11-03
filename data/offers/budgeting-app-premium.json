@@ -1,0 +1,17 @@
+{
+  "id": "budgeting_app_premium",
+  "title": "Premium Budgeting App Subscription",
+  "description": "Advanced budgeting tools with automatic categorization, bill reminders, and spending analysis. Special offer: 3 months free.",
+  "category": "budgeting_app",
+  "eligibility": {
+    "rules": [
+      {"field": "annual_income", "operator": ">=", "value": 25000},
+      {"field": "is_overdue", "operator": "==", "value": false}
+    ],
+    "required_signals": ["variable_income", "subscription_heavy"],
+    "exclude_if_has_account": ["budgeting_app_premium"]
+  },
+  "persona_fit": ["variable_income", "subscription_heavy"],
+  "url": "https://partner.example.com/budgeting-app"
+}
+

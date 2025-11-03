@@ -454,12 +454,8 @@ Fields:
   - excerpt: Text (short preview)
   - markdown_content: Text (cached full content, nullable)
   - tags: JSON (array of strings)
-  - persona_affinity: JSON (object with persona scores)
-    Example: {
-      "high_utilization": 1.0,
-      "savings_builder": 0.3,
-      "net_worth_maximizer": 0.1
-    }
+  - persona_fit: JSON (array of persona types)
+    Example: ["high_utilization", "savings_builder"]
   - signals: JSON (array of signal types this content matches)
   - created_at: DateTime (auto)
   - updated_at: DateTime (auto)
@@ -884,7 +880,7 @@ Steps:
 
 ### 1. API Overview
 
-**Base URL:** `http://localhost:3000/api`
+**Base URL:** `http://localhost:3000/api` (standard REST API prefix; endpoints match prompt requirements with `/api` prefix)
 
 **Authentication:** JWT token in Authorization header: `Bearer <token>`
 
@@ -901,8 +897,8 @@ Steps:
 
 ### 2. Authentication Endpoints
 
-#### **POST /api/auth/register**
-Create new user account.
+#### **POST /api/users**
+Create new user account (matches prompt requirement `POST /users` with `/api` prefix).
 
 **Request:**
 ```json
@@ -935,7 +931,7 @@ Return user object and token
 ```
 
 #### **POST /api/auth/login**
-Login with email/password.
+Login with email/password (additional endpoint for authentication; register via `/api/users`).
 
 **Request:**
 ```json
@@ -969,7 +965,7 @@ Return user object and token
 ### 3. User & Consent Endpoints
 
 #### **POST /api/consent**
-Record or update user consent.
+Record or update user consent (matches prompt requirement `POST /consent` with `/api` prefix).
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -1000,7 +996,7 @@ Return updated consent status
 ```
 
 #### **GET /api/users/me**
-Get current user profile.
+Get current user profile (additional endpoint for convenience).
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -1019,7 +1015,7 @@ Get current user profile.
 ### 4. Profile & Signals Endpoint
 
 #### **GET /api/profile/:userId**
-Get user's behavioral profile (signals and personas).
+Get user's behavioral profile (signals and personas) - matches prompt requirement `GET /profile/{user_id}` with `/api` prefix.
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -1089,7 +1085,7 @@ Format and return profile data
 ### 5. Recommendations Endpoint
 
 #### **GET /api/recommendations/:userId**
-Get personalized recommendations for user.
+Get personalized recommendations for user - matches prompt requirement `GET /recommendations/{user_id}` with `/api` prefix.
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -1143,18 +1139,21 @@ For each recommendation:
 Return formatted recommendations with disclaimer
 ```
 
-#### **POST /api/recommendations/:recommendationId/feedback**
-Record user action on recommendation.
+#### **POST /api/feedback**
+Record user action on recommendation - matches prompt requirement `POST /feedback` with `/api` prefix.
 
 **Headers:** `Authorization: Bearer <token>`
 
 **Request:**
 ```json
 {
+  "recommendation_id": "rec_123",
   "action": "dismissed"
 }
 ```
 Actions: dismissed, completed, saved, clicked
+
+**Note:** Changed from path parameter to request body to match prompt's simpler endpoint structure.
 
 **Response (200):**
 ```json
@@ -1170,6 +1169,7 @@ Actions: dismissed, completed, saved, clicked
 **Pseudo Logic:**
 ```
 Authenticate user
+Extract recommendation_id from request body
 Verify user owns this recommendation
 Update recommendation.status based on action
 Create user_feedback record
@@ -1179,7 +1179,7 @@ Return updated recommendation
 ### 6. Chat Endpoint
 
 #### **POST /api/chat**
-Send message to chat assistant.
+Send message to chat assistant (additional endpoint for chat functionality).
 
 **Headers:** `Authorization: Bearer <token>`
 
@@ -1231,13 +1231,44 @@ Return assistant response and function call trace
 
 All operator actions are subject to consent gating; generation/recompute for a user is blocked if `consent_status=false`.
 
+#### **GET /api/operator/review**
+Get operator approval queue (flagged recommendations) - matches prompt requirement `GET /operator/review` with `/api` prefix.
+
+**Note:** This endpoint returns the flagged recommendations queue for operator review. For full dashboard stats, use `GET /api/operator/dashboard` (additional endpoint).
+
 #### **GET /api/operator/dashboard**
-Get operator dashboard overview with flagged items and system stats.
+Get operator dashboard overview with system stats (additional endpoint for full dashboard).
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
 
 **Response (200):**
+```json
+{
+  "flaggedRecommendations": [
+    {
+      "id": "rec_789",
+      "userId": "user_123",
+      "type": "offer",
+      "title": "Payday Loan Offer",
+      "rationale": "You should get this loan...",
+      "agenticReviewStatus": "flagged",
+      "agenticReviewReason": "Contains financial advice ('you should')",
+      "flaggedAt": "2025-11-03T10:30:00Z"
+    }
+  ],
+  "total": 3
+}
+```
+
+**Pseudo Logic:**
+```
+Authenticate operator role
+Query recommendations where agentic_review_status = 'flagged'
+Return flagged recommendations queue for review
+```
+
+**Response (200) for /operator/dashboard:**
 ```json
 {
   "stats": {
@@ -1251,32 +1282,12 @@ Get operator dashboard overview with flagged items and system stats.
       "savings_builder": 20,
       "net_worth_maximizer": 20
     }
-  },
-  "flaggedRecommendations": [
-    {
-      "id": "rec_789",
-      "userId": "user_123",
-      "type": "offer",
-      "title": "Payday Loan Offer",
-      "rationale": "You should get this loan...",
-      "agenticReviewStatus": "flagged",
-      "agenticReviewReason": "Contains financial advice ('you should')",
-      "flaggedAt": "2025-11-03T10:30:00Z"
-    }
-  ]
+  }
 }
 ```
 
-**Pseudo Logic:**
-```
-Authenticate operator role
-Query system stats (user counts, persona distribution)
-Query recommendations where agentic_review_status = 'flagged'
-Return dashboard data
-```
-
 #### **GET /api/operator/users**
-Get list of all users with persona summaries for oversight.
+Get list of all users with persona summaries for oversight (additional endpoint for operator management).
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
@@ -1309,7 +1320,7 @@ Get list of all users with persona summaries for oversight.
 ```
 
 #### **GET /api/operator/user/:userId**
-Get detailed user profile for operator review (signals, personas, recommendations).
+Get detailed user profile for operator review (signals, personas, recommendations) - additional endpoint for operator management.
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
@@ -1354,7 +1365,7 @@ Get detailed user profile for operator review (signals, personas, recommendation
 ```
 
 #### **POST /api/operator/recommendation/:recommendationId/hide**
-Hide recommendation from user (manual override).
+Hide recommendation from user (manual override) - additional endpoint for operator actions.
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
@@ -1390,7 +1401,7 @@ Return confirmation
 ```
 
 #### **POST /api/operator/recommendation/:recommendationId/approve**
-Approve flagged recommendation (make visible to user).
+Approve flagged recommendation (make visible to user) - additional endpoint for operator actions.
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
@@ -1418,7 +1429,7 @@ Approve flagged recommendation (make visible to user).
 ```
 
 #### **POST /api/operator/user/:userId/persona-override**
-Manually override persona assignment (for testing/debugging).
+Manually override persona assignment (for testing/debugging) - additional endpoint for operator actions.
 
 **Headers:** `Authorization: Bearer <token>`
 **Required Role:** operator
@@ -1596,7 +1607,7 @@ Returns: "I can help you understand your spending patterns. Try asking: [suggest
 ### 2. Content Catalog (Pre-Tagged Metadata)
 
 **Policy:**
-- Curate ~3–5 vetted links per persona from trusted sources (NerdWallet, Investopedia, CFPB).
+- Curate 6 vetted links per persona (30 total articles) from trusted sources (NerdWallet, Investopedia, CFPB).
 - Store hand-authored JSON metadata: `tags`, `persona_fit`, `signals`, `editorial_summary`.
 - No scraping and no LLM analysis for metadata or ranking.
 
@@ -1693,10 +1704,10 @@ For each generated recommendation:
   - [ ] Scoring algorithm for each persona
   - [ ] Rank top 2 personas per user
   - [ ] Store persona assignments
-- [ ] Curate 30 educational articles
+- [ ] Curate 30 educational articles (6 per persona)
   - [ ] Find articles from trusted sources
-  - [ ] Use LLM to generate metadata (tags, affinity scores)
-  - [ ] Store as markdown files with YAML frontmatter
+  - [ ] Hand-author metadata (tags, persona_fit, signals, editorial_summary) - no LLM analysis
+  - [ ] Store as JSON files with pre-tagged metadata
 - [ ] Create 15-20 partner offers (JSON files)
   - [ ] Define eligibility rules
   - [ ] Map to personas
@@ -1809,12 +1820,13 @@ For each generated recommendation:
     - [ ] Provide override reason
     - [ ] Apply and regenerate recommendations
 - [ ] Build operator API endpoints:
-  - [ ] GET /api/operator/dashboard
-  - [ ] GET /api/operator/users (with pagination)
-  - [ ] GET /api/operator/user/:userId
-  - [ ] POST /api/operator/recommendation/:id/hide
-  - [ ] POST /api/operator/recommendation/:id/approve
-  - [ ] POST /api/operator/user/:userId/persona-override
+- [ ] GET /api/operator/review (approval queue - matches prompt)
+- [ ] GET /api/operator/dashboard (full dashboard stats - additional)
+- [ ] GET /api/operator/users (with pagination)
+- [ ] GET /api/operator/user/:userId
+- [ ] POST /api/operator/recommendation/:id/hide
+- [ ] POST /api/operator/recommendation/:id/approve
+- [ ] POST /api/operator/user/:userId/persona-override
 - [ ] Implement audit trail logging for all operator actions
 - [ ] Write comprehensive test suite
   - [ ] Unit tests: signal detection (5 tests)
@@ -1867,11 +1879,13 @@ For each generated recommendation:
 ### 2. Integration Tests
 
 **API Endpoints (5 tests):**
-- Test POST /auth/register → creates user, returns token
-- Test GET /profile/:userId → returns signals and personas
-- Test GET /recommendations/:userId → returns recs with rationales
-- Test POST /consent → updates consent, clears recs if revoked
-- Test POST /chat → calls OpenAI, returns response
+- Test POST /api/users → creates user, returns token (matches prompt)
+- Test GET /api/profile/:userId → returns signals and personas (matches prompt)
+- Test GET /api/recommendations/:userId → returns recs with rationales (matches prompt)
+- Test POST /api/consent → updates consent, clears recs if revoked (matches prompt)
+- Test POST /api/feedback → records user action on recommendation (matches prompt)
+- Test GET /api/operator/review → returns flagged recommendations queue (matches prompt)
+- Test POST /api/chat → calls OpenAI, returns response (additional)
 
 **Auth Flow (2 tests):**
 - Test JWT validation middleware (valid token, expired token, no token)
