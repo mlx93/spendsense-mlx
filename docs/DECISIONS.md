@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Date:** November 3, 2025  
-**Project:** Platinum Project - Peak6 SpendSense
+**Project:** SpendSense
 
 ---
 

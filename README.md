@@ -2,8 +2,7 @@
 
 **Version:** 1.0  
 **Date:** November 3, 2025  
-**Project:** Platinum Project - Peak6 SpendSense  
-**Contact:** Bryce Harris - bharris@peak6.com
+**Project:** SpendSense
 
 ---
 
@@ -556,14 +555,13 @@ vercel --prod
 
 ## Contributing
 
-This is a project submission for Peak6. For questions or clarifications, contact:
-- **Bryce Harris** - bharris@peak6.com
+This is an open-source financial education platform project.
 
 ---
 
 ## License
 
-This project is a submission for Peak6's Platinum Project. All rights reserved.
+This project is licensed under the MIT License.
 
 ---
 

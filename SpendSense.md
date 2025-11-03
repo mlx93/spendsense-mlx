@@ -282,8 +282,7 @@ presentation Performance metrics and benchmarks Test cases and
 validation results Data model/schema documentation Evaluation report
 (JSON/CSV + summary)
 
-Technical Contact For questions or clarifications: Bryce Harris -
-bharris@peak6.com
+Technical Contact For questions or clarifications, please refer to the project documentation.
 
 Build Strategy Recommended phases: 
 
