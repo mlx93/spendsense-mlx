@@ -489,6 +489,71 @@ See `docs/DECISIONS.md` for prioritized roadmap.
 
 ---
 
+## Deployment
+
+### Vercel Deployment
+
+**Prerequisites:**
+- Vercel account (free tier is sufficient)
+- GitHub repository connected to Vercel
+
+**Option 1: Deploy via Vercel CLI**
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Link project (first time only)
+vercel link
+
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+**Option 2: Deploy via GitHub Integration**
+
+1. Go to [vercel.com](https://vercel.com)
+2. Click "Add New Project"
+3. Import your GitHub repository: `mlx93/SpendSense`
+4. Configure project settings:
+   - **Framework Preset:** Other
+   - **Root Directory:** `./` (root)
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `frontend/dist`
+5. Add environment variables in Vercel dashboard:
+   ```
+   DATABASE_URL=file:./spendsense.db
+   JWT_SECRET=<generate-secure-random-string>
+   JWT_EXPIRES_IN=24h
+   USE_LLM_STUB=true
+   DATA_SEED=1337
+   NODE_ENV=production
+   OPENAI_API_KEY=sk-... (if USE_LLM_STUB=false)
+   ```
+6. Click "Deploy"
+
+**Important Notes:**
+- **SQLite on Vercel:** SQLite files persist in `/tmp` directory on Vercel serverless functions, but they reset on redeploy. For production, consider migrating to Vercel Postgres or an external PostgreSQL database.
+- **Local Run Mode:** The assignment requires "run locally without external dependencies." Set `USE_LLM_STUB=true` to use deterministic mock responses.
+- **Custom Domain:** You can add a custom domain in Vercel Dashboard → Project → Settings → Domains.
+
+**Environment Variables in Vercel:**
+- Go to Project → Settings → Environment Variables
+- Add all variables from `.env.example`
+- Set different values for Production, Preview, and Development if needed
+
+**Deployment Status:**
+- Preview deployments: Created automatically for each push to feature branches
+- Production deployments: Created automatically for pushes to `main` branch (if configured)
+
+---
+
 ## Contributing
 
 This is a project submission for Peak6. For questions or clarifications, contact:
