@@ -316,13 +316,15 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// TODO: Add routes from Architecture PRD
-// POST /api/users
-// POST /api/consent
-// GET /api/profile/:userId
-// GET /api/recommendations/:userId
-// POST /api/feedback
-// GET /api/operator/review
+// TODO: Import routes from ui/routes/ (per Architecture PRD)
+// import authRoutes from './ui/routes/auth';
+// import profileRoutes from './ui/routes/profile';
+// import recommendationsRoutes from './ui/routes/recommendations';
+// import chatRoutes from './ui/routes/chat';
+// import operatorRoutes from './ui/routes/operator';
+// 
+// app.use('/api', authRoutes);
+// app.use('/api', profileRoutes);
 // etc.
 
 app.listen(PORT, () => {
@@ -393,15 +395,18 @@ export default api;
 
 ## 📋 Implementation Priority Order
 
-1. **Project Structure** - Create backend/ and frontend/ folders
+1. **Project Structure** - Create backend/ and frontend/ folders with exact structure from Architecture PRD:
+   - `backend/src/ingest/`, `features/`, `personas/`, `recommend/`, `guardrails/`, `ui/`, `eval/`, `shared/`
+   - `backend/scripts/` (at root, not in src)
+   - `frontend/src/` with components, pages, hooks, lib folders
 2. **Environment Setup** - Create .env.example
 3. **Prisma Schema** - Create schema.prisma from SCHEMA.md
 4. **TypeScript Configs** - Set up tsconfig.json files
 5. **Package.json Files** - Create backend and frontend package.json
-6. **Basic Server** - Create Express server stub
+6. **Basic Server** - Create Express server stub (import routes from ui/routes/)
 7. **Vite Config** - Set up frontend build tool
 8. **Testing Setup** - Configure Jest
-9. **Data Generator Stub** - Create seed.ts structure
+9. **Data Generator Stub** - Create seed.ts structure (follow Architecture PRD Phase 2-8)
 10. **API Client** - Create frontend API service
 
 ---
