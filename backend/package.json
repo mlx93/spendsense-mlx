@@ -1,0 +1,46 @@
+{
+  "name": "spendsense-backend",
+  "version": "1.0.0",
+  "description": "SpendSense backend API server",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "eval": "tsx scripts/eval-harness.ts",
+    "eval:metrics": "tsx scripts/eval-harness.ts --metrics",
+    "eval:report": "tsx scripts/eval-harness.ts --report",
+    "eval:traces": "tsx scripts/eval-harness.ts --traces",
+    "export:csv": "tsx scripts/export-csv.ts",
+    "export:json": "tsx scripts/export-json.ts",
+    "export:parquet": "tsx scripts/export-parquet.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "express": "^4.18.2",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.22.4",
+    "openai": "^4.20.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/jest": "^29.5.8",
+    "prisma": "^5.7.0",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
+

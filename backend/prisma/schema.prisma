@@ -1,0 +1,247 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Core Tables - Plaid-Compatible Schema
+// ============================================
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  consent_status Boolean  @default(false)
+  consent_date  DateTime?
+  role          String   @default("user") // 'user' or 'operator'
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relationships
+  accounts         Account[]
+  signals         Signal[]
+  personas        Persona[]
+  recommendations  Recommendation[]
+  chat_messages   ChatMessage[]
+  user_feedback   UserFeedback[]
+  operator_audits OperatorAuditLog[] @relation("OperatorAudits")
+
+  @@index([email])
+}
+
+model Account {
+  account_id            String   @id // Plaid account identifier
+  user_id              String
+  type                 String   // checking, savings, credit_card, money_market, hsa
+  subtype              String?
+  balance_available    Decimal?
+  balance_current      Decimal
+  balance_limit        Decimal? // REQUIRED when type=credit_card
+  iso_currency_code    String   @default("USD")
+  holder_category      String   @default("personal")
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  // Relationships
+  user         User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  liability    Liability?
+
+  @@index([user_id])
+  @@index([type])
+}
+
+model Transaction {
+  transaction_id                     String   @id // Plaid transaction identifier
+  account_id                         String
+  date                               DateTime
+  amount                             Decimal // Negative for debits, positive for credits
+  merchant_name                      String?
+  merchant_entity_id                 String?
+  payment_channel                    String   // online, in_store, other
+  personal_finance_category_primary  String
+  personal_finance_category_detailed String
+  pending                            Boolean  @default(false)
+  created_at                         DateTime @default(now())
+
+  // Relationships
+  account Account @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+
+  @@index([account_id, date])
+  @@index([merchant_name])
+  @@index([personal_finance_category_primary])
+}
+
+model Liability {
+  id                    String   @id @default(uuid())
+  account_id            String   @unique
+  liability_type        String   // credit_card, mortgage, student_loan
+  
+  // Credit Card Fields (REQUIRED when liability_type='credit_card')
+  aprs                  String? // JSON array of APR objects
+  minimum_payment_amount Decimal?
+  last_payment_amount   Decimal?
+  is_overdue            Boolean?
+  next_payment_due_date DateTime?
+  last_statement_balance Decimal?
+  
+  // Mortgage/Student Loan Fields (REQUIRED when liability_type='mortgage' or 'student_loan')
+  interest_rate         Decimal?
+  
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relationships
+  account Account @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+
+  @@index([account_id])
+  @@index([is_overdue])
+}
+
+// ============================================
+// SpendSense-Specific Tables
+// ============================================
+
+model Signal {
+  id          String   @id @default(uuid())
+  user_id     String
+  signal_type String   // subscription, savings, credit, income
+  window_days Int      // 30 or 180
+  data        String // JSON
+  computed_at DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, signal_type, window_days])
+}
+
+model Persona {
+  id           String   @id @default(uuid())
+  user_id      String
+  persona_type String   // high_utilization, variable_income, subscription_heavy, savings_builder, net_worth_maximizer
+  score        Decimal // 0.0 to 1.0
+  rank         Int      // 1 = primary, 2 = secondary
+  window_days  Int      // 30 or 180
+  criteria_met String // JSON
+  computed_at  DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, rank])
+  @@index([user_id, window_days, rank])
+}
+
+model Content {
+  id                String   @id @default(uuid())
+  title             String
+  source            String
+  url               String   @unique
+  excerpt           String?
+  tags              String // JSON array
+  persona_fit       String // JSON array
+  signals           String // JSON array
+  editorial_summary String
+  editorial_priority Int     @default(50)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relationships
+  recommendations Recommendation[]
+}
+
+model Offer {
+  id                    String   @id @default(uuid())
+  title                 String
+  description           String
+  category              String
+  eligibility_rules     String // JSON array
+  required_signals      String // JSON array
+  exclude_if_has_account String // JSON array
+  persona_fit           String // JSON array
+  url                   String
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relationships
+  recommendations Recommendation[]
+}
+
+model Recommendation {
+  id                      String   @id @default(uuid())
+  user_id                 String
+  type                    String   // education or offer
+  content_id              String?
+  offer_id                String?
+  rationale               String
+  persona_type            String
+  signals_used             String // JSON array
+  decision_trace          String // JSON
+  status                  String   @default("active") // active, dismissed, completed, saved, hidden
+  agentic_review_status   String?  // approved or flagged
+  agentic_review_reason   String?
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+
+  // Relationships
+  user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  content Content? @relation(fields: [content_id], references: [id])
+  offer   Offer?   @relation(fields: [offer_id], references: [id])
+  user_feedbacks UserFeedback[]
+
+  @@index([user_id, status])
+}
+
+model UserFeedback {
+  id               String   @id @default(uuid())
+  user_id          String
+  recommendation_id String
+  action            String   // dismissed, completed, saved, clicked
+  timestamp         DateTime @default(now())
+
+  // Relationships
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  recommendation Recommendation @relation(fields: [recommendation_id], references: [id], onDelete: Cascade)
+}
+
+model ChatMessage {
+  id             String   @id @default(uuid())
+  user_id        String
+  role           String   // user, assistant, system
+  content        String
+  function_call  String? // JSON
+  function_result String? // JSON
+  timestamp      DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, timestamp])
+}
+
+model OperatorAuditLog {
+  id           String   @id @default(uuid())
+  operator_id  String
+  action_type  String   // approve, hide, flag, override
+  target_type  String   // recommendation or persona
+  target_id    String
+  reason       String?
+  before_state String? // JSON
+  after_state  String? // JSON
+  timestamp    DateTime @default(now())
+
+  // Relationships
+  operator User @relation("OperatorAudits", fields: [operator_id], references: [id])
+
+  @@index([operator_id, timestamp])
+  @@index([target_type, target_id])
+}
+
