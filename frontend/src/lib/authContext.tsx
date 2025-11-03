@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface AuthContextType {
   user: { id: string; email: string; role: string } | null;
@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ id: string; email: string; role: string } | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  const login = async (email: string, password: string) => {
+  const login = async (_email: string, _password: string) => {
     // TODO: Implement login logic
     throw new Error('Not implemented');
   };
