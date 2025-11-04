@@ -744,62 +744,62 @@ export async function runSeed() {
   console.log('Clearing existing data...');
   // Wrap deleteMany() calls in try-catch to handle cases where tables don't exist yet
   try {
-    await prisma.operatorAuditLog.deleteMany();
+  await prisma.operatorAuditLog.deleteMany();
   } catch (error) {
     console.log('Note: operatorAuditLog table may not exist yet, skipping...');
   }
   try {
-    await prisma.chatMessage.deleteMany();
+  await prisma.chatMessage.deleteMany();
   } catch (error) {
     console.log('Note: chatMessage table may not exist yet, skipping...');
   }
   try {
-    await prisma.userFeedback.deleteMany();
+  await prisma.userFeedback.deleteMany();
   } catch (error) {
     console.log('Note: userFeedback table may not exist yet, skipping...');
   }
   try {
-    await prisma.recommendation.deleteMany();
+  await prisma.recommendation.deleteMany();
   } catch (error) {
     console.log('Note: recommendation table may not exist yet, skipping...');
   }
   try {
-    await prisma.persona.deleteMany();
+  await prisma.persona.deleteMany();
   } catch (error) {
     console.log('Note: persona table may not exist yet, skipping...');
   }
   try {
-    await prisma.signal.deleteMany();
+  await prisma.signal.deleteMany();
   } catch (error) {
     console.log('Note: signal table may not exist yet, skipping...');
   }
   try {
-    await prisma.liability.deleteMany();
+  await prisma.liability.deleteMany();
   } catch (error) {
     console.log('Note: liability table may not exist yet, skipping...');
   }
   try {
-    await prisma.transaction.deleteMany();
+  await prisma.transaction.deleteMany();
   } catch (error) {
     console.log('Note: transaction table may not exist yet, skipping...');
   }
   try {
-    await prisma.account.deleteMany();
+  await prisma.account.deleteMany();
   } catch (error) {
     console.log('Note: account table may not exist yet, skipping...');
   }
   try {
-    await prisma.content.deleteMany();
+  await prisma.content.deleteMany();
   } catch (error) {
     console.log('Note: content table may not exist yet, skipping...');
   }
   try {
-    await prisma.offer.deleteMany();
+  await prisma.offer.deleteMany();
   } catch (error) {
     console.log('Note: offer table may not exist yet, skipping...');
   }
   try {
-    await prisma.user.deleteMany();
+  await prisma.user.deleteMany();
   } catch (error) {
     console.log('Note: user table may not exist yet, skipping...');
   }

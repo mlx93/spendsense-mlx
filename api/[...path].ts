@@ -33,17 +33,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   } else {
     // Fallback to req.url
     let fullPath = req.url || '';
-    
-    // Remove query string if present
-    const queryIndex = fullPath.indexOf('?');
-    if (queryIndex !== -1) {
-      fullPath = fullPath.substring(0, queryIndex);
-    }
-    
+  
+  // Remove query string if present
+  const queryIndex = fullPath.indexOf('?');
+  if (queryIndex !== -1) {
+    fullPath = fullPath.substring(0, queryIndex);
+  }
+  
     path = fullPath;
     
     // Strip /api prefix if present
-    if (path.startsWith('/api')) {
+  if (path.startsWith('/api')) {
       path = path.substring(4) || '/';
     }
   }

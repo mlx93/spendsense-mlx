@@ -153,7 +153,7 @@ export default function LoginPage() {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
+                <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
                   </>
                 )}
                 {loadingExamples && (
