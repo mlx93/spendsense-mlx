@@ -2,16 +2,24 @@
 
 ## Pre-Deployment Checklist
 
-Before deploying to Vercel, ensure you complete these steps:
+**⚠️ CRITICAL: Always test builds before deploying!**
 
-### 1. Test Build Locally
+Before deploying to Vercel, ensure you complete these steps **in order**:
+
+### 1. Test Build Locally (REQUIRED)
 ```bash
-# Test frontend build
+# Test frontend build (MUST pass before deploying)
 cd frontend && npm run build
 
 # If build succeeds, test backend compilation
 cd ../backend && npm run build
 ```
+
+**If build fails:**
+- Fix all TypeScript errors
+- Fix all linting errors
+- Re-run build until it passes
+- **NEVER deploy with build errors**
 
 ### 2. Fix All TypeScript Errors
 - Run `npm run build` in both frontend and backend directories
@@ -35,7 +43,10 @@ git commit -m "Your descriptive commit message"
 git push
 ```
 
-**Note:** Pushing to the `main` branch automatically triggers Vercel deployment.
+**Note:** 
+- Pushing to the `main` branch automatically triggers Vercel deployment
+- Vercel will run the build command during deployment
+- If build fails on Vercel, deployment will fail (this is expected behavior)
 
 ## Vercel Deployment
 
@@ -50,32 +61,57 @@ Vercel automatically deploys when you push to `main` branch. The deployment proc
 
 ### Initial Seeding
 
-After first deployment, you need to seed the production database:
+After first deployment, you need to seed the production database. **Note:** SQLite on Vercel serverless functions uses `/tmp` which resets on each deployment. For persistent data, consider using Vercel Postgres or an external database.
 
-1. **Option 1: Using Vercel CLI (Recommended)**
+#### Option 1: Using Vercel API Endpoint (Easiest)
+
+1. **Set SEED_SECRET environment variable in Vercel Dashboard:**
+   - Go to Project Settings → Environment Variables
+   - Add `SEED_SECRET` with a secure random string
+   - Generate one: `openssl rand -hex 32`
+
+2. **Call the seed endpoint:**
    ```bash
-   # Install Vercel CLI if not already installed
-   npm i -g vercel
-   
-   # Login to Vercel
-   vercel login
-   
-   # Link to your project
-   vercel link
-   
-   # Run seed script in production
-   vercel env pull .env.production
-   cd backend
-   DATABASE_URL=$(grep DATABASE_URL ../.env.production | cut -d '=' -f2) npx tsx prisma/seed.ts
+   curl -X POST https://your-vercel-url.vercel.app/api/seed \
+     -H "Content-Type: application/json" \
+     -d '{"secret": "your-seed-secret-here"}'
    ```
 
-2. **Option 2: Using Vercel Function**
-   - Visit `/api/seed` endpoint (if implemented)
-   - Or use Vercel's web console to run a one-time script
+   Or use force reseed (clears existing data first):
+   ```bash
+   curl -X POST https://your-vercel-url.vercel.app/api/seed \
+     -H "Content-Type: application/json" \
+     -d '{"secret": "your-seed-secret-here", "force": true}'
+   ```
 
-3. **Option 3: Direct Database Access**
-   - Connect to your production database
-   - Run the seed script with production DATABASE_URL
+#### Option 2: Using Vercel CLI
+
+```bash
+# Install Vercel CLI if not already installed
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Link to your project
+vercel link
+
+# Pull production environment variables
+vercel env pull .env.production
+
+# Run seed script with production DATABASE_URL
+cd backend
+DATABASE_URL=$(grep DATABASE_URL ../.env.production | cut -d '=' -f2) npx tsx prisma/seed.ts
+```
+
+#### Option 3: Using Vercel Postgres (Recommended for Production)
+
+For persistent data in production, migrate to Vercel Postgres:
+
+1. In Vercel Dashboard → Project → Storage → Create Database → Postgres
+2. Update `DATABASE_URL` environment variable to use Postgres connection string
+3. Run migrations: `npx prisma migrate deploy`
+4. Run seed using Option 1 or 2 above
 
 ### Database Migrations
 
