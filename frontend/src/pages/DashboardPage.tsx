@@ -14,7 +14,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user && user.consentStatus) {
       // Only load data if user has consented (consent modal handled at app level)
-      loadData();
+        loadData();
     }
   }, [user]);
 

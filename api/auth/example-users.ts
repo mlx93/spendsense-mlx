@@ -95,15 +95,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         envVars: Object.keys(process.env).filter(k => k.includes('DATABASE') || k.includes('SUPABASE')).length + ' env vars found',
       },
       fallback: {
-        exampleEmails: [],
-        password: 'password123',
-        operatorEmail: 'operator@spendsense.com',
-        operatorPassword: 'operator123',
+      exampleEmails: [],
+      password: 'password123',
+      operatorEmail: 'operator@spendsense.com',
+      operatorPassword: 'operator123',
       },
     });
   } finally {
     if (prisma) {
-      await prisma.$disconnect();
+    await prisma.$disconnect();
     }
   }
 }
