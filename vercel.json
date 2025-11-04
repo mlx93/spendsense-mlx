@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx prisma generate --schema=backend/prisma/schema.prisma && cd backend && npx prisma generate && echo 'Creating database schema...' && npx prisma db push --accept-data-loss && echo 'Schema created. Starting seed...' && (npx prisma db seed || echo 'Seed failed, continuing build') && cd ../frontend && npm run build",
+  "buildCommand": "bash build.sh",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install",
   "functions": {
