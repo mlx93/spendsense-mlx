@@ -428,17 +428,34 @@ async function generateTransactionsForAccount(
         }
       }
 
-      // Recurring subscriptions (for subscription_heavy persona)
-      if (persona === 'subscription_heavy') {
-        const numSubs = randomInt(3, 8);
-        const subsToUse = seededFaker.helpers.arrayElements(SUBSCRIPTION_MERCHANTS, numSubs);
+      currentDate = new Date(currentDate.getTime() + payFrequency * 24 * 60 * 60 * 1000);
+    }
+
+    // Generate recurring subscriptions separately (for subscription_heavy persona)
+    // Subscriptions should be monthly (~30 days apart) to match detection criteria
+    if (persona === 'subscription_heavy' && isIncomeAccount) {
+      const numSubs = randomInt(3, 8);
+      const subsToUse = seededFaker.helpers.arrayElements(SUBSCRIPTION_MERCHANTS, numSubs);
+      
+      // Store base amounts per merchant for consistency
+      const merchantBaseAmounts = new Map<string, number>();
+      for (const merchant of subsToUse) {
+        merchantBaseAmounts.set(merchant, randomFloat(5, 30));
+      }
+      
+      // Generate monthly subscription transactions starting from startDate
+      let subscriptionDate = new Date(startDate);
+      while (subscriptionDate <= endDate) {
         for (const merchant of subsToUse) {
-          const subAmount = randomFloat(5, 30);
+          // Use consistent amount per merchant (±$1 variance for realistic variability)
+          const baseAmount = merchantBaseAmounts.get(merchant)!;
+          const subAmount = baseAmount + randomFloat(-1, 1);
+          
           transactions.push({
             transaction_id: generateTransactionId(),
             account_id: account.account_id,
-            date: new Date(currentDate),
-            amount: new Prisma.Decimal(-subAmount),
+            date: new Date(subscriptionDate),
+            amount: new Prisma.Decimal(-Math.max(0.01, subAmount)), // Ensure positive amount
             merchant_name: merchant,
             merchant_entity_id: `merchant_${merchant.toLowerCase().replace(/\s+/g, '_')}_001`,
             payment_channel: 'online',
@@ -447,10 +464,16 @@ async function generateTransactionsForAccount(
             pending: false,
           });
         }
+        // Move to next month (~30 days)
+        subscriptionDate = new Date(subscriptionDate.getTime() + 30 * 24 * 60 * 60 * 1000);
       }
+    }
 
-      // Savings transfers (for savings_builder and net_worth_maximizer)
-      if ((persona === 'savings_builder' || persona === 'net_worth_maximizer') && random() < 0.3) {
+    // Savings transfers (for savings_builder and net_worth_maximizer)
+    if (isIncomeAccount) {
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        if ((persona === 'savings_builder' || persona === 'net_worth_maximizer') && random() < 0.3) {
         const transferAmount = persona === 'net_worth_maximizer' 
           ? randomFloat(500, 3000)
           : randomFloat(100, 1000);

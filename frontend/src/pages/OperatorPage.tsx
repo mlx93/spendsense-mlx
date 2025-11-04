@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { operatorApi } from '../services/api';
 import UserDetailView from '../components/Operator/UserDetailView';
+import { useAuth } from '../lib/authContext';
+import { showToast } from '../utils/toast';
 import api from '../lib/apiClient';
 
 interface DashboardStats {
@@ -35,6 +38,7 @@ interface User {
 }
 
 export default function OperatorPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [flaggedRecs, setFlaggedRecs] = useState<FlaggedRecommendation[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -44,6 +48,11 @@ export default function OperatorPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [exampleUserEmails, setExampleUserEmails] = useState<string[]>([]);
+
+  // Redirect non-operators
+  if (user && user.role !== 'operator') {
+    return <Navigate to="/" replace />;
+  }
 
   useEffect(() => {
     loadData();
@@ -80,20 +89,24 @@ export default function OperatorPage() {
   const handleApprove = async (recId: string) => {
     try {
       await operatorApi.approveRecommendation(recId, 'Approved by operator');
+      showToast('Recommendation approved', 'success', 'The recommendation is now active and will be shown to the user');
       loadData();
       setSelectedRec(null);
     } catch (error) {
       console.error('Error approving:', error);
+      showToast('Failed to approve recommendation', 'error', 'Please try again');
     }
   };
 
   const handleHide = async (recId: string) => {
     try {
       await operatorApi.hideRecommendation(recId, 'Hidden by operator');
+      showToast('Recommendation hidden', 'success', 'The recommendation will not be shown to the user');
       loadData();
       setSelectedRec(null);
     } catch (error) {
       console.error('Error hiding:', error);
+      showToast('Failed to hide recommendation', 'error', 'Please try again');
     }
   };
 
@@ -103,11 +116,11 @@ export default function OperatorPage() {
     }
     try {
       const response = await operatorApi.resetConsent();
-      alert(`Successfully reset consent for ${response.data.usersAffected} users`);
+      showToast(`Successfully reset consent for ${response.data.usersAffected} users`, 'success');
       loadData(); // Reload to see updated consent statuses
     } catch (error) {
       console.error('Error resetting consent:', error);
-      alert('Failed to reset consent. Please try again.');
+      showToast('Failed to reset consent', 'error', 'Please try again');
     }
   };
 

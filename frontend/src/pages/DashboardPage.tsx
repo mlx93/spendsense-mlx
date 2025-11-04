@@ -621,13 +621,22 @@ export default function DashboardPage() {
                 key={rec.id}
                 className={`bg-white rounded-2xl shadow-md border p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative ${
                   isSaved ? 'border-blue-300 bg-blue-50/30' : 'border-gray-100 hover:border-blue-200'
-                }`}
+                } ${showDismissed ? 'border-gray-300 bg-gray-50/50' : ''}`}
               >
-                {isSaved && (
-                  <div className="absolute top-4 right-4 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                    ⭐ Saved
-                  </div>
-                )}
+                <div className="absolute top-4 right-4 flex flex-col gap-1.5 items-end z-10">
+                  {showDismissed && (
+                    <div className="bg-gray-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                      Dismissed
+                    </div>
+                  )}
+                  {isSaved && (
+                    <div className={`bg-blue-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm ${
+                      showDismissed ? '' : 'opacity-0 group-hover:opacity-100 transition-opacity'
+                    }`}>
+                      ⭐ Saved
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors pr-2">{rec.title}</h3>

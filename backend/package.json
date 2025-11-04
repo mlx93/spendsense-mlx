@@ -16,7 +16,8 @@
     "eval:traces": "tsx scripts/eval-harness.ts --traces",
     "export:csv": "tsx scripts/export-csv.ts",
     "export:json": "tsx scripts/export-json.ts",
-    "export:parquet": "tsx scripts/export-parquet.ts"
+    "export:parquet": "tsx scripts/export-parquet.ts",
+    "reseed:transactions": "tsx scripts/reseed-transactions.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^8.3.0",

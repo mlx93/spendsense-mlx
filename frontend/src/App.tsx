@@ -116,18 +116,16 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {user?.role === 'operator' && (
-        <Route
-          path="/operator"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <OperatorPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-      )}
+      <Route
+        path="/operator"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <OperatorPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

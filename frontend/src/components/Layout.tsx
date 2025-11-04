@@ -43,12 +43,14 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
               {user && (
                 <div className="hidden sm:ml-8 sm:flex sm:space-x-1">
-                  <Link
-                    to="/"
-                    className={navLinkClass('/')}
-                  >
-                    Dashboard
-                  </Link>
+                  {user.role !== 'operator' && (
+                    <Link
+                      to="/"
+                      className={navLinkClass('/')}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <Link
                     to="/insights"
                     className={navLinkClass('/insights')}

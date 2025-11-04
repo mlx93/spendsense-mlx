@@ -6,19 +6,19 @@
     "totalUsers": 100
   },
   "explainability": {
-    "recommendationsWithRationales": 598,
+    "recommendationsWithRationales": 586,
     "explainabilityPercentage": 100,
-    "totalRecommendations": 598
+    "totalRecommendations": 586
   },
   "latency": {
-    "averageLatencyMs": 504,
-    "p50LatencyMs": 506,
-    "p95LatencyMs": 575,
+    "averageLatencyMs": 541,
+    "p50LatencyMs": 454,
+    "p95LatencyMs": 884,
     "targetMet": true
   },
   "auditability": {
-    "recommendationsWithTraces": 598,
+    "recommendationsWithTraces": 586,
     "auditabilityPercentage": 100,
-    "totalRecommendations": 598
+    "totalRecommendations": 586
   }
 }

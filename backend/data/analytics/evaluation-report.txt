@@ -1,7 +1,7 @@
 SpendSense Evaluation Report
 ============================
 
-Generated: 2025-11-04T20:41:12.539Z
+Generated: 2025-11-04T20:49:07.739Z
 
 Coverage Analysis
 ------------------
@@ -11,20 +11,20 @@ Status: PASS
 
 Explainability Analysis
 -----------------------
-Recommendations with rationales: 598/598 (100.0%)
+Recommendations with rationales: 586/586 (100.0%)
 Status: PASS
 
 Latency Measurement
 -------------------
-Average latency: 504ms
-P50 latency: 506ms
-P95 latency: 575ms
+Average latency: 541ms
+P50 latency: 454ms
+P95 latency: 884ms
 Target: <5000ms
 Status: PASS
 
 Auditability Analysis
 ---------------------
-Recommendations with decision traces: 598/598 (100.0%)
+Recommendations with decision traces: 586/586 (100.0%)
 Status: PASS
 
 Overall Status

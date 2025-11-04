@@ -300,7 +300,7 @@ export default function InsightsPage() {
         {/* Second Row: Spending by Month (Left) + Savings by Month (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Spending by Month Chart - Left */}
-          {spendingPatterns && spendingPatterns.spendingByMonth && Object.keys(spendingPatterns.spendingByMonth).length > 0 && (
+          {spendingPatterns && spendingPatterns.spendingByMonth && Object.keys(spendingPatterns.spendingByMonth).length > 0 ? (
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
               <h2 className="text-base font-semibold text-gray-900 mb-3">Spending by Month</h2>
               <ResponsiveContainer width="100%" height={250}>
@@ -331,6 +331,13 @@ export default function InsightsPage() {
                   <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Spending by Month</h2>
+              <div className="flex items-center justify-center h-[250px] text-sm text-gray-500">
+                No spending data available. Refresh insights to generate chart.
+              </div>
             </div>
           )}
 
