@@ -46,11 +46,14 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const queryString = originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : '';
   const pathWithQuery = path + queryString;
   
-  // Log for debugging
-  console.log(`[api/[...path]] ${req.method} ${req.url}`);
+  // Log for debugging (will appear in Vercel function logs)
+  console.log(`[api/[...path]] ===== REQUEST START =====`);
+  console.log(`[api/[...path]] Method: ${req.method}`);
+  console.log(`[api/[...path]] Original URL: ${req.url}`);
   console.log(`[api/[...path]] Extracted path: ${path}`);
   console.log(`[api/[...path]] Path with query: ${pathWithQuery}`);
   console.log(`[api/[...path]] Query object:`, JSON.stringify(req.query));
+  console.log(`[api/[...path]] Headers:`, JSON.stringify(req.headers));
   
   // Update request properties for Express routing
   // Express uses these properties to match routes
