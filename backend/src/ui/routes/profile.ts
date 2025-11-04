@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { AuthRequest, authenticateToken } from '../middleware/auth.middleware';
 import { requireConsent } from '../middleware/consent.middleware';
+import { generateUserData } from './recommendations';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -20,6 +21,15 @@ router.post('/consent', authenticateToken, async (req: AuthRequest, res: Respons
         details: {},
       });
     }
+
+    // Get current consent status to check if this is a new consent grant
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { consent_status: true },
+    });
+
+    const wasPreviouslyConsented = currentUser?.consent_status === true;
+    const isNewConsent = !wasPreviouslyConsented && consentStatus === true;
 
     await prisma.user.update({
       where: { id: userId },
@@ -39,6 +49,13 @@ router.post('/consent', authenticateToken, async (req: AuthRequest, res: Respons
         data: {
           status: 'hidden',
         },
+      });
+    } else if (isNewConsent) {
+      // If this is a new consent grant, automatically generate signals, personas, and recommendations
+      // Run in background - don't wait for completion to return response
+      generateUserData(userId).catch((error) => {
+        console.error(`Error generating user data for user ${userId} after consent:`, error);
+        // Don't throw - user consent is already saved, generation can retry later via refresh
       });
     }
 

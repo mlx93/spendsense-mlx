@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/authContext';
-import { profileApi, Profile, transactionsApi, SpendingPatterns } from '../services/api';
+import { profileApi, Profile, transactionsApi, SpendingPatterns, recommendationsApi } from '../services/api';
 import EmergencyFundCalculator from '../components/Calculators/EmergencyFundCalculator';
 import DebtPayoffSimulator from '../components/Calculators/DebtPayoffSimulator';
 import SubscriptionAuditTool from '../components/Calculators/SubscriptionAuditTool';
@@ -11,6 +11,7 @@ export default function InsightsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [spendingPatterns, setSpendingPatterns] = useState<SpendingPatterns | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedWindow, setSelectedWindow] = useState<30 | 180>(30);
 
   const loadProfile = async () => {
@@ -27,6 +28,23 @@ export default function InsightsPage() {
       console.error('Error loading profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (!user || refreshing) return;
+    
+    try {
+      setRefreshing(true);
+      // Trigger refresh which regenerates signals and personas
+      await recommendationsApi.getRecommendations(user.id, 'active', true);
+      // Reload profile data to get updated signals
+      await loadProfile();
+    } catch (error) {
+      console.error('Error refreshing insights:', error);
+      alert('Failed to refresh insights. Please try again.');
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -52,7 +70,29 @@ export default function InsightsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Your Financial Insights</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Your Financial Insights</h1>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg
+            className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          {refreshing ? 'Refreshing...' : 'Refresh Insights'}
+        </button>
+      </div>
 
       {/* Spending Patterns */}
       {spendingPatterns && (

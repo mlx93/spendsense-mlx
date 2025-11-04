@@ -2,34 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { recommendationsApi, profileApi, Recommendation } from '../services/api';
-import ConsentModal from '../components/ConsentModal';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
-  const [showConsentModal, setShowConsentModal] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // Check if user has never consented (first login)
-      if (user.consentStatus === false) {
-        setShowConsentModal(true);
-      } else {
-        loadData();
-      }
-    }
-  }, [user]);
-
-  const handleConsentModalClose = (consented: boolean) => {
-    setShowConsentModal(false);
-    if (consented) {
-      // Reload data after consent
+    if (user && user.consentStatus) {
+      // Only load data if user has consented (consent modal handled at app level)
       loadData();
     }
-  };
+  }, [user]);
 
   const loadData = async () => {
     if (!user) return;
@@ -94,6 +81,23 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    if (!user || refreshing) return;
+    
+    try {
+      setRefreshing(true);
+      // Trigger refresh which regenerates signals, personas, and recommendations
+      await recommendationsApi.getRecommendations(user.id, 'active', true);
+      // Reload all data
+      await loadData();
+    } catch (error) {
+      console.error('Error refreshing recommendations:', error);
+      alert('Failed to refresh recommendations. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleAction = async (recId: string, action: string) => {
     try {
       await recommendationsApi.submitFeedback(recId, action);
@@ -128,7 +132,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {showConsentModal && <ConsentModal onConsent={handleConsentModalClose} />}
       <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
 
       {/* Critical Alert Banners */}
@@ -176,7 +179,29 @@ export default function DashboardPage() {
 
       {/* Recommendations Section */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4">For You Today</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-semibold text-gray-900">For You Today</h2>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg
+              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
         {recommendations.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
             You're doing great! Check back later for new insights.
