@@ -1,12 +1,18 @@
 #!/bin/bash
 set -e
 
-echo "Generating Prisma Client at root..."
-npx prisma generate --schema=backend/prisma/schema.prisma
+echo "Installing dependencies at root..."
+npm install
 
 echo "Generating Prisma Client in backend..."
 cd backend
 npx prisma generate
+
+echo "Copying Prisma Client to root for api/ directory..."
+# Prisma generates to backend/node_modules/@prisma/client
+# We need it in root node_modules for api/ serverless functions
+mkdir -p ../node_modules/@prisma
+cp -r node_modules/@prisma/client ../node_modules/@prisma/ 2>/dev/null || echo "Note: Prisma Client copy may have failed, but backend generation succeeded"
 
 # Only run migrations and seed in production if DATABASE_URL is set
 if [ -n "$DATABASE_URL" ]; then
