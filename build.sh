@@ -11,11 +11,21 @@ npx prisma generate
 # Only run migrations and seed in production if DATABASE_URL is set
 if [ -n "$DATABASE_URL" ]; then
   echo "DATABASE_URL is set, running migrations..."
-  npx prisma migrate deploy
+  
+  # Use non-pooling connection for migrations (pooler doesn't support DDL)
+  # If we have the non-pooling URL, use it for migrations
+  if [ -n "$SUPABASE_POSTGRES_URL_NON_POOLING" ]; then
+    echo "Using direct (non-pooling) connection for migrations..."
+    export MIGRATION_DATABASE_URL="$SUPABASE_POSTGRES_URL_NON_POOLING"
+  else
+    export MIGRATION_DATABASE_URL="$DATABASE_URL"
+  fi
+  
+  DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma migrate deploy
   
   echo "Checking if database needs seeding..."
   # Only seed if User table is empty (first deployment)
-  USER_COUNT=$(npx prisma db execute --stdin <<< "SELECT COUNT(*) FROM \"User\";" 2>/dev/null | tail -1 || echo "0")
+  USER_COUNT=$(DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma db execute --stdin <<< "SELECT COUNT(*) FROM \"User\";" 2>/dev/null | tail -1 || echo "0")
   if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo "Database is empty, seeding..."
     npx prisma db seed || echo "Seed failed, continuing build"
