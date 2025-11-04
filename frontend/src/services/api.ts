@@ -124,6 +124,21 @@ export const transactionsApi = {
 };
 
 // Operator APIs
+export interface Article {
+  id: string;
+  title: string;
+  content: string;
+  rationale: string;
+  type: 'education' | 'offer';
+  generatedAt: string;
+  disclaimer: string;
+}
+
+export const articlesApi = {
+  getArticle: (recommendationId: string) =>
+    api.get<Article>(`/articles/${recommendationId}`),
+};
+
 export const operatorApi = {
   getDashboard: () => api.get('/operator/dashboard'),
   getReviewQueue: () => api.get('/operator/review'),

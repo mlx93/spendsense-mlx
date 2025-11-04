@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { authRoutes, userRoutes, profileRoutes, recommendationsRoutes, chatRoutes, operatorRoutes, contentRoutes, transactionsRoutes } from './ui/routes';
+import { authRoutes, userRoutes, profileRoutes, recommendationsRoutes, chatRoutes, operatorRoutes, contentRoutes, transactionsRoutes, articlesRoutes } from './ui/routes';
 import { errorHandler } from './ui/middleware';
 
 dotenv.config();
@@ -53,15 +53,16 @@ app.get('/', (req, res) => {
   res.json({
     message: 'SpendSense API',
     version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      auth: '/api/auth',
-      users: '/api/users',
-      profile: '/api/profile',
-      recommendations: '/api/recommendations',
-      chat: '/api/chat',
-      operator: '/api/operator',
-    },
+      endpoints: {
+        health: '/health',
+        auth: '/api/auth',
+        users: '/api/users',
+        profile: '/api/profile',
+        recommendations: '/api/recommendations',
+        chat: '/api/chat',
+        operator: '/api/operator',
+        articles: '/api/articles',
+      },
     docs: 'See SS_Reqs_PRD.md and SS_Architecture_PRD.md for API documentation',
   });
 });
@@ -84,6 +85,7 @@ app.use('/chat', chatRoutes);
 app.use('/operator', operatorRoutes);
 app.use('/content', contentRoutes);
 app.use('/transactions', transactionsRoutes);
+app.use('/articles', articlesRoutes);
 
 // Also mount with /api prefix for local dev (won't conflict with Vercel)
 if (!isVercel) {
@@ -95,6 +97,7 @@ if (!isVercel) {
   app.use('/api/operator', operatorRoutes);
   app.use('/api/content', contentRoutes);
   app.use('/api/transactions', transactionsRoutes);
+  app.use('/api/articles', articlesRoutes);
 }
 
 // Error handling middleware (must be last)

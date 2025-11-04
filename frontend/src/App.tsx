@@ -7,6 +7,7 @@ import InsightsPage from './pages/InsightsPage';
 import LibraryPage from './pages/LibraryPage';
 import SettingsPage from './pages/SettingsPage';
 import OperatorPage from './pages/OperatorPage';
+import ArticlePage from './pages/ArticlePage';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { user, loading } = useAuth();
@@ -57,6 +58,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <SettingsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/article/:recommendationId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ArticlePage />
             </Layout>
           </ProtectedRoute>
         }

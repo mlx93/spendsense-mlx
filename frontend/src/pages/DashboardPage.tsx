@@ -194,16 +194,6 @@ export default function DashboardPage() {
                     {expandedId === rec.id ? (
                       <div>
                         <p className="text-gray-700 mb-4">{rec.rationale}</p>
-                        {rec.url && (
-                          <a
-                            href={rec.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            Learn More →
-                          </a>
-                        )}
                         <p className="text-sm text-gray-500 mt-4">
                           This is educational content, not financial advice. Consult a licensed advisor for personalized guidance.
                         </p>
@@ -241,16 +231,12 @@ export default function DashboardPage() {
                   >
                     Save for Later
                   </button>
-                  {rec.url && (
-                    <a
-                      href={rec.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Learn More →
-                    </a>
-                  )}
+                  <Link
+                    to={`/article/${rec.id}`}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Learn More →
+                  </Link>
                 </div>
               </div>
             ))}

@@ -7,4 +7,5 @@ export { default as chatRoutes } from './chat';
 export { default as operatorRoutes } from './operator';
 export { default as contentRoutes } from './content';
 export { default as transactionsRoutes } from './transactions';
+export { default as articlesRoutes } from './articles';
 
