@@ -74,25 +74,16 @@ router.post('/login', async (req: Request, res: Response) => {
     // Normalize email for case-insensitive lookup
     const normalizedEmail = email.toLowerCase().trim();
 
-    // SQLite is case-sensitive, so we need to do case-insensitive lookup manually
-    // Try exact match first (will work if email is already lowercase)
-    let user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    // If not found, fetch all users and find case-insensitive match
-    // Note: This is not efficient for large datasets, but SQLite doesn't support
-    // case-insensitive queries efficiently without COLLATE NOCASE in schema
-    if (!user) {
-      const allUsers = await prisma.user.findMany({
-        where: {
-          email: {
-            contains: normalizedEmail.split('@')[0], // Match by local part
-          },
+    // PostgreSQL: Use case-insensitive query
+    // Find user by email (case-insensitive match)
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive', // PostgreSQL case-insensitive comparison
         },
-      });
-      user = allUsers.find(u => u.email.toLowerCase() === normalizedEmail) || null;
-    }
+      },
+    });
 
     if (!user) {
       return res.status(401).json({
