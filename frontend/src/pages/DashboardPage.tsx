@@ -14,22 +14,6 @@ export default function DashboardPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
 
-  useEffect(() => {
-    // Only load data if user has consented
-    // Consent modal is shown at App level before user can access dashboard
-    // Profile endpoint will generate data if missing, so we show progress during initial load
-    if (user && user.consentStatus) {
-      // Show progress bar while loading initial data
-      // Profile endpoint will generate data synchronously if missing
-      loadDataWithProgress();
-    } else if (user && !user.consentStatus) {
-      // User hasn't consented - show empty dashboard
-      setLoading(false);
-      setRecommendations([]);
-      setAlerts([]);
-    }
-  }, [user?.id, user?.consentStatus, loadDataWithProgress]); // Include loadDataWithProgress in dependencies
-
   const loadDataWithProgress = useCallback(async () => {
     if (!user) return;
     
@@ -63,7 +47,70 @@ export default function DashboardPage() {
     
     try {
       // Load data - profile endpoint will generate if missing
-      const loadedCount = await loadData(true); // Skip loading state since we're showing progress bar
+      // loadData is defined below, but we need to reference it here
+      // We'll call it directly without the skipLoadingState check since we're managing loading state ourselves
+      if (!user) return;
+      
+      // Load profile and recommendations in parallel
+      const [profileResponse, recsResponse] = await Promise.allSettled([
+        profileApi.getProfile(user.id),
+        recommendationsApi.getRecommendations(user.id, 'active'),
+      ]);
+      
+      // Extract data or handle errors
+      const profile = profileResponse.status === 'fulfilled' ? profileResponse.value.data : null;
+      const recommendations = recsResponse.status === 'fulfilled' ? recsResponse.value.data.recommendations : [];
+      
+      // Set recommendations
+      setRecommendations(recommendations);
+      
+      // Generate alerts if profile loaded successfully
+      if (profile && profile.signals) {
+        const newAlerts: Array<{ type: 'critical' | 'warning' | 'info'; message: string }> = [];
+        
+        const creditSignal = profile.signals['30d']?.credit;
+        if (creditSignal?.any_overdue) {
+          newAlerts.push({
+            type: 'critical',
+            message: 'One or more credit cards are overdue. Please make payments immediately.',
+          });
+        } else if (creditSignal?.max_utilization > 0.8) {
+          newAlerts.push({
+            type: 'critical',
+            message: `High credit utilization detected (${Math.round(creditSignal.max_utilization * 100)}%). Consider paying down balances.`,
+          });
+        } else if (creditSignal?.max_utilization > 0.5) {
+          newAlerts.push({
+            type: 'warning',
+            message: `Credit utilization is ${Math.round(creditSignal.max_utilization * 100)}%. Keeping it below 30% may help your credit score.`,
+          });
+        }
+        
+        const savingsSignal = profile.signals['30d']?.savings;
+        if (savingsSignal?.savings_balance < 100) {
+          newAlerts.push({
+            type: 'critical',
+            message: 'Low savings balance detected. Building an emergency fund is important.',
+          });
+        } else if (savingsSignal?.emergency_fund_coverage < 3) {
+          newAlerts.push({
+            type: 'info',
+            message: `Your emergency fund covers ${savingsSignal.emergency_fund_coverage.toFixed(1)} months. Experts recommend 3-6 months.`,
+          });
+        }
+        
+        const subscriptionSignal = profile.signals['30d']?.subscription;
+        if (subscriptionSignal?.count >= 3) {
+          newAlerts.push({
+            type: 'info',
+            message: `You have ${subscriptionSignal.count} recurring subscriptions totaling $${subscriptionSignal.monthly_spend.toFixed(2)}/month.`,
+          });
+        }
+        
+        setAlerts(newAlerts.slice(0, 2));
+      }
+      
+      const loadedCount = recommendations.length;
       
       setRefreshProgress(100);
       setRefreshStatus('Complete!');
@@ -96,6 +143,22 @@ export default function DashboardPage() {
       setLoading(false); // Ensure loading is cleared even on error
     }
   }, [user]);
+
+  useEffect(() => {
+    // Only load data if user has consented
+    // Consent modal is shown at App level before user can access dashboard
+    // Profile endpoint will generate data if missing, so we show progress during initial load
+    if (user && user.consentStatus) {
+      // Show progress bar while loading initial data
+      // Profile endpoint will generate data synchronously if missing
+      loadDataWithProgress();
+    } else if (user && !user.consentStatus) {
+      // User hasn't consented - show empty dashboard
+      setLoading(false);
+      setRecommendations([]);
+      setAlerts([]);
+    }
+  }, [user?.id, user?.consentStatus, loadDataWithProgress]); // Include loadDataWithProgress in dependencies
 
   const loadData = async (skipLoadingState = false) => {
     if (!user) return;
