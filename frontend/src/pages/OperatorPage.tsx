@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { operatorApi } from '../services/api';
 import UserDetailView from '../components/Operator/UserDetailView';
+import api from '../lib/apiClient';
 
 interface DashboardStats {
   totalUsers: number;
@@ -41,10 +42,23 @@ export default function OperatorPage() {
   const [selectedRec, setSelectedRec] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [exampleUserEmails, setExampleUserEmails] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
+    loadExampleUsers();
   }, []);
+
+  const loadExampleUsers = async () => {
+    try {
+      const response = await api.get('/auth/example-users');
+      const emails = response.data.exampleUsers?.map((u: any) => u.email) || [];
+      setExampleUserEmails(emails);
+    } catch (error) {
+      console.error('Error loading example users:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -140,34 +154,104 @@ export default function OperatorPage() {
       {/* User Search */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">User Search</h2>
-        <input
-          type="text"
-          placeholder="Search by email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-        />
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {users
-            .filter(user => !searchTerm || user.email.toLowerCase().includes(searchTerm.toLowerCase()))
-            .map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
-                onClick={() => setSelectedUserId(user.id)}
-              >
-                <div>
-                  <p className="font-medium text-gray-900">{user.email}</p>
-                  <p className="text-sm text-gray-500">
-                    {user.primaryPersona?.replace(/_/g, ' ') || 'No persona'} • {user.activeRecommendations} recs
-                  </p>
-                </div>
-                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                  View Details →
-                </button>
-              </div>
-            ))}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by email..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {showDropdown && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto">
+              {(() => {
+                const filteredUsers = users.filter(user => 
+                  !searchTerm || user.email.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                // Sort: example users first, then alphabetically
+                const sortedUsers = [...filteredUsers].sort((a, b) => {
+                  const aIsExample = exampleUserEmails.includes(a.email.toLowerCase());
+                  const bIsExample = exampleUserEmails.includes(b.email.toLowerCase());
+                  
+                  if (aIsExample && !bIsExample) return -1;
+                  if (!aIsExample && bIsExample) return 1;
+                  return a.email.localeCompare(b.email);
+                });
+                
+                if (sortedUsers.length === 0) {
+                  return (
+                    <div className="p-4 text-sm text-gray-500 text-center">
+                      No users found
+                    </div>
+                  );
+                }
+                
+                return (
+                  <>
+                    {sortedUsers.map((user) => {
+                      const isExample = exampleUserEmails.includes(user.email.toLowerCase());
+                      const personaDisplay = user.primaryPersona?.replace(/_/g, ' ') || 'No persona';
+                      
+                      return (
+                        <div
+                          key={user.id}
+                          className={`flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                            isExample ? 'bg-blue-50' : ''
+                          }`}
+                          onClick={() => {
+                            setSelectedUserId(user.id);
+                            setShowDropdown(false);
+                            setSearchTerm('');
+                          }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 truncate">{user.email}</p>
+                              {isExample && (
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded flex-shrink-0">
+                                  Example
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                user.primaryPersona === 'high_utilization' ? 'bg-red-100 text-red-800' :
+                                user.primaryPersona === 'variable_income' ? 'bg-yellow-100 text-yellow-800' :
+                                user.primaryPersona === 'subscription_heavy' ? 'bg-purple-100 text-purple-800' :
+                                user.primaryPersona === 'savings_builder' ? 'bg-green-100 text-green-800' :
+                                user.primaryPersona === 'net_worth_maximizer' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {personaDisplay}
+                              </span>
+                              {' • '}
+                              {user.activeRecommendations} recs
+                            </p>
+                          </div>
+                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium ml-2 flex-shrink-0">
+                            View →
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </>
+                );
+              })()}
+            </div>
+          )}
         </div>
+        {/* Click outside to close dropdown */}
+        {showDropdown && (
+          <div
+            className="fixed inset-0 z-0"
+            onClick={() => setShowDropdown(false)}
+          />
+        )}
       </div>
 
       {/* User Detail View Modal */}

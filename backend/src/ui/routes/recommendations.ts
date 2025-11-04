@@ -20,6 +20,17 @@ const prisma = new PrismaClient();
 export async function generateUserData(userId: string): Promise<void> {
   console.log(`[generateUserData] Starting data generation for user ${userId}`);
   
+  // Check consent FIRST - exit early if consent revoked
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { consent_status: true },
+  });
+  
+  if (!user?.consent_status) {
+    console.log(`[generateUserData] User ${userId} has revoked consent, aborting`);
+    return; // Exit early
+  }
+  
   try {
     // Generate signals for both time windows first (regenerate before deleting old ones)
     // This ensures signals are available during the refresh process
@@ -199,11 +210,39 @@ export async function generateUserData(userId: string): Promise<void> {
           );
         }
 
+        // Exclude dismissed/completed recommendations from matching
+        const excludedRecommendations = await prisma.recommendation.findMany({
+          where: {
+            user_id: userId,
+            status: { in: ['dismissed', 'completed'] },
+          },
+          select: { content_id: true, offer_id: true },
+        });
+
+        const excludedContentIds = new Set(
+          excludedRecommendations
+            .map(r => r.content_id)
+            .filter(Boolean)
+        );
+        const excludedOfferIds = new Set(
+          excludedRecommendations
+            .map(r => r.offer_id)
+            .filter(Boolean)
+        );
+
+        // Filter out excluded content from matches
+        const filteredContentMatches = contentMatches.filter(
+          m => !excludedContentIds.has(m.contentId)
+        );
+        const filteredSecondaryMatches = secondaryMatches.filter(
+          m => !excludedContentIds.has(m.contentId)
+        );
+
         // Diversify recommendations across signal types and personas
         // Fetch all content metadata upfront for efficient category detection
         const allContentIds = new Set([
-          ...contentMatches.map(m => m.contentId),
-          ...secondaryMatches.map(m => m.contentId),
+          ...filteredContentMatches.map(m => m.contentId),
+          ...filteredSecondaryMatches.map(m => m.contentId),
         ]);
         const contentMetadata = await prisma.content.findMany({
           where: { id: { in: Array.from(allContentIds) } },
@@ -245,7 +284,7 @@ export async function generateUserData(userId: string): Promise<void> {
         };
 
         // First pass: Prioritize diversity - get at least one from each available signal category
-        for (const match of contentMatches) {
+        for (const match of filteredContentMatches) {
           if (selectedMatches.length >= 5) break;
           if (usedContentIds.has(match.contentId)) continue;
           
@@ -269,8 +308,8 @@ export async function generateUserData(userId: string): Promise<void> {
         }
 
         // Second pass: Add secondary persona matches for diversity
-        if (secondaryMatches.length > 0 && selectedMatches.length < 5) {
-          for (const match of secondaryMatches) {
+        if (filteredSecondaryMatches.length > 0 && selectedMatches.length < 5) {
+          for (const match of filteredSecondaryMatches) {
             if (selectedMatches.length >= 5) break;
             if (usedContentIds.has(match.contentId)) continue;
             
@@ -287,11 +326,30 @@ export async function generateUserData(userId: string): Promise<void> {
 
         // Final pass: Fill remaining slots with best matches regardless of category
         if (selectedMatches.length < 5) {
-          for (const match of contentMatches) {
+          for (const match of filteredContentMatches) {
             if (selectedMatches.length >= 5) break;
             if (usedContentIds.has(match.contentId)) continue;
             selectedMatches.push(match);
             usedContentIds.add(match.contentId);
+          }
+        }
+
+        // Enforce minimum recommendation count (3-5 education items)
+        if (selectedMatches.length < 3) {
+          console.warn(`[generateUserData] Only ${selectedMatches.length} education matches found for user ${userId}, minimum is 3`);
+          // Try to pad with any remaining matches, even if lower relevance
+          const remainingMatches = filteredContentMatches.filter(
+            m => !usedContentIds.has(m.contentId)
+          );
+          while (selectedMatches.length < 3 && remainingMatches.length > 0) {
+            const match = remainingMatches.shift();
+            if (match) {
+              selectedMatches.push(match);
+              usedContentIds.add(match.contentId);
+            }
+          }
+          if (selectedMatches.length < 3) {
+            console.warn(`[generateUserData] Cannot meet minimum of 3 education recommendations for user ${userId}. Only ${selectedMatches.length} available.`);
           }
         }
 
@@ -377,10 +435,27 @@ export async function generateUserData(userId: string): Promise<void> {
       signalsMap
     );
 
-    console.log(`[generateUserData] Found ${offerMatches.length} offer matches for user ${userId}`);
+    // Filter out excluded offers
+    const filteredOfferMatches = offerMatches.filter(
+      m => m.eligible && !excludedOfferIds.has(m.offerId)
+    );
+
+    console.log(`[generateUserData] Found ${filteredOfferMatches.length} eligible offer matches for user ${userId} (after filtering dismissed)`);
+    
+    // Enforce minimum offer count (1-3 offers)
+    const minOffers = 1;
+    const maxOffers = 3;
+    const targetOfferCount = Math.min(Math.max(filteredOfferMatches.length, minOffers), maxOffers);
+    
+    if (filteredOfferMatches.length === 0) {
+      console.warn(`[generateUserData] No eligible offers found for user ${userId}`);
+    } else if (filteredOfferMatches.length < minOffers) {
+      console.warn(`[generateUserData] Only ${filteredOfferMatches.length} eligible offers found for user ${userId}, minimum is ${minOffers}`);
+    }
+    
     let offerCount = 0;
-    for (let i = 0; i < Math.min(offerMatches.length, 3); i++) {
-      const match = offerMatches[i];
+    for (let i = 0; i < Math.min(filteredOfferMatches.length, targetOfferCount); i++) {
+      const match = filteredOfferMatches[i];
       if (!match || !match.eligible) continue;
 
       try {
@@ -513,6 +588,7 @@ router.post('/feedback', authenticateToken, async (req: AuthRequest, res: Respon
       completed: 'completed',
       saved: 'saved',
       clicked: 'active',
+      undismiss: 'active', // Add undismiss action that restores to active
     };
 
     const newStatus = statusMap[action] || recommendation.status;

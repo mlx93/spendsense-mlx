@@ -70,10 +70,33 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         await login(email, password);
+        // Check if user is operator and redirect accordingly
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split('')
+                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+            );
+            const decoded = JSON.parse(jsonPayload);
+            if (decoded.role === 'operator') {
+              navigate('/operator');
+              return;
+            }
+          } catch (e) {
+            // If decoding fails, proceed with normal redirect
+            console.error('Error decoding token:', e);
+          }
+        }
+        navigate('/');
       } else {
         await register(email, password);
+        navigate('/');
       }
-      navigate('/');
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     }

@@ -160,6 +160,4 @@ export const operatorApi = {
     api.post(`/operator/recommendation/${recommendationId}/hide`, { reason }),
   approveRecommendation: (recommendationId: string, notes: string) =>
     api.post(`/operator/recommendation/${recommendationId}/approve`, { notes }),
-  overridePersona: (userId: string, primaryPersona: string, reason: string) =>
-    api.post(`/operator/user/${userId}/persona-override`, { primaryPersona, reason }),
 };

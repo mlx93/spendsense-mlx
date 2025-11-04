@@ -1,0 +1,32 @@
+SpendSense Evaluation Report
+============================
+
+Generated: 2025-11-04T20:41:12.539Z
+
+Coverage Analysis
+------------------
+Users with assigned persona: 100/100 (100.0%)
+Users with ≥3 behavioral signals: 99
+Status: PASS
+
+Explainability Analysis
+-----------------------
+Recommendations with rationales: 598/598 (100.0%)
+Status: PASS
+
+Latency Measurement
+-------------------
+Average latency: 504ms
+P50 latency: 506ms
+P95 latency: 575ms
+Target: <5000ms
+Status: PASS
+
+Auditability Analysis
+---------------------
+Recommendations with decision traces: 598/598 (100.0%)
+Status: PASS
+
+Overall Status
+--------------
+All metrics passing: YES

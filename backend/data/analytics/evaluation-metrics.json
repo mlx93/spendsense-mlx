@@ -1,0 +1,24 @@
+{
+  "coverage": {
+    "usersWithPersona": 100,
+    "usersWithThreeOrMoreSignals": 99,
+    "coveragePercentage": 100,
+    "totalUsers": 100
+  },
+  "explainability": {
+    "recommendationsWithRationales": 598,
+    "explainabilityPercentage": 100,
+    "totalRecommendations": 598
+  },
+  "latency": {
+    "averageLatencyMs": 504,
+    "p50LatencyMs": 506,
+    "p95LatencyMs": 575,
+    "targetMet": true
+  },
+  "auditability": {
+    "recommendationsWithTraces": 598,
+    "auditabilityPercentage": 100,
+    "totalRecommendations": 598
+  }
+}

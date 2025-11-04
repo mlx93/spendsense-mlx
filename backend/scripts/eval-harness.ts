@@ -50,13 +50,20 @@ async function runEvaluation() {
     const explainability = await computeExplainabilityMetrics();
 
     console.log('Computing latency metrics...');
-    // Note: Latency metrics require server to be running and authenticated
-    // For evaluation, we'll skip if server is not available
+    // Note: Latency metrics require server to be running
+    // The eval harness will check if server is running and generate auth tokens automatically
+    // Make sure to run "npm run dev" in backend/ before running evaluation
     let latency;
     try {
       latency = await computeLatencyMetrics();
-    } catch (error) {
-      console.warn('Latency metrics skipped (server may not be running):', error);
+      if (latency.samples.length === 0) {
+        console.warn('\n⚠️  Latency measurement failed. Possible reasons:');
+        console.warn('   1. Server is not running - start with: npm run dev');
+        console.warn('   2. No users with consent - check database');
+        console.warn('   3. Authentication failed - check JWT_SECRET in .env\n');
+      }
+    } catch (error: any) {
+      console.warn('Latency metrics skipped (server may not be running):', error.message || error);
       latency = {
         averageLatencyMs: 0,
         p50LatencyMs: 0,

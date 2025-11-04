@@ -13,6 +13,8 @@ export default function DashboardPage() {
   const [refreshStatus, setRefreshStatus] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
+  const [showDismissed, setShowDismissed] = useState(false);
+  const [dismissedRecs, setDismissedRecs] = useState<Recommendation[]>([]);
 
   const loadDataWithProgress = useCallback(async () => {
     if (!user) return;
@@ -31,9 +33,10 @@ export default function DashboardPage() {
     setRefreshProgress(10);
     setRefreshStatus('Connecting to server...');
     
-    // Start API calls in parallel - they will trigger generateUserData if needed
-    const profilePromise = profileApi.getProfile(user.id);
-    const recommendationsPromise = recommendationsApi.getRecommendations(user.id, 'active');
+      // Start API calls in parallel - they will trigger generateUserData if needed
+      const profilePromise = profileApi.getProfile(user.id);
+      const recommendationsPromise = recommendationsApi.getRecommendations(user.id, 'active');
+      const dismissedPromise = recommendationsApi.getRecommendations(user.id, 'dismissed');
     
     // Update progress as we wait for responses
     const progressInterval = setInterval(() => {
@@ -66,17 +69,20 @@ export default function DashboardPage() {
       setRefreshProgress(90);
       setRefreshStatus('Finalizing...');
       
-      const [profileResponse, recsResponse] = await Promise.allSettled([
+      const [profileResponse, recsResponse, dismissedResponse] = await Promise.allSettled([
         profilePromise,
         recommendationsPromise,
+        dismissedPromise,
       ]);
       
       // Extract data or handle errors
       const profile = profileResponse.status === 'fulfilled' ? profileResponse.value.data : null;
       const recommendations = recsResponse.status === 'fulfilled' ? recsResponse.value.data.recommendations : [];
+      const dismissed = dismissedResponse.status === 'fulfilled' ? dismissedResponse.value.data.recommendations : [];
       
       // Set recommendations
       setRecommendations(recommendations);
+      setDismissedRecs(dismissed);
       
       // Generate alerts if profile loaded successfully
       if (profile && profile.signals) {
@@ -422,7 +428,29 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg
+            className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
 
       {/* Critical Alert Banners */}
       {alerts.map((alert, idx) => {
@@ -508,27 +536,26 @@ export default function DashboardPage() {
       {/* Recommendations Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900">For You Today</h2>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg
-              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            {showDismissed ? 'Dismissed Recommendations' : 'For You Today'}
+          </h2>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showDismissed}
+              onChange={(e) => {
+                setShowDismissed(e.target.checked);
+                if (e.target.checked && dismissedRecs.length === 0) {
+                  // Load dismissed recommendations if not already loaded
+                  recommendationsApi.getRecommendations(user!.id, 'dismissed')
+                    .then(res => setDismissedRecs(res.data.recommendations))
+                    .catch(err => console.error('Error loading dismissed:', err));
+                }
+              }}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Show dismissed</span>
+          </label>
         </div>
         
         {/* Progress Bar */}
@@ -549,13 +576,22 @@ export default function DashboardPage() {
             </p>
           </div>
         )}
-        {recommendations.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
-            You're doing great! Check back later for new insights.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {sortedRecommendations.map((rec) => {
+        {(() => {
+          const displayRecs = showDismissed ? dismissedRecs : sortedRecommendations;
+          
+          if (displayRecs.length === 0) {
+            return (
+              <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
+                {showDismissed 
+                  ? "You haven't dismissed any recommendations yet."
+                  : "You're doing great! Check back later for new insights."}
+              </div>
+            );
+          }
+          
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {displayRecs.map((rec) => {
               const isSaved = rec.status === 'saved';
               
               // Icon and color mapping for categories
@@ -633,13 +669,33 @@ export default function DashboardPage() {
                     </button>
                   )}
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleAction(rec.id, 'dismissed')}
-                      className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all duration-150"
-                      title="Dismiss"
-                    >
-                      Dismiss
-                    </button>
+                    {showDismissed ? (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await recommendationsApi.submitFeedback(rec.id, 'undismiss');
+                            setDismissedRecs(recs => recs.filter(r => r.id !== rec.id));
+                            // Reload active recommendations to show the restored item
+                            const activeResponse = await recommendationsApi.getRecommendations(user!.id, 'active');
+                            setRecommendations(activeResponse.data.recommendations);
+                          } catch (error) {
+                            console.error('Error undismissing:', error);
+                          }
+                        }}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-150"
+                        title="Restore"
+                      >
+                        Restore
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleAction(rec.id, 'dismissed')}
+                        className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all duration-150"
+                        title="Dismiss"
+                      >
+                        Dismiss
+                      </button>
+                    )}
                     <button
                       onClick={() => handleAction(rec.id, isSaved ? 'active' : 'saved')}
                       className={`text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-150 ${
@@ -664,9 +720,10 @@ export default function DashboardPage() {
                 </div>
               </div>
             );
-            })}
-          </div>
-        )}
+              })}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

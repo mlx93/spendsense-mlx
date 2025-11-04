@@ -30,6 +30,23 @@ export default function InsightsPage() {
       setProfile(profileResponse.data);
       setSpendingPatterns(spendingResponse.data);
       setSpendingPatternsCache({ [selectedWindow]: spendingResponse.data });
+      
+      // Debug logging for savings data
+      if (import.meta.env.DEV) {
+        const signals30d = profileResponse.data.signals?.['30d'];
+        const savingsSignal = signals30d?.savings;
+        console.log('[InsightsPage] Profile loaded:', {
+          userId: user.id,
+          hasSignals30d: !!signals30d,
+          hasSavingsSignal: !!savingsSignal,
+          savingsSignalKeys: savingsSignal ? Object.keys(savingsSignal) : [],
+          hasSavingsByMonth: !!savingsSignal?.savingsByMonth,
+          savingsByMonthKeys: savingsSignal?.savingsByMonth ? Object.keys(savingsSignal.savingsByMonth).length : 0,
+        });
+        if (savingsSignal?.savingsByMonth) {
+          console.log('[InsightsPage] savingsByMonth data:', savingsSignal.savingsByMonth);
+        }
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
@@ -323,6 +340,17 @@ export default function InsightsPage() {
             const savingsByMonth = savingsSignal?.savingsByMonth;
             const hasSavingsData = savingsByMonth && typeof savingsByMonth === 'object' && Object.keys(savingsByMonth).length > 0;
             
+            // Debug logging to help diagnose issues
+            if (import.meta.env.DEV) {
+              console.log('[Savings Chart] Data check:', {
+                hasSavingsSignal: !!savingsSignal,
+                savingsByMonthType: typeof savingsByMonth,
+                savingsByMonthKeys: savingsByMonth ? Object.keys(savingsByMonth).length : 0,
+                hasSavingsData,
+                savingsSignalKeys: savingsSignal ? Object.keys(savingsSignal) : [],
+              });
+            }
+            
             if (!hasSavingsData) {
               // Show placeholder if no data available
               return (
@@ -353,6 +381,16 @@ export default function InsightsPage() {
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([k, v]) => ({ month: k, balance: v }));
               const filteredMonthsData = filteredMonths.map(([k, v]) => ({ month: k, balance: v }));
+              const chartData = filteredMonths.map(([month, balance]) => {
+                const [year, monthNum] = month.split('-');
+                const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+                const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                return {
+                  monthKey: month,
+                  month: monthName,
+                  balance: Math.round(Number(balance)),
+                };
+              });
               console.log('[Savings Chart] Filtering:', {
                 selectedWindow,
                 cutoffDate: cutoffDate.toISOString().split('T')[0],
@@ -361,6 +399,7 @@ export default function InsightsPage() {
                 filteredMonths: filteredMonths.length,
                 allMonthsData,
                 filteredMonthsData,
+                chartData,
               });
             }
             
@@ -395,8 +434,8 @@ export default function InsightsPage() {
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60} />
                     <YAxis 
                       tick={{ fontSize: 10 }}
-                      tickFormatter={(value) => value > 0 ? `$${formatNumber(value)}` : ''}
-                      domain={['dataMin', 'dataMax']}
+                      tickFormatter={(value) => `$${formatNumber(value)}`}
+                      domain={[(dataMin: number) => Math.max(0, dataMin - 1000), 'auto']}
                     />
                     <Tooltip
                       formatter={(value: number) => [formatCurrency(value), 'Savings Balance']}

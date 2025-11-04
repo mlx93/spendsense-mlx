@@ -193,7 +193,7 @@ export default function SettingsPage() {
 
   const handleUndismiss = async (recId: string) => {
     try {
-      await recommendationsApi.submitFeedback(recId, 'saved');
+      await recommendationsApi.submitFeedback(recId, 'undismiss');
       setDismissedRecs(recs => recs.filter(r => r.id !== recId));
     } catch (error) {
       console.error('Error undismissing:', error);
