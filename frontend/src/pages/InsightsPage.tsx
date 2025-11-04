@@ -261,7 +261,7 @@ export default function InsightsPage() {
                   <XAxis dataKey="name" />
                   <YAxis domain={[0, 100]} label={{ value: 'Utilization %', angle: -90, position: 'insideLeft' }} />
                   <Tooltip
-                    formatter={(value: number, name: string, props: any) => {
+                    formatter={(value: number, name: string) => {
                       if (name === 'utilization') {
                         return [`${value}%`, 'Utilization'];
                       }

@@ -737,7 +737,7 @@ async function loadOffers(): Promise<Array<{
   return offers;
 }
 
-async function main() {
+export async function runSeed() {
   console.log(`Seeding with DATA_SEED=${DATA_SEED}`);
 
   // Clear existing data
@@ -1104,11 +1104,14 @@ async function main() {
   console.log('Seed completed successfully!');
 }
 
-main()
-  .catch((e) => {
-    console.error('Seed failed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Only run main() if this file is executed directly (not imported)
+if (require.main === module) {
+  runSeed()
+    .catch((e) => {
+      console.error('Seed failed:', e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
