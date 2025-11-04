@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '../lib/authContext';
 import { articlesApi, Article } from '../services/api';
 import ReactMarkdown from 'react-markdown';
 
 export default function ArticlePage() {
   const { recommendationId } = useParams<{ recommendationId: string }>();
-  const { user } = useAuth();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
