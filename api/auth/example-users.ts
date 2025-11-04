@@ -4,14 +4,32 @@ process.env.VERCEL = '1';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient } from '@prisma/client';
 
-// Ensure DATABASE_URL is set (Vercel provides this automatically)
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+// Initialize Prisma Client inside handler to ensure DATABASE_URL is available
+let prisma: PrismaClient | null = null;
+
+function getPrismaClient(): PrismaClient {
+  if (!prisma) {
+    // Try DATABASE_URL first, then fall back to Supabase env vars
+    const dbUrl = process.env.DATABASE_URL || 
+                  process.env.SUPABASE_POSTGRES_PRISMA_URL ||
+                  process.env.SUPABASE_POSTGRES_URL;
+    
+    if (!dbUrl) {
+      throw new Error('No database URL found in environment variables. Checked: DATABASE_URL, SUPABASE_POSTGRES_PRISMA_URL, SUPABASE_POSTGRES_URL');
+    }
+    
+    console.log('Initializing Prisma Client with database URL:', dbUrl.substring(0, 30) + '...');
+    
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: dbUrl,
+        },
+      },
+    });
+  }
+  return prisma;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
@@ -32,17 +50,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Attempting to fetch example users from database...');
     console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set (' + process.env.DATABASE_URL.substring(0, 30) + '...)' : 'Not set');
     
-    // Ensure Prisma Client is using the correct DATABASE_URL
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL environment variable not set!');
-      return res.status(500).json({ 
-        error: 'Database configuration error',
-        _note: 'DATABASE_URL not set in serverless function'
-      });
-    }
+    // Get Prisma Client (initializes with current DATABASE_URL)
+    const prismaClient = getPrismaClient();
     
     // Get 5 random regular users (exclude operator)
-    const users = await prisma.user.findMany({
+    const users = await prismaClient.user.findMany({
       where: {
         role: 'user',
       },
@@ -69,16 +81,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error: any) {
     console.error('Error fetching example users:', error);
     console.error('Error details:', error.message, error.stack);
+    console.error('Error code:', error.code);
+    console.error('Error meta:', JSON.stringify(error.meta || {}));
     
-    // Return fallback if database query fails
-    return res.status(200).json({
-      exampleEmails: [],
-      password: 'password123',
-      operatorEmail: 'operator@spendsense.com',
-      operatorPassword: 'operator123',
-      _note: 'Database unavailable, showing fallback credentials',
+    // Return error details for debugging (remove in production if needed)
+    return res.status(500).json({
+      error: 'Failed to fetch example users',
+      message: error.message,
+      code: error.code || 'UNKNOWN_ERROR',
+      _debug: {
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasSupabaseUrl: !!process.env.SUPABASE_POSTGRES_PRISMA_URL,
+        envVars: Object.keys(process.env).filter(k => k.includes('DATABASE') || k.includes('SUPABASE')).length + ' env vars found',
+      },
+      fallback: {
+        exampleEmails: [],
+        password: 'password123',
+        operatorEmail: 'operator@spendsense.com',
+        operatorPassword: 'operator123',
+      },
     });
   } finally {
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   }
 }
