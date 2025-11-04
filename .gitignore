@@ -39,7 +39,6 @@ spendsense.db
 *.tsbuildinfo
 
 # Prisma
-backend/prisma/migrations/
 
 # Generated files
 backend/prisma/generated/
