@@ -69,9 +69,12 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       });
     }
 
-    // Get user accounts
+    // Get user accounts with liability data
     const accounts = await prisma.account.findMany({
       where: { user_id: userId },
+      include: {
+        liability: true,
+      },
     });
 
     const accountsFormatted = accounts.map(account => ({
@@ -81,6 +84,21 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       limit: account.balance_limit ? Number(account.balance_limit) : null,
       utilization: account.type === 'credit_card' && account.balance_limit
         ? Number(account.balance_current) / Number(account.balance_limit)
+        : null,
+      // Include liability data for credit cards
+      apr: account.liability && account.liability.liability_type === 'credit_card' && account.liability.aprs
+        ? (() => {
+            try {
+              const aprs = JSON.parse(account.liability.aprs);
+              // Get the first APR percentage (aprs is array of {apr_type, apr_percentage})
+              return aprs && aprs.length > 0 ? Number(aprs[0].apr_percentage) : null;
+            } catch {
+              return null;
+            }
+          })()
+        : null,
+      minimumPayment: account.liability && account.liability.liability_type === 'credit_card'
+        ? Number(account.liability.minimum_payment_amount || 0)
         : null,
     }));
 

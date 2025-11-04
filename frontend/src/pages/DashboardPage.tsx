@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/authContext';
 import { recommendationsApi, profileApi, Recommendation } from '../services/api';
+import ConsentModal from '../components/ConsentModal';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -8,12 +9,26 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   useEffect(() => {
     if (user) {
-      loadData();
+      // Check if user has never consented (first login)
+      if (user.consentStatus === false) {
+        setShowConsentModal(true);
+      } else {
+        loadData();
+      }
     }
   }, [user]);
+
+  const handleConsentModalClose = (consented: boolean) => {
+    setShowConsentModal(false);
+    if (consented) {
+      // Reload data after consent
+      loadData();
+    }
+  };
 
   const loadData = async () => {
     if (!user) return;
@@ -112,26 +127,51 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {showConsentModal && <ConsentModal onConsent={handleConsentModalClose} />}
       <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
 
       {/* Critical Alert Banners */}
-      {alerts.map((alert, idx) => (
-        <div
-          key={idx}
-          className={`p-4 rounded-md ${
-            alert.type === 'critical'
-              ? 'bg-red-50 border border-red-200 text-red-800'
-              : alert.type === 'warning'
-              ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-              : 'bg-blue-50 border border-blue-200 text-blue-800'
-          }`}
-        >
-          {alert.type === 'critical' && '🔴 '}
-          {alert.type === 'warning' && '🟡 '}
-          {alert.type === 'info' && 'ℹ️ '}
-          {alert.message}
-        </div>
-      ))}
+      {alerts.map((alert, idx) => {
+        // Determine topic for "Learn more" link based on alert type
+        let learnMoreTopic = '';
+        if (alert.message.includes('credit') || alert.message.includes('utilization') || alert.message.includes('overdue')) {
+          learnMoreTopic = 'credit';
+        } else if (alert.message.includes('savings') || alert.message.includes('emergency fund')) {
+          learnMoreTopic = 'savings';
+        } else if (alert.message.includes('subscription')) {
+          learnMoreTopic = 'budgeting';
+        }
+
+        return (
+          <div
+            key={idx}
+            className={`p-4 rounded-md ${
+              alert.type === 'critical'
+                ? 'bg-red-50 border border-red-200 text-red-800'
+                : alert.type === 'warning'
+                ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                : 'bg-blue-50 border border-blue-200 text-blue-800'
+            }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {alert.type === 'critical' && '🔴 '}
+                {alert.type === 'warning' && '🟡 '}
+                {alert.type === 'info' && 'ℹ️ '}
+                {alert.message}
+              </div>
+              {learnMoreTopic && (
+                <a
+                  href={`/library?topic=${learnMoreTopic}`}
+                  className="ml-4 text-sm font-medium underline hover:no-underline whitespace-nowrap"
+                >
+                  Learn more →
+                </a>
+              )}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Recommendations Section */}
       <div>

@@ -6,4 +6,5 @@ export { default as recommendationsRoutes } from './recommendations';
 export { default as chatRoutes } from './chat';
 export { default as operatorRoutes } from './operator';
 export { default as contentRoutes } from './content';
+export { default as transactionsRoutes } from './transactions';
 

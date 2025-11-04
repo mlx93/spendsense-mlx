@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { authRoutes, userRoutes, profileRoutes, recommendationsRoutes, chatRoutes, operatorRoutes, contentRoutes } from './ui/routes';
+import { authRoutes, userRoutes, profileRoutes, recommendationsRoutes, chatRoutes, operatorRoutes, contentRoutes, transactionsRoutes } from './ui/routes';
 import { errorHandler } from './ui/middleware';
 
 dotenv.config();
@@ -44,7 +44,8 @@ app.use(cors({
 app.use(express.json());
 
 // Detect if running on Vercel (serverless function)
-const isVercel = process.env.VERCEL === '1';
+// Check multiple ways: VERCEL env var, or if we're in the api/ directory
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
 
 // Root route - API information
 app.get('/', (req, res) => {
@@ -70,19 +71,21 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-// On Vercel, /api/* requests are routed to /api/index.ts, so paths don't include /api prefix
+// On Vercel, /api/* requests are routed to /api/[...path].ts, which strips /api prefix
+// So /api/auth/login becomes /auth/login in the Express app
 // On local dev, we mount routes with /api prefix
-if (isVercel) {
-  // Vercel: paths come without /api prefix
-  app.use('/auth', authRoutes);
-  app.use('/users', userRoutes);
-  app.use('/profile', profileRoutes);
-  app.use('/recommendations', recommendationsRoutes);
-  app.use('/chat', chatRoutes);
-  app.use('/operator', operatorRoutes);
-  app.use('/content', contentRoutes);
-} else {
-  // Local dev: mount with /api prefix
+// Mount routes for both Vercel (without /api) and local dev (with /api)
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/profile', profileRoutes);
+app.use('/recommendations', recommendationsRoutes);
+app.use('/chat', chatRoutes);
+app.use('/operator', operatorRoutes);
+app.use('/content', contentRoutes);
+app.use('/transactions', transactionsRoutes);
+
+// Also mount with /api prefix for local dev (won't conflict with Vercel)
+if (!isVercel) {
   app.use('/api/auth', authRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/profile', profileRoutes);
@@ -90,6 +93,7 @@ if (isVercel) {
   app.use('/api/chat', chatRoutes);
   app.use('/api/operator', operatorRoutes);
   app.use('/api/content', contentRoutes);
+  app.use('/api/transactions', transactionsRoutes);
 }
 
 // Error handling middleware (must be last)

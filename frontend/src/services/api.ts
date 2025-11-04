@@ -20,6 +20,8 @@ export interface Profile {
     balance: number;
     limit: number | null;
     utilization: number | null;
+    apr: number | null;
+    minimumPayment: number | null;
   }>;
   signals: {
     '30d': any;
@@ -93,6 +95,30 @@ export const contentApi = {
     if (search) params.append('search', search);
     return api.get<{ content: ContentItem[]; total: number }>(`/content?${params.toString()}`);
   },
+};
+
+// Transactions APIs
+export interface SpendingPatterns {
+  transactions: Array<{
+    id: string;
+    date: string;
+    amount: number;
+    merchant: string | null;
+    category: string | null;
+    categoryDetailed: string | null;
+  }>;
+  categoryBreakdown: Record<string, number>;
+  recurringVsOneTime: {
+    recurring: number;
+    oneTime: number;
+  };
+  totalSpending: number;
+  windowDays: number;
+}
+
+export const transactionsApi = {
+  getSpendingPatterns: (windowDays: number = 30) =>
+    api.get<SpendingPatterns>(`/transactions?windowDays=${windowDays}`),
 };
 
 // Operator APIs

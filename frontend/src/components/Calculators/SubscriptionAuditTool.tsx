@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Profile } from '../../services/api';
+import { Link } from 'react-router-dom';
+import { Profile, transactionsApi } from '../../services/api';
 
 interface SubscriptionAuditToolProps {
   profile: Profile;
@@ -16,25 +17,66 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
   const subscriptionSignal = profile.signals['30d']?.subscription;
   
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real implementation, this would come from the subscription signal's recurring_merchants
-    // For now, create mock subscriptions based on the signal
-    if (subscriptionSignal?.count > 0) {
-      const mockSubs: Subscription[] = [];
-      const monthlySpend = subscriptionSignal.monthly_spend || 0;
-      const avgPerSub = monthlySpend / subscriptionSignal.count;
-      
-      for (let i = 0; i < subscriptionSignal.count; i++) {
-        mockSubs.push({
-          id: `sub_${i}`,
-          name: `Subscription ${i + 1}`,
-          amount: avgPerSub + (Math.random() - 0.5) * avgPerSub * 0.4, // Add some variance
-          keeping: true,
-        });
+    const loadSubscriptions = async () => {
+      if (!subscriptionSignal?.recurring_merchants || subscriptionSignal.recurring_merchants.length === 0) {
+        setLoading(false);
+        return;
       }
-      setSubscriptions(mockSubs);
-    }
+
+      try {
+        // Get transactions to calculate individual subscription amounts
+        const spendingData = await transactionsApi.getSpendingPatterns(30);
+        
+        // Group transactions by merchant and calculate monthly averages for recurring merchants
+        const merchantTotals: Record<string, number> = {};
+        const merchantCounts: Record<string, number> = {};
+        
+        spendingData.data.transactions.forEach(txn => {
+          if (txn.merchant && subscriptionSignal.recurring_merchants.includes(txn.merchant)) {
+            merchantTotals[txn.merchant] = (merchantTotals[txn.merchant] || 0) + txn.amount;
+            merchantCounts[txn.merchant] = (merchantCounts[txn.merchant] || 0) + 1;
+          }
+        });
+
+        // Calculate average monthly spend per merchant
+        const subs: Subscription[] = subscriptionSignal.recurring_merchants.map((merchant, idx) => {
+          const total = merchantTotals[merchant] || 0;
+          const count = merchantCounts[merchant] || 1;
+          // Average per transaction, multiplied by estimated monthly frequency (4 for weekly, 1 for monthly)
+          const avgPerTransaction = count > 0 ? total / count : 0;
+          // Estimate monthly: assume weekly subscriptions occur ~4x/month, monthly occur ~1x/month
+          const estimatedMonthly = avgPerTransaction * (count >= 3 ? 4 : 1);
+          
+          return {
+            id: `sub_${idx}`,
+            name: merchant,
+            amount: estimatedMonthly > 0 ? estimatedMonthly : (subscriptionSignal.monthly_spend || 0) / subscriptionSignal.count,
+            keeping: true,
+          };
+        });
+
+        setSubscriptions(subs);
+      } catch (error) {
+        console.error('Error loading subscriptions:', error);
+        // Fallback to estimated amounts
+        const monthlySpend = subscriptionSignal.monthly_spend || 0;
+        const avgPerSub = monthlySpend / subscriptionSignal.count;
+        const fallbackSubs = subscriptionSignal.recurring_merchants.map((merchant, idx) => ({
+          id: `sub_${idx}`,
+          name: merchant,
+          amount: avgPerSub,
+          keeping: true,
+        }));
+        setSubscriptions(fallbackSubs);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSubscriptions();
   }, [subscriptionSignal]);
 
   const handleToggle = (id: string) => {
@@ -72,7 +114,9 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         <div className="border-t pt-4">
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Your Subscriptions</h4>
           <div className="space-y-2">
-            {subscriptions.length === 0 ? (
+            {loading ? (
+              <p className="text-sm text-gray-500">Loading subscriptions...</p>
+            ) : subscriptions.length === 0 ? (
               <p className="text-sm text-gray-500">No subscriptions detected</p>
             ) : (
               subscriptions.map((sub) => (
@@ -116,6 +160,28 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
             </p>
           </div>
         )}
+
+        {/* Formula Transparency */}
+        <details className="mt-4">
+          <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+            Show calculation formula
+          </summary>
+          <div className="mt-2 p-3 bg-gray-50 rounded text-xs font-mono space-y-1">
+            <p>Total Monthly = Σ(All Subscription Amounts)</p>
+            <p>Potential Savings = Σ(Canceled Subscription Amounts)</p>
+            <p>Annual Savings = Potential Savings × 12</p>
+          </div>
+        </details>
+
+        {/* Take Action Button */}
+        <div className="mt-4 pt-4 border-t">
+          <Link
+            to="/library?topic=budgeting"
+            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+          >
+            Learn About Subscription Management →
+          </Link>
+        </div>
       </div>
     </div>
   );

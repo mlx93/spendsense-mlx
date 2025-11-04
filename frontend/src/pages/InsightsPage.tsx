@@ -1,32 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/authContext';
-import { profileApi, Profile } from '../services/api';
+import { profileApi, Profile, transactionsApi, SpendingPatterns } from '../services/api';
 import EmergencyFundCalculator from '../components/Calculators/EmergencyFundCalculator';
 import DebtPayoffSimulator from '../components/Calculators/DebtPayoffSimulator';
 import SubscriptionAuditTool from '../components/Calculators/SubscriptionAuditTool';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function InsightsPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [spendingPatterns, setSpendingPatterns] = useState<SpendingPatterns | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      loadProfile();
-    }
-  }, [user]);
+  const [selectedWindow, setSelectedWindow] = useState<30 | 180>(30);
 
   const loadProfile = async () => {
     if (!user) return;
     try {
-      const response = await profileApi.getProfile(user.id);
-      setProfile(response.data);
+      setLoading(true);
+      const [profileResponse, spendingResponse] = await Promise.all([
+        profileApi.getProfile(user.id),
+        transactionsApi.getSpendingPatterns(selectedWindow),
+      ]);
+      setProfile(profileResponse.data);
+      setSpendingPatterns(spendingResponse.data);
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user, selectedWindow]);
 
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
@@ -45,6 +53,154 @@ export default function InsightsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Your Financial Insights</h1>
+
+      {/* Spending Patterns */}
+      {spendingPatterns && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Spending Patterns</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedWindow(30)}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedWindow === 30
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                30 Days
+              </button>
+              <button
+                onClick={() => setSelectedWindow(180)}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedWindow === 180
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                180 Days
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Category Breakdown - Pie Chart */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Spending by Category</h3>
+              {Object.keys(spendingPatterns.categoryBreakdown).length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={Object.entries(spendingPatterns.categoryBreakdown).map(([name, value]) => ({
+                        name: name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                        value: Math.round(value),
+                      }))}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {Object.entries(spendingPatterns.categoryBreakdown).map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#0088fe'][index % 6]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-gray-500 text-center py-12">No spending data available</p>
+              )}
+            </div>
+
+            {/* Recurring vs One-Time */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Recurring vs One-Time Spending</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={[
+                  {
+                    name: 'Recurring',
+                    amount: Math.round(spendingPatterns.recurringVsOneTime.recurring),
+                  },
+                  {
+                    name: 'One-Time',
+                    amount: Math.round(spendingPatterns.recurringVsOneTime.oneTime),
+                  },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Bar dataKey="amount" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Recurring Spending</span>
+                  <span className="font-semibold">
+                    ${spendingPatterns.recurringVsOneTime.recurring.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">One-Time Spending</span>
+                  <span className="font-semibold">
+                    ${spendingPatterns.recurringVsOneTime.oneTime.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t pt-2">
+                  <span className="text-gray-700 font-medium">Total Spending</span>
+                  <span className="font-bold text-lg">
+                    ${spendingPatterns.totalSpending.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Category Breakdown Table */}
+          <div className="mt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Category Details</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Percentage
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {Object.entries(spendingPatterns.categoryBreakdown)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([category, amount]) => (
+                      <tr key={category}>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-medium text-gray-900">
+                          ${amount.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
+                          {spendingPatterns.totalSpending > 0
+                            ? `${((amount / spendingPatterns.totalSpending) * 100).toFixed(1)}%`
+                            : '0%'}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Financial Snapshot */}
       <div className="bg-white rounded-lg shadow p-6">

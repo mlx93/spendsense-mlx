@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Profile } from '../../services/api';
 
 interface EmergencyFundCalculatorProps {
@@ -108,6 +109,29 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
             </p>
           </div>
         )}
+
+        {/* Formula Transparency */}
+        <details className="mt-4">
+          <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+            Show calculation formula
+          </summary>
+          <div className="mt-2 p-3 bg-gray-50 rounded text-xs font-mono space-y-1">
+            <p>Emergency Fund Coverage = Savings Balance ÷ Monthly Expenses</p>
+            <p>Target Amount = Monthly Expenses × Target Months</p>
+            <p>Gap = Target Amount - Current Savings</p>
+            <p>Months to Goal = Gap ÷ Monthly Savings Goal</p>
+          </div>
+        </details>
+
+        {/* Take Action Button */}
+        <div className="mt-4 pt-4 border-t">
+          <Link
+            to="/library?topic=savings"
+            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+          >
+            Learn About Emergency Funds →
+          </Link>
+        </div>
       </div>
     </div>
   );

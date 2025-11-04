@@ -27,8 +27,11 @@ describe('Rationale Generator', () => {
 
     // Rationale should contain user-specific data
     expect(rationale).toBeTruthy();
-    expect(typeof rationale).toBe('string');
-    expect(rationale.length).toBeGreaterThan(0);
+    expect(rationale).toHaveProperty('rationale');
+    expect(rationale).toHaveProperty('templateId');
+    expect(typeof rationale.rationale).toBe('string');
+    expect(rationale.rationale.length).toBeGreaterThan(0);
+    expect(rationale.templateId).toBeDefined();
   });
 
   it('should generate rationale with proper shape (no missing variables)', async () => {
@@ -49,7 +52,8 @@ describe('Rationale Generator', () => {
     );
 
     // Should not contain unsubstituted template variables
-    expect(rationale).not.toMatch(/\{[^}]+\}/); // Unsubstituted {variables}
+    expect(rationale.rationale).not.toMatch(/\{[^}]+\}/); // Unsubstituted {variables}
+    expect(rationale.templateId).toBeDefined();
   });
 });
 

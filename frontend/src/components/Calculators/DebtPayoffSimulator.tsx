@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Profile } from '../../services/api';
 
 interface DebtPayoffSimulatorProps {
@@ -20,13 +21,13 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
 
   useEffect(() => {
-    // Build credit card list from accounts
+    // Build credit card list from accounts with real liability data
     const cards: CreditCard[] = accounts.map((acc) => ({
       id: acc.id,
       name: acc.id.substring(acc.id.length - 4), // Last 4 digits
       balance: acc.balance,
-      apr: 18.99, // Default APR (would come from liability data in real implementation)
-      minimumPayment: acc.balance * 0.02, // Estimate 2% minimum
+      apr: acc.apr || 18.99, // Use real APR from liability, fallback to 18.99%
+      minimumPayment: acc.minimumPayment || acc.balance * 0.02, // Use real minimum payment, fallback to 2% estimate
     }));
     setCreditCards(cards);
   }, [accounts]);
@@ -137,6 +138,29 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
             </ul>
           </div>
         )}
+
+        {/* Formula Transparency */}
+        <details className="mt-4">
+          <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+            Show calculation formula
+          </summary>
+          <div className="mt-2 p-3 bg-gray-50 rounded text-xs font-mono space-y-1">
+            <p>Monthly Interest = Balance × (APR ÷ 12)</p>
+            <p>Principal Payment = Total Payment - Monthly Interest</p>
+            <p>New Balance = Balance - Principal Payment</p>
+            <p>Repeat until balance ≤ $0</p>
+          </div>
+        </details>
+
+        {/* Take Action Button */}
+        <div className="mt-4 pt-4 border-t">
+          <Link
+            to="/library?topic=credit"
+            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+          >
+            Learn About Debt Payoff Strategies →
+          </Link>
+        </div>
       </div>
     </div>
   );
