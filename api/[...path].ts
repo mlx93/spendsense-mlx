@@ -47,13 +47,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   return app(req as any, res as any);
 }
 
-// Export the handler with explicit configuration
+// Export the handler
+// Note: For Vercel serverless functions (not Next.js), we don't need the config export
+// The bodyParser and externalResolver configs are Next.js specific
 export default handler;
-
-// Export config to ensure all HTTP methods are allowed
-export const config = {
-  api: {
-    bodyParser: false, // Let Express handle body parsing
-    externalResolver: true, // Tell Vercel we're using an external resolver (Express)
-  },
-};
