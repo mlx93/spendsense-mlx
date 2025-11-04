@@ -6,10 +6,16 @@ The login endpoint returned **405 Method Not Allowed** in Vercel production when
 
 ## Root Cause
 
-The issue was with the Vercel serverless function configuration in `api/[...path].ts`:
+**PRIMARY ISSUE:** The rewrite rule in `vercel.json` was catching ALL paths (including `/api/*`) and routing them to `index.html` instead of serverless functions. This caused Vercel to return the frontend HTML file for API requests, resulting in a 405 error.
 
-1. **Missing API configuration export**: Vercel needs an explicit `config` export to disable its default body parser and allow Express to handle requests properly
-2. **Missing `externalResolver` flag**: This tells Vercel that we're using an external framework (Express) to handle the requests
+**SECONDARY ISSUE:** The Vercel serverless function configuration in `api/[...path].ts` was missing critical configuration exports.
+
+### Issue 1: Incorrect Rewrite Rule (Main Problem)
+The original rewrite rule `"source": "/(.*)"` matched EVERYTHING, including API routes. This sent API requests to `index.html` instead of the serverless functions.
+
+### Issue 2: Missing API Configuration
+1. **Missing API configuration export**: Vercel needs an explicit `config` export to disable its default body parser
+2. **Missing `externalResolver` flag**: This tells Vercel that we're using an external framework (Express)
 3. **Improper typing**: Using `any` types instead of proper `VercelRequest` and `VercelResponse` types
 
 ## Changes Made
@@ -33,20 +39,41 @@ export const config = {
 };
 ```
 
-### 2. Updated `vercel.json`
+### 2. Fixed `vercel.json` (CRITICAL FIX)
 
-**Key changes:**
-- Removed the redundant `/api/(.*)` rewrite rule that was causing confusion
-- Added explicit function configuration for all API routes with proper memory and timeout settings
-- Simplified rewrites to only handle SPA routing for the frontend
+**The Problem:**
+```json
+"rewrites": [
+  {
+    "source": "/(.*)",  // ❌ This catches EVERYTHING including /api/*
+    "destination": "/index.html"
+  }
+]
+```
+
+This rewrite rule was sending ALL requests (including `/api/auth/login`) to `index.html`, which resulted in a 405 error because HTML files don't handle POST methods.
+
+**The Solution:**
+```json
+"rewrites": [
+  {
+    "source": "/((?!api).*)",  // ✅ Negative lookahead: match anything EXCEPT /api/*
+    "destination": "/index.html"
+  }
+]
+```
+
+The regex `/((?!api).*)` uses a **negative lookahead** `(?!api)` to match any path that does NOT start with `api`. This ensures:
+- `/api/*` requests → Serverless functions in `api/` directory  
+- All other requests (/, /dashboard, etc.) → `index.html` (SPA routing)
 
 ## Why This Fixes the 405 Error
 
-1. **`bodyParser: false`**: By default, Vercel's API routes parse the request body, which can interfere with Express's body parsing middleware. This caused the body to be consumed before Express could read it, leading to routing issues.
+1. **Correct routing** (PRIMARY FIX): The negative lookahead regex ensures `/api/*` requests go to serverless functions, not `index.html`. Previously, ALL requests were being routed to `index.html`, which doesn't support POST methods.
 
-2. **`externalResolver: true`**: This flag tells Vercel not to expect an immediate response and to let Express fully handle the request/response cycle. Without this, Vercel might timeout or return errors if Express doesn't respond immediately.
+2. **`bodyParser: false`**: Vercel doesn't consume the request body before Express can process it.
 
-3. **Proper types**: Using `VercelRequest` and `VercelResponse` ensures compatibility with Vercel's serverless environment.
+3. **`externalResolver: true`**: Vercel lets Express fully handle the request/response cycle without timing out or interfering.
 
 ## Testing Instructions
 
