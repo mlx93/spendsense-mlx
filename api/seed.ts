@@ -36,8 +36,13 @@ export default async function handler(req: any, res: any) {
 
   try {
     // Import and run the seed function
-    // Use .js extension for ESM compatibility in Vercel
-    const { runSeed } = await import('../backend/prisma/seed.js');
+    // Use require for CommonJS compatibility in Vercel
+    const seedModule = require('../backend/prisma/seed');
+    const { runSeed } = seedModule;
+    
+    if (!runSeed) {
+      throw new Error('runSeed function not found in seed module');
+    }
     
     // Run seed
     await runSeed();
