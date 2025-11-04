@@ -72,13 +72,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   (req as any).path = path;
   (req as any).baseUrl = '';
   
-  // Update request properties for Express routing
-  // Express uses these properties to match routes
-  (req as any).url = path;
-  (req as any).originalUrl = path;
-  (req as any).path = path;
-  (req as any).baseUrl = '';
-  
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
   return app(req as any, res as any);
