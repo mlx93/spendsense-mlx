@@ -1,12 +1,15 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { AuthRequest, authenticateToken } from '../middleware/auth.middleware';
 import { requireConsent } from '../middleware/consent.middleware';
 import { generateUserData } from './recommendations';
 
 const router = Router();
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 // POST /api/consent - Record or update user consent
 router.post('/consent', authenticateToken, async (req: AuthRequest, res: Response) => {
@@ -31,11 +34,18 @@ router.post('/consent', authenticateToken, async (req: AuthRequest, res: Respons
     const wasPreviouslyConsented = currentUser?.consent_status === true;
     const isNewConsent = !wasPreviouslyConsented && consentStatus === true;
 
-    await prisma.user.update({
+    // Update consent status
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         consent_status: consentStatus,
         consent_date: consentStatus ? new Date() : null,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        consent_status: true,
       },
     });
 
@@ -59,10 +69,28 @@ router.post('/consent', authenticateToken, async (req: AuthRequest, res: Respons
       });
     }
 
+    // Generate new JWT token with updated consent status
+    const token = jwt.sign(
+      {
+        userId: updatedUser.id,
+        role: updatedUser.role,
+        consentStatus: updatedUser.consent_status,
+      } as object,
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
+    );
+
     res.json({
       success: true,
       consentStatus,
       consentDate: consentStatus ? new Date() : null,
+      token, // Return new token so frontend can update without re-login
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        consentStatus: updatedUser.consent_status,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -138,7 +166,14 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
     const formatSignals = (signals: any[]) => {
       const result: any = {};
       for (const signal of signals) {
-        result[signal.signal_type] = JSON.parse(signal.data);
+        try {
+          if (signal.data) {
+            result[signal.signal_type] = JSON.parse(signal.data);
+          }
+        } catch (error) {
+          console.error(`Error parsing signal ${signal.signal_type} for user ${userId}:`, error);
+          // Skip invalid signals rather than failing the entire request
+        }
       }
       return result;
     };
@@ -169,12 +204,26 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
         primary: primary ? {
           type: primary.persona_type,
           score: Number(primary.score),
-          criteria_met: JSON.parse(primary.criteria_met),
+          criteria_met: (() => {
+            try {
+              return primary.criteria_met ? JSON.parse(primary.criteria_met) : [];
+            } catch (error) {
+              console.error(`Error parsing criteria_met for persona ${primary.persona_type}:`, error);
+              return [];
+            }
+          })(),
         } : null,
         secondary: secondary ? {
           type: secondary.persona_type,
           score: Number(secondary.score),
-          criteria_met: JSON.parse(secondary.criteria_met),
+          criteria_met: (() => {
+            try {
+              return secondary.criteria_met ? JSON.parse(secondary.criteria_met) : [];
+            } catch (error) {
+              console.error(`Error parsing criteria_met for persona ${secondary.persona_type}:`, error);
+              return [];
+            }
+          })(),
         } : null,
       };
     };
@@ -198,12 +247,26 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
         '180d': formatPersonas(personas180d),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Profile error:', error);
+    console.error('Error stack:', error?.stack);
+    const errorDetails: any = {
+      errorMessage: error?.message,
+      errorCode: error?.code,
+    };
+    try {
+      errorDetails.userId = req.params.userId;
+    } catch (e) {
+      // Ignore if req is not available
+    }
+    console.error('Error details:', errorDetails);
     res.status(500).json({
       error: 'Failed to fetch profile',
       code: 'INTERNAL_ERROR',
-      details: {},
+      details: {
+        message: error?.message || 'Unknown error',
+        ...(process.env.NODE_ENV === 'development' && { stack: error?.stack }),
+      },
     });
   }
 });

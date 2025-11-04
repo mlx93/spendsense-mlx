@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { profileApi } from '../services/api';
+import { useAuth } from '../lib/authContext';
 
 interface ConsentModalProps {
   onConsent: (consented: boolean) => void;
@@ -7,14 +8,20 @@ interface ConsentModalProps {
 
 export default function ConsentModal({ onConsent }: ConsentModalProps) {
   const [loading, setLoading] = useState(false);
+  const { updateToken } = useAuth();
 
   const handleAllow = async () => {
     setLoading(true);
     try {
-      await profileApi.updateConsent(true);
+      const response = await profileApi.updateConsent(true);
+      // Update token and user in auth context with new consent status
+      if (response.data.token && response.data.user) {
+        updateToken(response.data.token, response.data.user);
+      }
       onConsent(true);
     } catch (error) {
       console.error('Error updating consent:', error);
+      alert('Failed to update consent. Please try again.');
     } finally {
       setLoading(false);
     }

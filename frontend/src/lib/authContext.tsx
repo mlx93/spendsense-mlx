@@ -1,12 +1,36 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import api from './apiClient';
 
+// Simple JWT decoder (we only need the payload, no verification needed on client)
+function decodeJWT(token: string): { userId: string; role: string; consentStatus: boolean } | null {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
+    return {
+      userId: decoded.userId,
+      role: decoded.role,
+      consentStatus: decoded.consentStatus,
+    };
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+}
+
 interface AuthContextType {
   user: { id: string; email: string; role: string; consentStatus: boolean } | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateToken: (token: string, user: { id: string; email: string; role: string; consentStatus: boolean }) => void;
   loading: boolean;
 }
 
@@ -18,11 +42,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored token on mount
+    // Check for stored token on mount and decode to get user info
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      // Optionally validate token with backend
+      const decoded = decodeJWT(storedToken);
+      if (decoded) {
+        // We need to fetch user email from backend or store it in token
+        // For now, we'll decode what we can from the token
+        // The login response includes email, so we should store it in localStorage too
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser({ ...userData, consentStatus: decoded.consentStatus });
+          } catch (e) {
+            // If stored user is invalid, just use decoded data
+            setUser({
+              id: decoded.userId,
+              email: '', // Will be updated on next login
+              role: decoded.role,
+              consentStatus: decoded.consentStatus,
+            });
+          }
+        } else {
+          // Decode what we can from token, but we need email from localStorage or backend
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            try {
+              const userData = JSON.parse(storedUser);
+              setUser({ ...userData, consentStatus: decoded.consentStatus });
+            } catch (e) {
+              setUser({
+                id: decoded.userId,
+                email: '', // Will be updated on next login
+                role: decoded.role,
+                consentStatus: decoded.consentStatus,
+              });
+            }
+          } else {
+            setUser({
+              id: decoded.userId,
+              email: '', // Will be updated on next login
+              role: decoded.role,
+              consentStatus: decoded.consentStatus,
+            });
+          }
+        }
+      }
     }
     setLoading(false);
   }, []);
@@ -34,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       setToken(newToken);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userData)); // Store user data for persistence
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Login failed');
     }
@@ -55,10 +123,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  const updateToken = (newToken: string, newUser: { id: string; email: string; role: string; consentStatus: boolean }) => {
+    setToken(newToken);
+    setUser(newUser);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser)); // Store user data for persistence
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, updateToken, loading }}>
       {children}
     </AuthContext.Provider>
   );

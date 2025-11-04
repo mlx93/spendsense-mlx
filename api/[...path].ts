@@ -21,29 +21,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   // Vercel's catch-all route: /api/profile/:userId
-  // In Vercel, catch-all segments are available via req.query.path as an array
-  // For /api/profile/user123, req.query.path = ['profile', 'user123']
-  let path = '/';
+  // Extract path from req.url (more reliable than req.query.path)
+  let path = req.url || '';
   
-  // Extract path from Vercel's query parameter (more reliable than req.url for catch-all)
-  if (req.query && Array.isArray(req.query.path) && req.query.path.length > 0) {
-    // Join path segments: ['profile', 'user123'] -> '/profile/user123'
-    path = '/' + req.query.path.join('/');
-  } else if (req.query && typeof req.query.path === 'string') {
-    // Handle single segment case
-    path = '/' + req.query.path;
-  } else if (req.url) {
-    // Fallback to req.url if query.path is not available
-    path = req.url;
-    // Remove query string if present
-    const queryIndex = path.indexOf('?');
-    if (queryIndex !== -1) {
-      path = path.substring(0, queryIndex);
-    }
-    // Strip /api prefix if present
-    if (path.startsWith('/api')) {
-      path = path.substring(4) || '/';
-    }
+  // Remove query string if present (e.g., ?status=active&refresh=true)
+  const queryIndex = path.indexOf('?');
+  if (queryIndex !== -1) {
+    path = path.substring(0, queryIndex);
+  }
+  
+  // Strip /api prefix if present
+  // For /api/profile/:userId, we want /profile/:userId for Express
+  if (path.startsWith('/api')) {
+    path = path.substring(4) || '/';
   }
   
   // Ensure path starts with /
@@ -52,31 +42,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   // Preserve query string for Express (e.g., ?status=active&refresh=true)
-  // Extract query string from original URL (excluding the path parameter)
-  const queryParams: string[] = [];
-  if (req.query) {
-    for (const [key, value] of Object.entries(req.query)) {
-      if (key !== 'path' && value !== undefined) {
-        if (Array.isArray(value)) {
-          value.forEach(v => queryParams.push(`${key}=${encodeURIComponent(String(v))}`));
-        } else {
-          queryParams.push(`${key}=${encodeURIComponent(String(value))}`);
-        }
-      }
-    }
-  }
-  const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
+  const originalUrl = req.url || '';
+  const queryString = originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : '';
   const pathWithQuery = path + queryString;
   
   // Log for debugging (will appear in Vercel function logs)
   console.log(`[api/[...path]] ===== REQUEST START =====`);
   console.log(`[api/[...path]] Method: ${req.method}`);
   console.log(`[api/[...path]] Original URL: ${req.url}`);
-  console.log(`[api/[...path]] Query object:`, JSON.stringify(req.query));
-  console.log(`[api/[...path]] Query.path (raw):`, req.query?.path);
-  console.log(`[api/[...path]] Query.path type:`, typeof req.query?.path, Array.isArray(req.query?.path));
   console.log(`[api/[...path]] Extracted path: ${path}`);
   console.log(`[api/[...path]] Path with query: ${pathWithQuery}`);
+  console.log(`[api/[...path]] Query object:`, JSON.stringify(req.query));
   console.log(`[api/[...path]] Headers:`, JSON.stringify(req.headers));
   
   // Update request properties for Express routing

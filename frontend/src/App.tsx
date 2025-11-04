@@ -10,7 +10,6 @@ import SettingsPage from './pages/SettingsPage';
 import OperatorPage from './pages/OperatorPage';
 import ArticlePage from './pages/ArticlePage';
 import ConsentModal from './components/ConsentModal';
-import { profileApi } from './services/api';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { user, loading } = useAuth();
@@ -24,22 +23,11 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
     }
   }, [user, loading, consentHandled]);
 
-  const handleConsent = async (consented: boolean) => {
+  const handleConsent = async (_consented: boolean) => {
     setShowConsentModal(false);
     setConsentHandled(true);
-    if (consented) {
-      // Update consent status - this will automatically trigger data generation in the background
-      try {
-        await profileApi.updateConsent(true);
-        // Reload page to refresh user context (JWT contains consentStatus)
-        // Data generation happens in background - user will see data appear as it's generated
-        // They can use the refresh button if they want to wait for completion
-        window.location.reload();
-      } catch (error) {
-        console.error('Error updating consent:', error);
-        alert('Failed to update consent. Please try again.');
-      }
-    }
+    // Consent modal handles token update internally via useAuth hook
+    // No need to reload page - token is updated in auth context
   };
 
   if (loading) return <div className="text-center py-12">Loading...</div>;

@@ -2,10 +2,10 @@
 process.env.VERCEL = '1';
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import app from '../../../backend/src/server';
+import app from '../../backend/src/server';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Extract userId from query parameter (Vercel dynamic route)
+  // Extract userId from Vercel's dynamic route parameter
   const userId = req.query.userId as string;
   
   if (!userId) {
@@ -15,24 +15,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       details: {},
     });
   }
-  
+
   // Set the URL to /recommendations/:userId (Express expects this path)
-  // Preserve query string from req.query (Vercel parses query params automatically)
-  const queryParams: string[] = [];
-  if (req.query) {
-    for (const [key, value] of Object.entries(req.query)) {
-      if (key !== 'userId' && value !== undefined) {
-        if (Array.isArray(value)) {
-          value.forEach(v => queryParams.push(`${key}=${encodeURIComponent(String(v))}`));
-        } else {
-          queryParams.push(`${key}=${encodeURIComponent(String(value))}`);
-        }
-      }
-    }
-  }
-  const queryString = queryParams.length > 0 ? '?' + queryParams.join('&') : '';
-  (req as any).url = `/recommendations/${userId}${queryString}`;
-  (req as any).originalUrl = `/recommendations/${userId}${queryString}`;
+  // Preserve query string if present (e.g., ?status=active&refresh=true)
+  const queryString = req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+  const path = `/recommendations/${userId}${queryString}`;
+  
+  (req as any).url = path;
+  (req as any).originalUrl = path;
   (req as any).path = `/recommendations/${userId}`;
   
   // Pass to Express app

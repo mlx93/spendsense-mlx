@@ -477,12 +477,25 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       });
     }
 
-    // If refresh=true, recompute signals and personas, then regenerate recommendations
+    // If refresh=true, start data generation in background (non-blocking)
+    // This allows the endpoint to return quickly while generation happens asynchronously
     if (refresh === 'true') {
-      await generateUserData(userId);
+      // Use setImmediate to ensure this runs in the next event loop tick
+      // This prevents any synchronous errors from affecting the current request
+      setImmediate(() => {
+        generateUserData(userId).catch((error) => {
+          console.error(`Error generating user data for user ${userId} during refresh:`, error);
+          console.error('Error stack:', error?.stack);
+          // Don't throw - generation happens in background, user can retry if needed
+        });
+      });
+      // Return immediately with existing recommendations
+      // Frontend can reload after a short delay to see updated data
     }
 
     // Get recommendations
+    // Note: During refresh, generateUserData runs in background and may delete recommendations
+    // We fetch existing ones here, and frontend will reload after generation completes
     const whereClause: any = { user_id: userId };
     if (status) {
       whereClause.status = status;
@@ -490,42 +503,74 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       whereClause.status = 'active'; // Default to active
     }
 
-    const recommendations = await prisma.recommendation.findMany({
-      where: whereClause,
-      include: {
-        content: true,
-        offer: true,
-      },
-      orderBy: { created_at: 'desc' },
-    });
+    let recommendations: Array<{
+      id: string;
+      type: string;
+      rationale: string | null;
+      persona_type: string;
+      status: string;
+      created_at: Date;
+      content: any;
+      offer: any;
+    }> = [];
+    try {
+      recommendations = await prisma.recommendation.findMany({
+        where: whereClause,
+        include: {
+          content: true,
+          offer: true,
+        },
+        orderBy: { created_at: 'desc' },
+      });
+    } catch (dbError: any) {
+      console.error('Error fetching recommendations from database:', dbError);
+      // If database query fails, return empty array rather than failing the entire request
+      recommendations = [];
+    }
 
     const formatted = recommendations.map(rec => {
-      const base = {
-        id: rec.id,
-        type: rec.type,
-        rationale: rec.rationale,
-        personaType: rec.persona_type,
-        status: rec.status,
-        createdAt: rec.created_at,
-      };
-
-      if (rec.type === 'education' && rec.content) {
-        return {
-          ...base,
-          title: rec.content.title,
-          excerpt: rec.content.excerpt,
-          url: rec.content.url,
+      try {
+        const base = {
+          id: rec.id,
+          type: rec.type,
+          rationale: rec.rationale || '',
+          personaType: rec.persona_type,
+          status: rec.status,
+          createdAt: rec.created_at,
         };
-      } else if (rec.type === 'offer' && rec.offer) {
+
+        if (rec.type === 'education' && rec.content) {
+          return {
+            ...base,
+            title: rec.content.title || 'Untitled',
+            excerpt: rec.content.excerpt || '',
+            url: rec.content.url || '',
+          };
+        } else if (rec.type === 'offer' && rec.offer) {
+          return {
+            ...base,
+            title: rec.offer.title || 'Untitled Offer',
+            description: rec.offer.description || '',
+            url: rec.offer.url || '',
+          };
+        }
+
+        return base;
+      } catch (formatError: any) {
+        console.error(`Error formatting recommendation ${rec.id}:`, formatError);
+        // Return a minimal valid recommendation object
         return {
-          ...base,
-          title: rec.offer.title,
-          description: rec.offer.description,
-          url: rec.offer.url,
+          id: rec.id,
+          type: rec.type || 'education',
+          rationale: rec.rationale || '',
+          personaType: rec.persona_type || '',
+          status: rec.status || 'active',
+          createdAt: rec.created_at,
+          title: 'Untitled',
+          excerpt: '',
+          url: '',
         };
       }
-
-      return base;
     });
 
     res.json({
@@ -533,12 +578,28 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       recommendations: formatted,
       disclaimer: 'This is educational content, not financial advice. Consult a licensed advisor for personalized guidance.',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Recommendations error:', error);
+    console.error('Error stack:', error?.stack);
+    const errorDetails: any = {
+      errorMessage: error?.message,
+      errorCode: error?.code,
+    };
+    try {
+      errorDetails.userId = req.params.userId;
+      errorDetails.status = req.query.status;
+      errorDetails.refresh = req.query.refresh;
+    } catch (e) {
+      // Ignore if req is not available
+    }
+    console.error('Error details:', errorDetails);
     res.status(500).json({
       error: 'Failed to fetch recommendations',
       code: 'INTERNAL_ERROR',
-      details: {},
+      details: {
+        message: error?.message || 'Unknown error',
+        ...(process.env.NODE_ENV === 'development' && { stack: error?.stack }),
+      },
     });
   }
 });

@@ -8,6 +8,8 @@ export default function DashboardPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshProgress, setRefreshProgress] = useState(0);
+  const [refreshStatus, setRefreshStatus] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
 
@@ -84,17 +86,95 @@ export default function DashboardPage() {
   const handleRefresh = async () => {
     if (!user || refreshing) return;
     
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    
     try {
       setRefreshing(true);
-      // Trigger refresh which regenerates signals, personas, and recommendations
+      setRefreshProgress(0);
+      setRefreshStatus('Analyzing your transactions...');
+      
+      // Trigger refresh - this starts background generation and returns immediately
       await recommendationsApi.getRecommendations(user.id, 'active', true);
-      // Reload all data
-      await loadData();
+      
+      // Simulate progress with realistic steps
+      const steps = [
+        { progress: 20, status: 'Detecting spending patterns...' },
+        { progress: 40, status: 'Analyzing credit utilization...' },
+        { progress: 60, status: 'Identifying savings opportunities...' },
+        { progress: 80, status: 'Generating personalized recommendations...' },
+        { progress: 95, status: 'Finalizing insights...' },
+      ];
+      
+      let currentStep = 0;
+      progressInterval = setInterval(() => {
+        if (currentStep < steps.length) {
+          setRefreshProgress(steps[currentStep].progress);
+          setRefreshStatus(steps[currentStep].status);
+          currentStep++;
+        } else {
+          if (progressInterval) clearInterval(progressInterval);
+        }
+      }, 500); // Update every 500ms for smooth animation
+      
+      // Wait 3 seconds for background generation to complete, then reload data
+      // This gives the backend time to generate new signals/personas/recommendations
+      // Use retry logic in case generation takes a bit longer
+      timeoutId = setTimeout(async () => {
+        if (progressInterval) clearInterval(progressInterval);
+        setRefreshProgress(100);
+        setRefreshStatus('Loading your insights...');
+        
+        // Retry loading data up to 3 times with exponential backoff
+        let retries = 0;
+        const maxRetries = 3;
+        const retryDelay = 1000; // Start with 1 second delay
+        
+        const attemptLoadData = async (): Promise<void> => {
+          try {
+            await loadData();
+            setRefreshStatus('Complete!');
+            // Clear status after a brief moment
+            setTimeout(() => {
+              setRefreshProgress(0);
+              setRefreshStatus('');
+            }, 500);
+            setRefreshing(false);
+          } catch (error: any) {
+            console.error(`Error reloading data after refresh (attempt ${retries + 1}):`, error);
+            
+            // If it's a 500 error and we haven't exceeded retries, try again
+            if (retries < maxRetries && (error?.response?.status === 500 || error?.response?.status === 404)) {
+              retries++;
+              setRefreshStatus(`Retrying... (${retries}/${maxRetries})`);
+              // Exponential backoff: 1s, 2s, 4s
+              setTimeout(() => attemptLoadData(), retryDelay * Math.pow(2, retries - 1));
+            } else {
+              // Final failure - show error but don't block UI
+              setRefreshStatus('Some data may still be updating. Please refresh again if needed.');
+              setTimeout(() => {
+                setRefreshProgress(0);
+                setRefreshStatus('');
+                // Still reload to show what we have
+                loadData().catch(() => {
+                  // Ignore errors on final attempt
+                });
+              }, 2000);
+              setRefreshing(false);
+            }
+          }
+        };
+        
+        await attemptLoadData();
+      }, 3000);
     } catch (error) {
       console.error('Error refreshing recommendations:', error);
+      if (progressInterval) clearInterval(progressInterval);
+      if (timeoutId) clearTimeout(timeoutId);
       alert('Failed to refresh recommendations. Please try again.');
-    } finally {
       setRefreshing(false);
+      setRefreshProgress(0);
+      setRefreshStatus('');
     }
   };
 
@@ -202,6 +282,25 @@ export default function DashboardPage() {
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
+        
+        {/* Progress Bar */}
+        {refreshing && (
+          <div className="mb-6 bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">{refreshStatus || 'Generating insights...'}</span>
+              <span className="text-sm text-gray-500">{refreshProgress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${refreshProgress}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              This usually takes 3-5 seconds. We're analyzing your latest transactions and updating your personalized recommendations.
+            </p>
+          </div>
+        )}
         {recommendations.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
             You're doing great! Check back later for new insights.
