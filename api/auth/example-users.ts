@@ -3,21 +3,6 @@ process.env.VERCEL = '1';
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
-
-// Copy database from build output to /tmp on cold start
-const dbPath = '/tmp/spendsense.db';
-const sourcePath = path.join(process.cwd(), 'backend/prisma/backend/spendsense.db');
-
-if (!fs.existsSync(dbPath) && fs.existsSync(sourcePath)) {
-  console.log('Copying database to /tmp...');
-  fs.copyFileSync(sourcePath, dbPath);
-  console.log('Database copied successfully');
-}
-
-// Ensure DATABASE_URL points to /tmp
-process.env.DATABASE_URL = `file:${dbPath}`;
 
 const prisma = new PrismaClient();
 

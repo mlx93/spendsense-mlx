@@ -60,3 +60,11 @@ tmp/
 temp/
 *.tmp
 
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/prisma/*.db
+backend/prisma/backend/
