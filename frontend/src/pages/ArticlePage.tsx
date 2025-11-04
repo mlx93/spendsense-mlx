@@ -18,7 +18,16 @@ export default function ArticlePage() {
 
     const loadArticle = async () => {
       try {
-        const response = await articlesApi.getArticle(recommendationId);
+        // Check if it's a content-based article (path includes "/content/")
+        const isContentArticle = window.location.pathname.includes('/article/content/');
+        let response;
+        
+        if (isContentArticle) {
+          response = await articlesApi.getContentArticle(recommendationId);
+        } else {
+          response = await articlesApi.getArticle(recommendationId);
+        }
+        
         setArticle(response.data);
       } catch (err: any) {
         console.error('Error loading article:', err);

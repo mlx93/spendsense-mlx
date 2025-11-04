@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Profile } from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 interface EmergencyFundCalculatorProps {
   profile: Profile;
@@ -15,13 +16,14 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
   const monthlyExpenses = monthlyIncome * 0.7; // Estimate 70% of income as expenses
   
   const [targetMonths, setTargetMonths] = useState(6);
-  const [monthlySavings, setMonthlySavings] = useState(0);
+  const [monthlySavings, setMonthlySavings] = useState<number | ''>('');
   
   const targetAmount = monthlyExpenses * targetMonths;
   const currentCoverage = monthlyExpenses > 0 ? currentSavings / monthlyExpenses : 0;
   const gap = Math.max(0, targetAmount - currentSavings);
   
-  const monthsToGoal = monthlySavings > 0 ? Math.ceil(gap / monthlySavings) : 0;
+  const monthlySavingsValue = typeof monthlySavings === 'number' ? monthlySavings : 0;
+  const monthsToGoal = monthlySavingsValue > 0 ? Math.ceil(gap / monthlySavingsValue) : 0;
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -46,11 +48,11 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-500">Current Savings</p>
-            <p className="text-2xl font-bold text-gray-900">${currentSavings.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(currentSavings)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Monthly Expenses</p>
-            <p className="text-2xl font-bold text-gray-900">${monthlyExpenses.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(monthlyExpenses)}</p>
           </div>
         </div>
 
@@ -69,14 +71,15 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
           </div>
         </div>
 
-        <div>
-          <p className="text-sm text-gray-500">Target Amount</p>
-          <p className="text-2xl font-bold text-gray-900">${targetAmount.toFixed(2)}</p>
-        </div>
-
-        <div>
-          <p className="text-sm text-gray-500">Gap to Target</p>
-          <p className="text-2xl font-bold text-red-600">${gap.toFixed(2)}</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-gray-500">Target Amount</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(targetAmount)}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Gap to Target</p>
+            <p className="text-2xl font-bold text-red-600">{formatCurrency(gap)}</p>
+          </div>
         </div>
 
         <div>
@@ -86,17 +89,33 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
           <input
             type="number"
             min="0"
+            step="10"
             value={monthlySavings}
-            onChange={(e) => setMonthlySavings(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '') {
+                setMonthlySavings('');
+              } else {
+                const num = Number(value);
+                if (!isNaN(num) && num >= 0) {
+                  setMonthlySavings(num);
+                }
+              }
+            }}
+            onFocus={(e) => {
+              if (e.target.value === '0' || e.target.value === '') {
+                e.target.select();
+              }
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter monthly savings amount"
           />
         </div>
 
-        {monthlySavings > 0 && gap > 0 && (
+        {monthlySavingsValue > 0 && gap > 0 && (
           <div className="bg-blue-50 p-4 rounded-md">
             <p className="text-sm text-gray-700">
-              At ${monthlySavings.toFixed(2)}/month, you'll reach your goal in{' '}
+              At {formatCurrency(monthlySavingsValue)}/month, you'll reach your goal in{' '}
               <strong>{monthsToGoal} months</strong>.
             </p>
           </div>
@@ -126,7 +145,7 @@ export default function EmergencyFundCalculator({ profile }: EmergencyFundCalcul
         {/* Take Action Button */}
         <div className="mt-4 pt-4 border-t">
           <Link
-            to="/library?topic=savings"
+            to="/library?topic=savings&search=emergency+fund"
             className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
           >
             Learn About Emergency Funds →

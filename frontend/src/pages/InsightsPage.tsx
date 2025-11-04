@@ -4,30 +4,60 @@ import { profileApi, Profile, transactionsApi, SpendingPatterns, recommendations
 import EmergencyFundCalculator from '../components/Calculators/EmergencyFundCalculator';
 import DebtPayoffSimulator from '../components/Calculators/DebtPayoffSimulator';
 import SubscriptionAuditTool from '../components/Calculators/SubscriptionAuditTool';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import LoadingOverlay from '../components/LoadingOverlay';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatCurrency, formatNumber } from '../utils/format';
 
 export default function InsightsPage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [spendingPatterns, setSpendingPatterns] = useState<SpendingPatterns | null>(null);
+  const [spendingPatternsCache, setSpendingPatternsCache] = useState<Record<number, SpendingPatterns>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedWindow, setSelectedWindow] = useState<30 | 180>(30);
+  const [updatingWindow, setUpdatingWindow] = useState(false);
+  const [selectedWindow, setSelectedWindow] = useState<30 | 90 | 180>(30);
 
   const loadProfile = async () => {
     if (!user) return;
     try {
       setLoading(true);
+      // Load profile and initial spending patterns in parallel
       const [profileResponse, spendingResponse] = await Promise.all([
         profileApi.getProfile(user.id),
         transactionsApi.getSpendingPatterns(selectedWindow),
       ]);
       setProfile(profileResponse.data);
       setSpendingPatterns(spendingResponse.data);
+      setSpendingPatternsCache({ [selectedWindow]: spendingResponse.data });
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWindowChange = async (window: 30 | 90 | 180) => {
+    if (window === selectedWindow) return;
+    
+    // Check cache first
+    if (spendingPatternsCache[window]) {
+      setSpendingPatterns(spendingPatternsCache[window]);
+      setSelectedWindow(window);
+      return;
+    }
+
+    // Load new data with overlay
+    setUpdatingWindow(true);
+    try {
+      const spendingResponse = await transactionsApi.getSpendingPatterns(window);
+      setSpendingPatterns(spendingResponse.data);
+      setSpendingPatternsCache(prev => ({ ...prev, [window]: spendingResponse.data }));
+      setSelectedWindow(window);
+    } catch (error) {
+      console.error('Error loading spending patterns:', error);
+    } finally {
+      setUpdatingWindow(false);
     }
   };
 
@@ -36,6 +66,7 @@ export default function InsightsPage() {
     
     try {
       setRefreshing(true);
+      setUpdatingWindow(true); // Show full-page overlay
       // Trigger refresh which regenerates signals and personas
       await recommendationsApi.getRecommendations(user.id, 'active', true);
       // Reload profile data to get updated signals
@@ -45,6 +76,7 @@ export default function InsightsPage() {
       alert('Failed to refresh insights. Please try again.');
     } finally {
       setRefreshing(false);
+      setUpdatingWindow(false);
     }
   };
 
@@ -52,10 +84,15 @@ export default function InsightsPage() {
     if (user) {
       loadProfile();
     }
-  }, [user, selectedWindow]);
+  }, [user]);
 
-  if (loading) {
-    return <div className="text-center py-12">Loading...</div>;
+  if (loading && !profile) {
+    return (
+      <>
+        <LoadingOverlay isLoading={true} message="Loading your insights..." />
+        <div className="text-center py-12">Loading...</div>
+      </>
+    );
   }
 
   if (!profile) {
@@ -69,428 +106,445 @@ export default function InsightsPage() {
   const incomeSignal = signals30d?.income;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-      <h1 className="text-3xl font-bold text-gray-900">Your Financial Insights</h1>
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          <svg
-            className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <>
+      <LoadingOverlay isLoading={refreshing || updatingWindow} message={refreshing ? "Refreshing insights..." : "Updating data..."} />
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Your Financial Insights</h1>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          {refreshing ? 'Refreshing...' : 'Refresh Insights'}
-        </button>
-      </div>
+            <svg
+              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
 
-      {/* Spending Patterns */}
-      {spendingPatterns && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Spending Patterns</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setSelectedWindow(30)}
-                className={`px-3 py-1 rounded text-sm ${
-                  selectedWindow === 30
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                30 Days
-              </button>
-              <button
-                onClick={() => setSelectedWindow(180)}
-                className={`px-3 py-1 rounded text-sm ${
-                  selectedWindow === 180
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                180 Days
-              </button>
+        {/* Top Row: Category Breakdown (Left) + Financial Snapshot (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Category Breakdown - Left Column */}
+          {spendingPatterns && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-semibold text-gray-900">Spending Patterns</h2>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleWindowChange(30)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedWindow === 30
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    1M
+                  </button>
+                  <button
+                    onClick={() => handleWindowChange(90)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedWindow === 90
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    3M
+                  </button>
+                  <button
+                    onClick={() => handleWindowChange(180)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedWindow === 180
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    6M
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Breakdown Table */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300 bg-gray-50">
+                      <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+                        %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {Object.entries(spendingPatterns.categoryBreakdown)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([category, amount]) => (
+                        <tr key={category} className="hover:bg-blue-50/50 transition-colors">
+                          <td className="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
+                            {category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-semibold text-gray-900">
+                            {formatCurrency(amount)}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-xs text-right text-gray-600">
+                            {spendingPatterns.totalSpending > 0
+                              ? `${((amount / spendingPatterns.totalSpending) * 100).toFixed(1)}%`
+                              : '0%'}
+                          </td>
+                        </tr>
+                      ))}
+                    {/* Total Row */}
+                    <tr className="border-t-2 border-gray-300 bg-gray-100 font-semibold">
+                      <td className="px-3 py-2 whitespace-nowrap text-xs font-bold text-gray-900">
+                        Total
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-bold text-gray-900">
+                        {formatCurrency(spendingPatterns.totalSpending)}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-bold text-gray-900">
+                        100.0%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Financial Snapshot - Right Column */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+            <h2 className="text-base font-semibold text-gray-900 mb-3">Financial Snapshot</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-1">Monthly Income</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCurrency(incomeSignal?.average_monthly_income || 0)}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-1">Credit Utilization</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {creditSignal?.max_utilization ? `${Math.round(creditSignal.max_utilization * 100)}%` : ''}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-1">Savings Balance</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCurrency(savingsSignal?.savings_balance || 0)}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-xs text-gray-600 mb-1">Subscriptions</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {subscriptionSignal?.count || 0}
+                </p>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Category Breakdown - Pie Chart */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Spending by Category</h3>
-              {Object.keys(spendingPatterns.categoryBreakdown).length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={Object.entries(spendingPatterns.categoryBreakdown).map(([name, value]) => ({
-                        name: name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                        value: Math.round(value),
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={(props: any) => {
-                        const { name, percent } = props;
-                        return `${name}: ${((percent as number) * 100).toFixed(0)}%`;
-                      }}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {Object.entries(spendingPatterns.categoryBreakdown).map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#0088fe'][index % 6]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
-                  </PieChart>
+        {/* Second Row: Spending by Month (Left) + Savings by Month (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Spending by Month Chart - Left */}
+          {spendingPatterns && spendingPatterns.spendingByMonth && Object.keys(spendingPatterns.spendingByMonth).length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Spending by Month</h2>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart
+                  data={Object.entries(spendingPatterns.spendingByMonth)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([month, amount]) => {
+                      // Format month as "Jan 2024"
+                      const [year, monthNum] = month.split('-');
+                      const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+                      const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                      return {
+                        month: monthName,
+                        amount: Math.round(amount),
+                      };
+                    })}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60} />
+                  <YAxis 
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(value) => `$${formatNumber(value)}`}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [formatCurrency(value), 'Spending']}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px' }}
+                  />
+                  <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Savings by Month Chart - Right */}
+          {(() => {
+            // Check if savingsByMonth exists and has data
+            const savingsByMonth = savingsSignal?.savingsByMonth;
+            const hasSavingsData = savingsByMonth && typeof savingsByMonth === 'object' && Object.keys(savingsByMonth).length > 0;
+            
+            if (!hasSavingsData) {
+              // Show placeholder if no data available
+              return (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                  <h2 className="text-base font-semibold text-gray-900 mb-3">Savings by Month</h2>
+                  <div className="flex items-center justify-center h-[250px] text-sm text-gray-500">
+                    No savings data available. Refresh insights to generate chart.
+                  </div>
+                </div>
+              );
+            }
+            
+            // Filter months based on selectedWindow (1M=30, 3M=90, 6M=180 days)
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - selectedWindow);
+            // Get the month key for the cutoff date (inclusive - include the month that contains the cutoff date)
+            const cutoffMonthKey = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            // Filter and sort months within the selected window
+            // Include all months from cutoff month onwards (string comparison works for YYYY-MM format)
+            const filteredMonths = Object.entries(savingsByMonth)
+              .filter(([monthKey]) => monthKey >= cutoffMonthKey)
+              .sort(([a], [b]) => a.localeCompare(b));
+            
+            // Debug logging in development
+            if (import.meta.env.DEV) {
+              const allMonthsData = Object.entries(savingsByMonth)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([k, v]) => ({ month: k, balance: v }));
+              const filteredMonthsData = filteredMonths.map(([k, v]) => ({ month: k, balance: v }));
+              console.log('[Savings Chart] Filtering:', {
+                selectedWindow,
+                cutoffDate: cutoffDate.toISOString().split('T')[0],
+                cutoffMonthKey,
+                totalMonths: Object.keys(savingsByMonth).length,
+                filteredMonths: filteredMonths.length,
+                allMonthsData,
+                filteredMonthsData,
+              });
+            }
+            
+            if (filteredMonths.length === 0) {
+              return (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                  <h2 className="text-base font-semibold text-gray-900 mb-3">Savings by Month</h2>
+                  <div className="flex items-center justify-center h-[250px] text-sm text-gray-500">
+                    No savings data for selected time period.
+                  </div>
+                </div>
+              );
+            }
+            
+            return (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <h2 className="text-base font-semibold text-gray-900 mb-3">Savings by Month</h2>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart
+                    data={filteredMonths.map(([month, balance]) => {
+                      // Format month as "Jan 2024"
+                      const [year, monthNum] = month.split('-');
+                      const date = new Date(parseInt(year), parseInt(monthNum) - 1);
+                      const monthName = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                      return {
+                        month: monthName,
+                        balance: Math.round(Number(balance)),
+                      };
+                    })}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="month" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={60} />
+                    <YAxis 
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={(value) => value > 0 ? `$${formatNumber(value)}` : ''}
+                      domain={['dataMin', 'dataMax']}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [formatCurrency(value), 'Savings Balance']}
+                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px' }}
+                    />
+                    <Bar dataKey="balance" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
                 </ResponsiveContainer>
-              ) : (
-                <p className="text-gray-500 text-center py-12">No spending data available</p>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Third Row: Savings Progress (Left) + Income Analysis (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Savings Progress - Left */}
+          {savingsSignal && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Savings Progress</h2>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Current Balance</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {formatCurrency(savingsSignal.savings_balance || 0)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Monthly Inflow</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {formatCurrency(savingsSignal.net_inflow || 0)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Growth Rate</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {savingsSignal.growth_rate ? `${Math.round(savingsSignal.growth_rate * 100)}%` : '0%'}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Emergency Coverage</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {savingsSignal.emergency_fund_coverage?.toFixed(1) || '0'} mo
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Income Analysis - Right */}
+          {incomeSignal && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Income Analysis</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Pay Frequency</p>
+                  <p className="text-sm font-semibold text-gray-900 capitalize">
+                    {incomeSignal.frequency || 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Median Pay Gap</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {incomeSignal.median_gap_days || 0} days
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Variability</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {incomeSignal.income_variability ? `${Math.round(incomeSignal.income_variability * 100)}%` : '0%'}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <p className="text-xs text-gray-600 mb-0.5">Cash Flow Buffer</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {incomeSignal.cash_flow_buffer?.toFixed(1) || '0'} mo
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Fourth Row: Spending Breakdown (Left) + Personas (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Spending Breakdown Stats - Left */}
+          {spendingPatterns && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Spending Breakdown</h2>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">Recurring Spending</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatCurrency(spendingPatterns.recurringVsOneTime.recurring)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">One-Time Spending</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatCurrency(spendingPatterns.recurringVsOneTime.oneTime)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">Total Spending</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatCurrency(spendingPatterns.totalSpending)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Personas - Right */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+            <h2 className="text-base font-semibold text-gray-900 mb-3">Your Personas</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {profile.personas['30d'].primary && (
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                  <p className="text-xs text-blue-600 uppercase tracking-wide font-semibold mb-1">Primary</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    {profile.personas['30d'].primary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Score: {Math.round((profile.personas['30d'].primary?.score || 0) * 100)}%
+                  </p>
+                </div>
+              )}
+              {profile.personas['30d'].secondary && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-1">Secondary</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    {profile.personas['30d'].secondary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Score: {Math.round((profile.personas['30d'].secondary?.score || 0) * 100)}%
+                  </p>
+                </div>
               )}
             </div>
+          </div>
+        </div>
 
-            {/* Recurring vs One-Time */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Recurring vs One-Time Spending</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={[
-                  {
-                    name: 'Recurring',
-                    amount: Math.round(spendingPatterns.recurringVsOneTime.recurring),
-                  },
-                  {
-                    name: 'One-Time',
-                    amount: Math.round(spendingPatterns.recurringVsOneTime.oneTime),
-                  },
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
-                  <Bar dataKey="amount" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="mt-4 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Recurring Spending</span>
-                  <span className="font-semibold">
-                    ${spendingPatterns.recurringVsOneTime.recurring.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">One-Time Spending</span>
-                  <span className="font-semibold">
-                    ${spendingPatterns.recurringVsOneTime.oneTime.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-gray-700 font-medium">Total Spending</span>
-                  <span className="font-bold text-lg">
-                    ${spendingPatterns.totalSpending.toFixed(2)}
-                  </span>
-                </div>
+        {/* Subscription Details */}
+        {subscriptionSignal && subscriptionSignal.count > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+            <h2 className="text-base font-semibold text-gray-900 mb-3">Subscriptions</h2>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="bg-gray-50 rounded-lg p-2.5">
+                <p className="text-xs text-gray-600 mb-0.5">Total</p>
+                <p className="text-sm font-semibold text-gray-900">{subscriptionSignal.count}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2.5">
+                <p className="text-xs text-gray-600 mb-0.5">Monthly Spend</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {formatCurrency(subscriptionSignal.monthly_spend || 0)}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2.5">
+                <p className="text-xs text-gray-600 mb-0.5">Share of Spending</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {subscriptionSignal.share_of_total ? `${Math.round(subscriptionSignal.share_of_total * 100)}%` : '0%'}
+                </p>
               </div>
             </div>
-          </div>
-
-          {/* Category Breakdown Table */}
-          <div className="mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Category Details</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Percentage
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {Object.entries(spendingPatterns.categoryBreakdown)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([category, amount]) => (
-                      <tr key={category}>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-medium text-gray-900">
-                          ${amount.toFixed(2)}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-500">
-                          {spendingPatterns.totalSpending > 0
-                            ? `${((amount / spendingPatterns.totalSpending) * 100).toFixed(1)}%`
-                            : '0%'}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Financial Snapshot */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Financial Snapshot</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Monthly Income</p>
-            <p className="text-2xl font-bold text-gray-900">
-              ${incomeSignal?.average_monthly_income?.toFixed(0) || '0'}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Credit Utilization</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {creditSignal?.max_utilization ? `${Math.round(creditSignal.max_utilization * 100)}%` : 'N/A'}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Savings Balance</p>
-            <p className="text-2xl font-bold text-gray-900">
-              ${savingsSignal?.savings_balance?.toFixed(0) || '0'}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Subscriptions</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {subscriptionSignal?.count || 0}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Credit Health */}
-      {creditSignal && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Credit Health</h2>
-          
-          {/* Credit Utilization Per Card Chart */}
-          {profile.accounts.filter(acc => acc.type === 'credit_card' && acc.utilization !== null).length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Credit Utilization by Card</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={profile.accounts
-                    .filter(acc => acc.type === 'credit_card' && acc.utilization !== null)
-                    .map(acc => ({
-                      name: `****${acc.id.slice(-4)}`,
-                      utilization: Math.round((acc.utilization || 0) * 100),
-                      balance: acc.balance,
-                      limit: acc.limit || 0,
-                    }))
-                    .sort((a, b) => b.utilization - a.utilization)}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} label={{ value: 'Utilization %', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip
-                    formatter={(value: number, name: string) => {
-                      if (name === 'utilization') {
-                        return [`${value}%`, 'Utilization'];
-                      }
-                      return [`$${value.toFixed(2)}`, name === 'balance' ? 'Balance' : 'Limit'];
-                    }}
-                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
-                  />
-                  <Bar dataKey="utilization" fill="#8884d8">
-                    {profile.accounts
-                      .filter(acc => acc.type === 'credit_card' && acc.utilization !== null)
-                      .map((acc, index) => {
-                        const util = (acc.utilization || 0) * 100;
-                        let color = '#82ca9d'; // Green for low
-                        if (util >= 70) color = '#ff7300'; // Red for high
-                        else if (util >= 30) color = '#ffc658'; // Yellow for medium
-                        return <Cell key={`cell-${index}`} fill={color} />;
-                      })}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="mt-4 flex items-center justify-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-green-500"></div>
-                  <span>&lt; 30% (Good)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-yellow-500"></div>
-                  <span>30-70% (Fair)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-orange-500"></div>
-                  <span>&gt; 70% (High)</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Max Utilization</span>
-              <span className="font-semibold">
-                {creditSignal.max_utilization ? `${Math.round(creditSignal.max_utilization * 100)}%` : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Average Utilization</span>
-              <span className="font-semibold">
-                {creditSignal.avg_utilization ? `${Math.round(creditSignal.avg_utilization * 100)}%` : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Monthly Interest Charges</span>
-              <span className="font-semibold">${creditSignal.interest_charges?.toFixed(2) || '0'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Minimum Payment Only</span>
-              <span className="font-semibold">{creditSignal.minimum_payment_only ? 'Yes' : 'No'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Any Overdue</span>
-              <span className="font-semibold">{creditSignal.any_overdue ? 'Yes' : 'No'}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Savings Progress */}
-      {savingsSignal && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Savings Progress</h2>
-          
-          {/* Savings Balance Trends Chart */}
-          {savingsSignal.savings_balance && savingsSignal.net_inflow && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Savings Balance Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={(() => {
-                    // Generate trend data: current balance and projected future balances
-                    const currentBalance = savingsSignal.savings_balance || 0;
-                    const monthlyInflow = savingsSignal.net_inflow || 0;
-                    const months = ['Current', '1 Month', '2 Months', '3 Months', '6 Months'];
-                    return months.map((month, index) => {
-                      let balance = currentBalance;
-                      if (index > 0) {
-                        balance = currentBalance + (monthlyInflow * index);
-                      }
-                      return {
-                        month,
-                        balance: Math.max(0, balance),
-                      };
-                    });
-                  })()}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Balance']}
-                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
-                  />
-                  <Bar dataKey="balance" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-              <p className="mt-2 text-sm text-gray-600 text-center">
-                Projected based on current monthly net inflow of ${savingsSignal.net_inflow?.toFixed(2) || '0'}
-              </p>
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Current Balance</span>
-              <span className="font-semibold">${savingsSignal.savings_balance?.toFixed(2) || '0'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Monthly Net Inflow</span>
-              <span className="font-semibold">${savingsSignal.net_inflow?.toFixed(2) || '0'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Growth Rate</span>
-              <span className="font-semibold">
-                {savingsSignal.growth_rate ? `${Math.round(savingsSignal.growth_rate * 100)}%` : '0%'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Emergency Fund Coverage</span>
-              <span className="font-semibold">
-                {savingsSignal.emergency_fund_coverage?.toFixed(1) || '0'} months
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Income Analysis */}
-      {incomeSignal && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Income Analysis</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Pay Frequency</span>
-              <span className="font-semibold capitalize">{incomeSignal.frequency || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Median Pay Gap</span>
-              <span className="font-semibold">{incomeSignal.median_gap_days || 0} days</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Income Variability</span>
-              <span className="font-semibold">
-                {incomeSignal.income_variability ? `${Math.round(incomeSignal.income_variability * 100)}%` : '0%'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Cash Flow Buffer</span>
-              <span className="font-semibold">
-                {incomeSignal.cash_flow_buffer?.toFixed(1) || '0'} months
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Subscription Details */}
-      {subscriptionSignal && subscriptionSignal.count > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Subscriptions</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total Subscriptions</span>
-              <span className="font-semibold">{subscriptionSignal.count}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Monthly Spend</span>
-              <span className="font-semibold">${subscriptionSignal.monthly_spend?.toFixed(2) || '0'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Share of Total Spending</span>
-              <span className="font-semibold">
-                {subscriptionSignal.share_of_total ? `${Math.round(subscriptionSignal.share_of_total * 100)}%` : '0%'}
-              </span>
-            </div>
-            {subscriptionSignal.recurring_merchants && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 mb-2">Recurring Merchants:</p>
+            {subscriptionSignal.recurring_merchants && subscriptionSignal.recurring_merchants.length > 0 && (
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-600 mb-2">Recurring Merchants:</p>
                 <div className="flex flex-wrap gap-2">
                   {subscriptionSignal.recurring_merchants.map((merchant: string, idx: number) => (
-                    <span key={idx} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                    <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded-md text-xs text-gray-700">
                       {merchant}
                     </span>
                   ))}
@@ -498,46 +552,22 @@ export default function InsightsPage() {
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Personas */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Personas</h2>
+        {/* Interactive Calculators */}
         <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-medium text-gray-700 mb-2">30-Day Window</h3>
-            {profile.personas['30d'].primary && (
-              <div className="bg-blue-50 p-4 rounded">
-                <p className="font-semibold">Primary: {profile.personas['30d'].primary.type.replace(/_/g, ' ')}</p>
-                <p className="text-sm text-gray-600">
-                  Score: {Math.round((profile.personas['30d'].primary?.score || 0) * 100)}%
-                </p>
-              </div>
-            )}
-            {profile.personas['30d'].secondary && (
-              <div className="bg-gray-50 p-4 rounded mt-2">
-                <p className="font-semibold">Secondary: {profile.personas['30d'].secondary.type.replace(/_/g, ' ')}</p>
-                <p className="text-sm text-gray-600">
-                  Score: {Math.round((profile.personas['30d'].secondary?.score || 0) * 100)}%
-                </p>
-              </div>
-            )}
+          <h2 className="text-base font-semibold text-gray-900">Interactive Calculators</h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <EmergencyFundCalculator profile={profile} />
+            <DebtPayoffSimulator profile={profile} />
           </div>
+          
+          {subscriptionSignal && subscriptionSignal.count > 0 && (
+            <SubscriptionAuditTool profile={profile} />
+          )}
         </div>
       </div>
-
-      {/* Interactive Calculators */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Interactive Calculators</h2>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <EmergencyFundCalculator profile={profile} />
-          <DebtPayoffSimulator profile={profile} />
-        </div>
-        
-        <SubscriptionAuditTool profile={profile} />
-      </div>
-    </div>
+    </>
   );
 }

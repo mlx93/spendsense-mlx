@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Profile, transactionsApi } from '../../services/api';
+import { formatCurrency } from '../../utils/format';
 
 interface SubscriptionAuditToolProps {
   profile: Profile;
@@ -99,15 +100,15 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         <div className="grid grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-gray-500">Total Monthly</p>
-            <p className="text-2xl font-bold text-gray-900">${totalMonthly.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalMonthly)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Potential Savings</p>
-            <p className="text-2xl font-bold text-green-600">${potentialSavings.toFixed(2)}/mo</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(potentialSavings)}/mo</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Annual Savings</p>
-            <p className="text-2xl font-bold text-green-600">${annualSavings.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-green-600">{formatCurrency(annualSavings)}</p>
           </div>
         </div>
 
@@ -133,7 +134,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
                     />
                     <div>
                       <p className="text-sm font-medium text-gray-900">{sub.name}</p>
-                      <p className="text-xs text-gray-500">${sub.amount.toFixed(2)}/month</p>
+                      <p className="text-xs text-gray-500">{formatCurrency(sub.amount)}/month</p>
                     </div>
                   </div>
                   <span
@@ -155,8 +156,8 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
           <div className="bg-blue-50 p-4 rounded-md">
             <p className="text-sm text-gray-700">
               By canceling the selected subscriptions, you could save{' '}
-              <strong>${potentialSavings.toFixed(2)}/month</strong> or{' '}
-              <strong>${annualSavings.toFixed(2)}/year</strong>.
+              <strong>{formatCurrency(potentialSavings)}/month</strong> or{' '}
+              <strong>{formatCurrency(annualSavings)}/year</strong>.
             </p>
           </div>
         )}
@@ -176,7 +177,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         {/* Take Action Button */}
         <div className="mt-4 pt-4 border-t">
           <Link
-            to="/library?topic=budgeting"
+            to="/library?topic=budgeting&search=subscription"
             className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
           >
             Learn About Subscription Management →

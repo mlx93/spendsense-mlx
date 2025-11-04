@@ -31,11 +31,13 @@ router.get('/', authenticateToken, requireConsent, async (req: AuthRequest, res:
     }
 
     // Get transactions in window
+    // Exclude TRANSFER category transactions (credit card payments, savings transfers, etc.)
     const transactions = await prisma.transaction.findMany({
       where: {
         account_id: { in: accountIds },
         date: { gte: startDate },
         amount: { lt: 0 }, // Only spending (negative amounts)
+        personal_finance_category_primary: { not: 'TRANSFER' }, // Exclude transfers
       },
       select: {
         transaction_id: true,
@@ -85,6 +87,14 @@ router.get('/', authenticateToken, requireConsent, async (req: AuthRequest, res:
       }
     }
 
+    // Calculate spending by month
+    const spendingByMonth: Record<string, number> = {};
+    for (const txn of transactions) {
+      const monthKey = `${txn.date.getFullYear()}-${String(txn.date.getMonth() + 1).padStart(2, '0')}`;
+      const amount = Math.abs(Number(txn.amount));
+      spendingByMonth[monthKey] = (spendingByMonth[monthKey] || 0) + amount;
+    }
+
     res.json({
       transactions: transactions.map(t => ({
         id: t.transaction_id,
@@ -99,6 +109,7 @@ router.get('/', authenticateToken, requireConsent, async (req: AuthRequest, res:
         recurring: recurringSpending,
         oneTime: oneTimeSpending,
       },
+      spendingByMonth,
       totalSpending,
       windowDays,
     });

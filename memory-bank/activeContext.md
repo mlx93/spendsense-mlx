@@ -5,17 +5,30 @@
 
 ## Recent Changes (Post-Memory Bank Update)
 
-### 1. Vercel Production Deployment Fixes
-**Issue:** 405 Method Not Allowed errors on `/api/auth/login` in production
-**Solution:**
-- Updated `api/[...path].ts` to properly handle Vercel serverless function routing
-- Strips `/api` prefix from URLs when present
-- Routes are now always mounted at both `/auth` (Vercel) and `/api/auth` (local dev)
-- Fixed CORS configuration to allow Vercel production domain
+### 1. Vercel Production Login Fixes (RESOLVED ✅)
+**Issue:** 405 Method Not Allowed errors on `/api/auth/login` in production + 401 errors due to case-sensitive email lookup
+
+**Primary Fix - Vercel Routing:**
+- **Root Cause:** `vercel.json` rewrite rule `"source": "/(.*)"` was catching ALL paths (including `/api/*`) and routing them to `index.html`
+- **Solution:** Changed rewrite to use negative lookahead regex: `"source": "/((?!api).*)"`
+  - This ensures `/api/*` requests go to serverless functions, not `index.html`
+  - HTML files don't support POST methods, causing 405 errors
+- **File:** `vercel.json` - Fixed rewrite rule
+
+**Secondary Fix - Case-Insensitive Email Lookup:**
+- **Root Cause:** Emails stored with mixed case (e.g., `Kellen_Effertz45@gmail.com`) but login was doing exact match after lowercasing
+- **Solution:** Updated PostgreSQL query to use `mode: 'insensitive'` for case-insensitive comparison
+- **File:** `backend/src/ui/routes/auth.ts` - Changed from SQLite-specific lookup to PostgreSQL native case-insensitive query
+
+**Additional Improvements:**
+- Added explicit serverless functions for nested routes (`api/auth/login.ts`, `api/auth/example-users.ts`)
+- Improved path extraction in catch-all handler (`api/[...path].ts`)
+- Fixed CORS configuration for Vercel production domain
 
 **Files Changed:**
-- `api/[...path].ts` - Added path prefix stripping and proper handler
-- `backend/src/server.ts` - Routes always mounted for both environments
+- `vercel.json` - Fixed rewrite rule (CRITICAL FIX)
+- `backend/src/ui/routes/auth.ts` - PostgreSQL case-insensitive email lookup
+- `api/[...path].ts` - Improved path extraction
 - `frontend/src/lib/apiClient.ts` - Auto-detects production and uses relative URLs
 
 ### 2. Spending Patterns & Visualizations

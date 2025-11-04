@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import ChatSidebar from './Chat/ChatSidebar';
 
@@ -10,51 +10,67 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const navLinkClass = (path: string) => {
+    const baseClass = "inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors";
+    if (isActive(path)) {
+      return `${baseClass} bg-blue-600 text-white`;
+    }
+    return `${baseClass} text-gray-600 hover:bg-gray-100 hover:text-gray-900`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex">
-              <Link to="/" className="flex items-center px-2 py-2 text-xl font-bold text-blue-600">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center px-2 py-2 text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
                 SpendSense
               </Link>
               {user && (
-                <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <div className="hidden sm:ml-8 sm:flex sm:space-x-1">
                   <Link
                     to="/"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className={navLinkClass('/')}
                   >
                     Dashboard
                   </Link>
                   <Link
                     to="/insights"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className={navLinkClass('/insights')}
                   >
                     Insights
                   </Link>
                   <Link
                     to="/library"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className={navLinkClass('/library')}
                   >
                     Library
                   </Link>
                   <Link
                     to="/settings"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                    className={navLinkClass('/settings')}
                   >
                     Settings
                   </Link>
                   {user.role === 'operator' && (
                     <Link
                       to="/operator"
-                      className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                      className={navLinkClass('/operator')}
                     >
                       Operator
                     </Link>
@@ -67,7 +83,7 @@ export default function Layout({ children }: LayoutProps) {
                 <span className="text-gray-700 text-sm mr-4">{user.email}</span>
                 <button
                   onClick={handleLogout}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Logout
                 </button>

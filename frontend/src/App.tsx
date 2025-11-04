@@ -97,6 +97,16 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/article/content/:recommendationId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ArticlePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/article/:recommendationId"
         element={
           <ProtectedRoute>

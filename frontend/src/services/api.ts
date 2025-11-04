@@ -114,6 +114,7 @@ export interface SpendingPatterns {
     recurring: number;
     oneTime: number;
   };
+  spendingByMonth: Record<string, number>;
   totalSpending: number;
   windowDays: number;
 }
@@ -137,6 +138,8 @@ export interface Article {
 export const articlesApi = {
   getArticle: (recommendationId: string) =>
     api.get<Article>(`/articles/${recommendationId}`),
+  getContentArticle: (contentId: string) =>
+    api.get<Article>(`/articles/content/${contentId}`),
 };
 
 export const operatorApi = {

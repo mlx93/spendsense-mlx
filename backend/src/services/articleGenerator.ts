@@ -73,12 +73,13 @@ const COMPLIANCE_TOOLS = [
 
 interface ArticleGenerationContext {
   userId: string;
-  recommendationId: string;
+  recommendationId: string | null;
   title: string;
   rationale: string;
   recommendationType: 'education' | 'offer';
   personaType: string;
   signals?: any;
+  contentId?: string;
 }
 
 export async function generateArticle(context: ArticleGenerationContext): Promise<{

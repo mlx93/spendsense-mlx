@@ -496,65 +496,65 @@ export default function DashboardPage() {
           </div>
         )}
         {recommendations.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
+          <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
             You're doing great! Check back later for new insights.
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {recommendations.map((rec) => (
               <div
                 key={rec.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all duration-200 flex flex-col"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{rec.title}</h3>
-                    {expandedId === rec.id ? (
-                      <div>
-                        <p className="text-gray-700 mb-4">{rec.rationale}</p>
-                        <p className="text-sm text-gray-500 mt-4">
-                          This is educational content, not financial advice. Consult a licensed advisor for personalized guidance.
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-gray-600">{rec.rationale.substring(0, 100)}...</p>
-                    )}
-                  </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">{rec.title}</h3>
+                  {expandedId === rec.id ? (
+                    <div>
+                      <p className="text-sm text-gray-700 mb-3 leading-relaxed">{rec.rationale}</p>
+                      <p className="text-xs text-gray-500 mt-3 italic">
+                        This is educational content, not financial advice. Consult a licensed advisor for personalized guidance.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-3">{rec.rationale.substring(0, 120)}...</p>
+                  )}
                 </div>
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between gap-2 flex-wrap">
                   {expandedId !== rec.id ? (
                     <button
                       onClick={() => setExpandedId(rec.id)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
                     >
                       Expand
                     </button>
                   ) : (
                     <button
                       onClick={() => setExpandedId(null)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
                     >
                       Collapse
                     </button>
                   )}
-                  <button
-                    onClick={() => handleAction(rec.id, 'dismissed')}
-                    className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-                  >
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={() => handleAction(rec.id, 'saved')}
-                    className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-                  >
-                    Save for Later
-                  </button>
-                  <Link
-                    to={`/article/${rec.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    Learn More →
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleAction(rec.id, 'dismissed')}
+                      className="text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-all duration-150"
+                    >
+                      Dismiss
+                    </button>
+                    <button
+                      onClick={() => handleAction(rec.id, 'saved')}
+                      className="text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-all duration-150"
+                    >
+                      Save
+                    </button>
+                    <Link
+                      to={`/article/${rec.id}`}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
+                    >
+                      Learn More →
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

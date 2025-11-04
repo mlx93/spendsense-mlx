@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Profile } from '../../services/api';
+import { formatCurrency, extractLast4Digits } from '../../utils/format';
 
 interface DebtPayoffSimulatorProps {
   profile: Profile;
@@ -21,14 +22,14 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
     [profile.accounts]
   );
   
-  const [extraPayment, setExtraPayment] = useState(0);
+  const [extraPayment, setExtraPayment] = useState<number | ''>('');
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
 
   useEffect(() => {
     // Build credit card list from accounts with real liability data
     const cards: CreditCard[] = accounts.map((acc) => ({
       id: acc.id,
-      name: acc.id.substring(acc.id.length - 4), // Last 4 digits
+      name: extractLast4Digits(acc.id), // Last 4 digits (numeric only)
       balance: acc.balance,
       apr: acc.apr || 18.99, // Use real APR from liability, fallback to 18.99%
       minimumPayment: acc.minimumPayment || acc.balance * 0.02, // Use real minimum payment, fallback to 2% estimate
@@ -56,6 +57,7 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
 
   const totalBalance = creditCards.reduce((sum, card) => sum + card.balance, 0);
   const totalMinPayment = creditCards.reduce((sum, card) => sum + card.minimumPayment, 0);
+  const extraPaymentValue = typeof extraPayment === 'number' ? extraPayment : 0;
   
   // Calculate with and without extra payment
   const withoutExtra = creditCards.reduce((acc, card) => {
@@ -67,7 +69,7 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
   }, { months: 0, interest: 0 });
 
   const withExtra = creditCards.reduce((acc, card) => {
-    const extraPerCard = extraPayment / creditCards.length;
+    const extraPerCard = extraPaymentValue / creditCards.length;
     const result = calculatePayoff(card.balance, card.apr, card.minimumPayment, extraPerCard);
     return {
       months: Math.max(acc.months, result.months),
@@ -85,12 +87,12 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
       <div className="space-y-4">
         <div>
           <p className="text-sm text-gray-500">Total Credit Card Debt</p>
-          <p className="text-2xl font-bold text-gray-900">${totalBalance.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalBalance)}</p>
         </div>
 
         <div>
           <p className="text-sm text-gray-500">Total Minimum Payments</p>
-          <p className="text-xl font-semibold text-gray-900">${totalMinPayment.toFixed(2)}/month</p>
+          <p className="text-xl font-semibold text-gray-900">{formatCurrency(totalMinPayment)}/month</p>
         </div>
 
         <div>
@@ -102,9 +104,24 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
             min="0"
             step="10"
             value={extraPayment}
-            onChange={(e) => setExtraPayment(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '') {
+                setExtraPayment('');
+              } else {
+                const num = Number(value);
+                if (!isNaN(num) && num >= 0) {
+                  setExtraPayment(num);
+                }
+              }
+            }}
+            onFocus={(e) => {
+              if (e.target.value === '0' || e.target.value === '') {
+                e.target.select();
+              }
+            }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="0"
+            placeholder="Enter extra payment amount"
           />
         </div>
 
@@ -114,7 +131,7 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
             <p className="text-2xl font-bold text-gray-900">
               {withExtra.months} {withExtra.months === 1 ? 'month' : 'months'}
             </p>
-            {extraPayment > 0 && (
+            {extraPaymentValue > 0 && (
               <p className="text-xs text-green-600 mt-1">
                 Saves {monthsSaved} {monthsSaved === 1 ? 'month' : 'months'}
               </p>
@@ -122,23 +139,23 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
           </div>
           <div>
             <p className="text-sm text-gray-500">Total Interest</p>
-            <p className="text-2xl font-bold text-gray-900">${withExtra.interest.toFixed(2)}</p>
-            {extraPayment > 0 && (
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(withExtra.interest)}</p>
+            {extraPaymentValue > 0 && (
               <p className="text-xs text-green-600 mt-1">
-                Saves ${interestSavings.toFixed(2)}
+                Saves {formatCurrency(interestSavings)}
               </p>
             )}
           </div>
         </div>
 
-        {extraPayment > 0 && (
+        {extraPaymentValue > 0 && (
           <div className="bg-green-50 p-4 rounded-md">
             <p className="text-sm text-gray-700">
-              By paying an extra <strong>${extraPayment.toFixed(2)}/month</strong>, you'll:
+              By paying an extra <strong>{formatCurrency(extraPaymentValue)}/month</strong>, you'll:
             </p>
             <ul className="list-disc list-inside mt-2 text-sm text-gray-700">
               <li>Pay off debt {monthsSaved} {monthsSaved === 1 ? 'month' : 'months'} faster</li>
-              <li>Save ${interestSavings.toFixed(2)} in interest charges</li>
+              <li>Save {formatCurrency(interestSavings)} in interest charges</li>
             </ul>
           </div>
         )}
@@ -159,7 +176,7 @@ export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProp
         {/* Take Action Button */}
         <div className="mt-4 pt-4 border-t">
           <Link
-            to="/library?topic=credit"
+            to="/library?topic=credit&search=debt+payoff"
             className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
           >
             Learn About Debt Payoff Strategies →

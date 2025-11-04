@@ -75,7 +75,8 @@
 - [x] Serverless function handler (`api/[...path].ts`)
 - [x] CORS configuration for production
 - [x] API URL auto-detection in frontend
-- [x] Production routing fixes
+- [x] Production routing fixes - **FIXED: vercel.json rewrite rule**
+- [x] Login authentication fixes - **FIXED: PostgreSQL case-insensitive email lookup**
 - [x] Database migration to Supabase PostgreSQL - **COMPLETE**
 - [x] Smart seeding (only on empty database) - **NEW**
 - [x] Example users endpoint (`/api/auth/example-users`) - **NEW**
@@ -118,6 +119,22 @@
 - **Seeding:** Only runs if database is empty (first deployment)
 - **Data Persistence:** ✅ All data persists across deployments
 - **Migration Status:** ✅ Complete - PostgreSQL migration created and applied
+
+## Authentication & Login Fixes ✅
+
+### Problem 1: 405 Method Not Allowed (RESOLVED)
+- **Root Cause:** `vercel.json` rewrite rule `"source": "/(.*)"` was routing ALL requests (including `/api/*`) to `index.html`
+- **Fix:** Changed to negative lookahead regex: `"source": "/((?!api).*)"` to exclude `/api/*` paths
+- **File:** `vercel.json`
+- **Impact:** API requests now correctly route to serverless functions instead of HTML files
+
+### Problem 2: 401 Unauthorized - Case-Sensitive Email (RESOLVED)
+- **Root Cause:** Seeded emails have mixed case, but login used exact match after lowercasing (SQLite-specific logic broke on PostgreSQL)
+- **Fix:** Updated to PostgreSQL native case-insensitive query: `mode: 'insensitive'`
+- **File:** `backend/src/ui/routes/auth.ts`
+- **Impact:** Login works with any email case variation, single efficient database query
+
+**See `memory-bank/signin-fixes.md` for complete details.**
 
 ## Current Blockers
 None - all critical features complete and working.
