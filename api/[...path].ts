@@ -20,35 +20,20 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
   
-  // Vercel's catch-all route: /api/auth/login
-  // Path segments come through req.query.path as an array
-  // For /api/profile/b8315341-4300-4315-8b58-ad35dd338020
-  // req.query.path = ['profile', 'b8315341-4300-4315-8b58-ad35dd338020']
-  let path = '';
+  // Vercel's catch-all route: /api/profile/:userId
+  // Extract path from req.url (more reliable than req.query.path)
+  let path = req.url || '';
   
-  // Check if path is in query (catch-all segments) - this is the primary method
-  if (req.query && req.query.path) {
-    const pathSegments = Array.isArray(req.query.path) 
-      ? req.query.path 
-      : [req.query.path];
-    path = '/' + pathSegments.join('/');
-  } else {
-    // Fallback: extract from req.url
-    // Vercel might set req.url to the full path including /api
-    let fullPath = req.url || '';
+  // Remove query string if present (e.g., ?status=active&refresh=true)
+  const queryIndex = path.indexOf('?');
+  if (queryIndex !== -1) {
+    path = path.substring(0, queryIndex);
+  }
   
-    // Remove query string if present (e.g., ?status=active&refresh=true)
-    const queryIndex = fullPath.indexOf('?');
-    if (queryIndex !== -1) {
-      fullPath = fullPath.substring(0, queryIndex);
-    }
-  
-    path = fullPath;
-    
-    // Strip /api prefix if present
-    if (path.startsWith('/api')) {
-      path = path.substring(4) || '/';
-    }
+  // Strip /api prefix if present
+  // For /api/profile/:userId, we want /profile/:userId for Express
+  if (path.startsWith('/api')) {
+    path = path.substring(4) || '/';
   }
   
   // Ensure path starts with /
@@ -56,29 +41,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     path = '/' + path;
   }
   
-  // Preserve query string for Express (status, refresh, etc.)
-  const originalUrl = req.url || '';
-  const queryString = originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : '';
-  
   // Log for debugging
-  console.log(`[api/[...path]] ${req.method} ${req.url}`);
-  console.log(`[api/[...path]] Query path:`, req.query?.path);
-  console.log(`[api/[...path]] Extracted path: ${path}${queryString}`);
+  console.log(`[api/[...path]] ${req.method} ${req.url} -> ${path}`);
+  console.log(`[api/[...path]] Query:`, JSON.stringify(req.query));
   
   // Update request properties for Express routing
-  // Express uses url and originalUrl for routing and parsing params
-  // Include query string so Express can parse query params
-  const fullPath = path + queryString;
-  (req as any).url = fullPath;
-  (req as any).originalUrl = fullPath;
-  // Don't set path - let Express parse it from url
+  // Express uses these properties to match routes
+  (req as any).url = path;
+  (req as any).originalUrl = path;
+  (req as any).path = path;
   (req as any).baseUrl = '';
-  // Ensure method is set
-  (req as any).method = req.method;
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
-  // Express will parse params from the URL automatically
   return app(req as any, res as any);
 }
 
