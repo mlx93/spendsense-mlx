@@ -4,7 +4,7 @@ import { profileApi, Profile, transactionsApi, SpendingPatterns } from '../servi
 import EmergencyFundCalculator from '../components/Calculators/EmergencyFundCalculator';
 import DebtPayoffSimulator from '../components/Calculators/DebtPayoffSimulator';
 import SubscriptionAuditTool from '../components/Calculators/SubscriptionAuditTool';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function InsightsPage() {
   const { user } = useAuth();
@@ -98,7 +98,10 @@ export default function InsightsPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={(props: any) => {
+                        const { name, percent } = props;
+                        return `${name}: ${((percent as number) * 100).toFixed(0)}%`;
+                      }}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"

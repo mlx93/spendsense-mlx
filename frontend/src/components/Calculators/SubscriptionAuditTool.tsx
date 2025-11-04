@@ -42,7 +42,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         });
 
         // Calculate average monthly spend per merchant
-        const subs: Subscription[] = subscriptionSignal.recurring_merchants.map((merchant, idx) => {
+        const subs: Subscription[] = subscriptionSignal.recurring_merchants.map((merchant: string, idx: number) => {
           const total = merchantTotals[merchant] || 0;
           const count = merchantCounts[merchant] || 1;
           // Average per transaction, multiplied by estimated monthly frequency (4 for weekly, 1 for monthly)
@@ -64,7 +64,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         // Fallback to estimated amounts
         const monthlySpend = subscriptionSignal.monthly_spend || 0;
         const avgPerSub = monthlySpend / subscriptionSignal.count;
-        const fallbackSubs = subscriptionSignal.recurring_merchants.map((merchant, idx) => ({
+        const fallbackSubs = subscriptionSignal.recurring_merchants.map((merchant: string, idx: number) => ({
           id: `sub_${idx}`,
           name: merchant,
           amount: avgPerSub,
