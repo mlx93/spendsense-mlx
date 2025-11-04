@@ -28,13 +28,17 @@ else
 fi
 
 # Only run migrations and seed in production if DATABASE_URL is set
-# Migrations are optional - since dev and prod share the same database,
-# migrations only need to run when schema changes, not on every build
+# Note: Since dev and prod share the same Supabase database, migrations are already applied
+# Migrations should only be run manually when schema changes, not during every build
 if [ -n "$DATABASE_URL" ]; then
-  # Check if migrations should run during build (default: skip)
-  # Set RUN_MIGRATIONS_IN_BUILD=true in Vercel env vars to enable
+  # Skip migrations during build since database is shared with dev
+  # Migrations are already applied and will be run manually when schema changes
+  echo "Skipping migrations during build (dev and prod share same database)"
+  echo "Migrations are already applied. Run manually with 'npx prisma migrate deploy' when schema changes."
+  
+  # Only run migrations if explicitly requested via environment variable
   if [ "$RUN_MIGRATIONS_IN_BUILD" = "true" ]; then
-    echo "RUN_MIGRATIONS_IN_BUILD=true, running migrations..."
+    echo "RUN_MIGRATIONS_IN_BUILD=true, attempting migrations..."
     
     # Use non-pooling connection for migrations (pooler doesn't support DDL)
     # If we have the non-pooling URL, use it for migrations
@@ -69,10 +73,6 @@ if [ -n "$DATABASE_URL" ]; then
       echo "Continuing build - migrations can be run manually if needed"
     fi
     cd ..
-  else
-    echo "Skipping migrations (RUN_MIGRATIONS_IN_BUILD not set to 'true')"
-    echo "Note: Since dev and prod share the same database, migrations should be run manually when schema changes"
-    echo "To enable migrations during build, set RUN_MIGRATIONS_IN_BUILD=true in Vercel environment variables"
   fi
   
   echo "Checking if database needs seeding..."
