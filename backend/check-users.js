@@ -5,6 +5,14 @@ const prisma = new PrismaClient();
 async function checkUsers() {
   try {
     const totalUsers = await prisma.user.count();
+    
+    // If SIMPLE_OUTPUT env var is set, just output the number (for build scripts)
+    if (process.env.SIMPLE_OUTPUT === '1') {
+      console.log(totalUsers);
+      await prisma.$disconnect();
+      return;
+    }
+    
     const regularUsers = await prisma.user.count({ where: { role: 'user' } });
     const operators = await prisma.user.count({ where: { role: 'operator' } });
     
