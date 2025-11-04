@@ -45,6 +45,7 @@ app.use(express.json());
 
 // Detect if running on Vercel (serverless function)
 // Check multiple ways: VERCEL env var, or if we're in the api/ directory
+// Note: In api/[...path].ts handler, VERCEL is set to '1' before importing this module
 const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV !== undefined;
 
 // Root route - API information
