@@ -4,7 +4,14 @@ process.env.VERCEL = '1';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// Ensure DATABASE_URL is set (Vercel provides this automatically)
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
@@ -23,7 +30,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     console.log('Attempting to fetch example users from database...');
-    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+    console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set (' + process.env.DATABASE_URL.substring(0, 30) + '...)' : 'Not set');
+    
+    // Ensure Prisma Client is using the correct DATABASE_URL
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL environment variable not set!');
+      return res.status(500).json({ 
+        error: 'Database configuration error',
+        _note: 'DATABASE_URL not set in serverless function'
+      });
+    }
     
     // Get 5 random regular users (exclude operator)
     const users = await prisma.user.findMany({
