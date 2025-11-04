@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Profile } from '../../services/api';
 
@@ -15,7 +15,11 @@ interface CreditCard {
 }
 
 export default function DebtPayoffSimulator({ profile }: DebtPayoffSimulatorProps) {
-  const accounts = profile.accounts.filter(acc => acc.type === 'credit_card' && acc.utilization !== null);
+  // Memoize accounts to prevent infinite re-renders
+  const accounts = useMemo(
+    () => profile.accounts.filter(acc => acc.type === 'credit_card' && acc.utilization !== null),
+    [profile.accounts]
+  );
   
   const [extraPayment, setExtraPayment] = useState(0);
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
