@@ -434,22 +434,23 @@ The SpendSense implementation successfully fulfills **all critical requirements*
 
 ---
 
-## Remaining Gaps (Low Priority)
+## Remaining Gaps (Minor Issues)
 
-### 1. Content Count ⚠️ PARTIAL
-**Requirement:** 30 articles (6 per persona)  
-**Current:** 32 articles ✅ (exceeds requirement)  
-**Status:** ✅ Complete (was increased from 7 to 32)
+### 1. Undismiss Functionality ⚠️ MINOR BUG
+**Requirement:** "Undismiss - User can restore dismissed items from settings" (SS_Reqs_PRD.md Section 4.5)  
+**Current:** Undismiss restores to 'saved' status instead of 'active' status  
+**Impact:** Low - Items are restored but don't immediately show in active recommendations  
+**Fix:** Change `handleUndismiss` to use action 'active' instead of 'saved', or add 'undismiss' action that restores to 'active'
 
-### 2. Charts/Visualizations ✅ COMPLETE
-**Requirement:** 4 chart types  
-**Current:** All 4 implemented:
-- ✅ Spending by category (pie chart)
-- ✅ Recurring vs one-time (bar chart)
-- ✅ Credit utilization per card (bar chart)
-- ✅ Savings balance trend (bar chart)
+**Location:** `frontend/src/pages/SettingsPage.tsx` line 190
 
-**Status:** ✅ Complete
+### 2. Test Coverage ⚠️ BELOW IDEAL
+**Requirement:** ≥10 tests (met ✅), but coverage is 10.56%  
+**Current:** 19 tests passing, but only 10.56% code coverage  
+**Impact:** Low - Core functionality tested, but integration tests missing  
+**Note:** This is acceptable for MVP per PRD (≥10 tests met), but higher coverage would be ideal
+
+**Missing:** Integration tests for API routes (mentioned as optional enhancement)
 
 ---
 

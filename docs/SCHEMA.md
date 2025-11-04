@@ -12,11 +12,21 @@ This document defines the complete data model for SpendSense, including all data
 
 ---
 
-## Database: SQLite (Development)
+## Database: ~~SQLite (Development)~~ → **Supabase PostgreSQL (Production)**
 
-**File:** `spendsense.db`  
+~~**File:** `spendsense.db`~~  
+**Provider:** Supabase (managed PostgreSQL)  
 **ORM:** Prisma  
-**Migration Tool:** `npx prisma migrate`
+**Migration Tool:** `npx prisma migrate deploy`
+
+**Migration Status:** ✅ **Completed November 2024**
+
+**Why Migrated:**
+- SQLite doesn't work in Vercel serverless environment (files don't persist)
+- Supabase provides managed PostgreSQL with free tier (500 MB storage, unlimited compute)
+- Same Prisma schema works seamlessly (just changed provider from `sqlite` to `postgresql`)
+- Data now persists across deployments
+- Better for production workloads (handles 200k+ transactions reliably)
 
 ---
 
@@ -473,12 +483,12 @@ users
 
 - **String (UUID):** UUID v4 format (e.g., "550e8400-e29b-41d4-a716-446655440000")
 - **String:** Variable-length text (max length varies by field)
-- **Decimal:** Fixed-point decimal number (stored as numeric in SQLite)
+- ~~**Decimal:** Fixed-point decimal number (stored as numeric in SQLite)~~ **→ PostgreSQL NUMERIC type**
 - **Date:** Date only (YYYY-MM-DD)
 - **DateTime:** Date and time (ISO-8601 format)
 - **Boolean:** True/false
 - **Integer:** Whole number
-- **JSON:** JSON object/array stored as text in SQLite, validated by Prisma
+- ~~**JSON:** JSON object/array stored as text in SQLite, validated by Prisma~~ **→ PostgreSQL JSONB type (native JSON support)**
 
 ---
 

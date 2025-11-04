@@ -136,15 +136,124 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
           signalsMap[signal.signal_type] = JSON.parse(signal.data);
         }
 
-        // Match content
+        // Match content - consider both primary and secondary personas for diversification
         const contentMatches = await matchContentToUser(
           userId,
           primaryPersona.persona_type,
           signalsMap
         );
 
-        for (let i = 0; i < Math.min(contentMatches.length, 5); i++) {
-          const match = contentMatches[i];
+        // Also get matches for secondary persona if it exists
+        const secondaryPersona = personas.find(p => p.rank === 2);
+        let secondaryMatches: any[] = [];
+        if (secondaryPersona && Number(secondaryPersona.score) >= 0.3) {
+          secondaryMatches = await matchContentToUser(
+            userId,
+            secondaryPersona.persona_type,
+            signalsMap
+          );
+        }
+
+        // Diversify recommendations across signal types and personas
+        // Strategy: Mix primary persona matches with secondary persona matches
+        // Also ensure we're not only showing credit articles if user has other signals
+        
+        // Fetch all content metadata upfront for efficient category detection
+        const allContentIds = new Set([
+          ...contentMatches.map(m => m.contentId),
+          ...secondaryMatches.map(m => m.contentId),
+        ]);
+        const contentMetadata = await prisma.content.findMany({
+          where: { id: { in: Array.from(allContentIds) } },
+          select: { id: true, signals: true, tags: true },
+        });
+        const contentMetadataMap = new Map(
+          contentMetadata.map(c => [c.id, { signals: JSON.parse(c.signals || '[]'), tags: JSON.parse(c.tags || '[]') }])
+        );
+        
+        const selectedMatches: any[] = [];
+        const usedContentIds = new Set<string>();
+        
+        // Track which signal categories we've covered
+        const signalCategoriesCovered = {
+          credit: 0,
+          subscription: 0,
+          savings: 0,
+          income: 0,
+        };
+
+        // Helper to determine content category
+        const getContentCategory = (contentId: string): string | null => {
+          const metadata = contentMetadataMap.get(contentId);
+          if (!metadata) return null;
+          
+          const { signals, tags } = metadata;
+          if (signals.some((s: string) => 
+            s.includes('credit') || s.includes('utilization') || s.includes('debt') || s.includes('interest')
+          ) || tags.some((t: string) => 
+            t.includes('credit') || t.includes('debt') || t.includes('utilization')
+          )) return 'credit';
+          if (signals.some((s: string) => s.includes('subscription')) || 
+              tags.some((t: string) => t.includes('subscription'))) return 'subscription';
+          if (signals.some((s: string) => s.includes('savings') || s.includes('emergency')) || 
+              tags.some((t: string) => t.includes('savings') || t.includes('emergency'))) return 'savings';
+          if (signals.some((s: string) => s.includes('income') || s.includes('budget')) || 
+              tags.some((t: string) => t.includes('income') || t.includes('budget'))) return 'income';
+          return null;
+        };
+
+        // First pass: Prioritize diversity - get at least one from each available signal category
+        for (const match of contentMatches) {
+          if (selectedMatches.length >= 5) break;
+          if (usedContentIds.has(match.contentId)) continue;
+          
+          const category = getContentCategory(match.contentId);
+          
+          // Limit credit articles to max 2 unless very high relevance
+          if (category === 'credit' && signalCategoriesCovered.credit >= 2 && match.relevanceScore < 0.85) {
+            continue;
+          }
+          
+          // Prioritize uncovered categories, but always take high-relevance items
+          const shouldAdd = category && signalCategoriesCovered[category as keyof typeof signalCategoriesCovered] === 0 ||
+                           match.relevanceScore >= 0.8 ||
+                           selectedMatches.length < 3;
+          
+          if (shouldAdd) {
+            selectedMatches.push(match);
+            usedContentIds.add(match.contentId);
+            if (category) signalCategoriesCovered[category as keyof typeof signalCategoriesCovered]++;
+          }
+        }
+
+        // Second pass: Add secondary persona matches for diversity
+        if (secondaryMatches.length > 0 && selectedMatches.length < 5) {
+          for (const match of secondaryMatches) {
+            if (selectedMatches.length >= 5) break;
+            if (usedContentIds.has(match.contentId)) continue;
+            
+            const category = getContentCategory(match.contentId);
+            
+            // Add if it's a new category or if we don't have many of that category yet
+            if (!category || signalCategoriesCovered[category as keyof typeof signalCategoriesCovered] < 2) {
+              selectedMatches.push(match);
+              usedContentIds.add(match.contentId);
+              if (category) signalCategoriesCovered[category as keyof typeof signalCategoriesCovered]++;
+            }
+          }
+        }
+
+        // Final pass: Fill remaining slots with best matches regardless of category
+        if (selectedMatches.length < 5) {
+          for (const match of contentMatches) {
+            if (selectedMatches.length >= 5) break;
+            if (usedContentIds.has(match.contentId)) continue;
+            selectedMatches.push(match);
+            usedContentIds.add(match.contentId);
+          }
+        }
+
+        for (const match of selectedMatches) {
           if (!match) continue;
 
           const rationaleResult = await generateRationale(

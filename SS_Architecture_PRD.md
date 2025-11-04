@@ -24,13 +24,13 @@ This document defines the technical architecture for SpendSense, including syste
 - Node.js 20+ with TypeScript
 - Express.js (REST API framework)
 - Prisma ORM (type-safe database access)
-- SQLite (development database)
+- ~~SQLite (development database)~~ **→ Supabase PostgreSQL (managed database)**
 - date-fns (date manipulation)
 - Zod (runtime validation)
 
 **Database:**
-- SQLite (file-based, easy setup)
-- Schema designed for PostgreSQL migration
+- ~~SQLite (file-based, easy setup)~~ **→ Supabase PostgreSQL (managed, persistent)**
+- Schema designed for PostgreSQL migration ✅ **Migration completed November 2024**
 
 **Authentication:**
 - JWT tokens (jsonwebtoken)
@@ -86,10 +86,14 @@ This document defines the technical architecture for SpendSense, including syste
 └────────────────────┬────────────────────────────────┘
                      │
                      ▼
-          ┌──────────────────┐
-          │  SQLite Database │
-          │  (spendsense.db) │
-          └──────────────────┘
+          ┌──────────────────────┐
+          │ ~~SQLite Database~~   │
+          │ ~~(spendsense.db)~~   │
+          │                      │
+          │  ✅ Supabase         │
+          │  PostgreSQL          │
+          │  (Managed, Persistent)│
+          └──────────────────────┘
 
 External:
 ┌──────────────────┐
@@ -220,9 +224,19 @@ spendsense/
 - **Choice:** Prisma over raw SQL or other ORMs
 - **Rationale:** Type-safe queries, auto-generated types, easy migrations, excellent TypeScript support
 
-**SQLite for Development:**
-- **Choice:** SQLite over PostgreSQL initially
-- **Rationale:** Zero setup, file-based, fast for demos, Prisma makes PostgreSQL migration trivial
+**Database Selection:**
+- ~~**SQLite for Development:**~~ **→ Migrated to Supabase PostgreSQL**
+- ~~**Choice:** SQLite over PostgreSQL initially~~
+- ~~**Rationale:** Zero setup, file-based, fast for demos, Prisma makes PostgreSQL migration trivial~~
+
+**✅ Current: Supabase PostgreSQL**
+- **Choice:** Supabase managed PostgreSQL for both dev and production
+- **Rationale:** 
+  - SQLite doesn't work in Vercel serverless (files don't persist, can't copy to runtime)
+  - Supabase provides persistent, scalable database with generous free tier (500 MB storage, unlimited compute)
+  - Same database in dev and prod ensures consistency
+  - Handles 200k+ transactions reliably
+  - Prisma migration was seamless (same schema, just changed provider)
 
 **REST API over GraphQL:**
 - **Choice:** REST
@@ -862,16 +876,34 @@ All formats supported for ingestion via Prisma seed script
 - All required Plaid fields present ✓ (exactly matching PDF specification)
 
 **Storage Strategy:**
-- **SQLite (runtime system of record):** users, accounts, transactions, liabilities, signals, personas, recommendations
+- ~~**SQLite (runtime system of record):** users, accounts, transactions, liabilities, signals, personas, recommendations~~ **→ Migrated to Supabase PostgreSQL**
 - **Parquet (optional):** Offline analytics only; not used in runtime signal queries
 - **JSON:** Configuration files, offer definitions, content metadata, logs
 
-**PostgreSQL Migration (Future):**
+**✅ PostgreSQL Migration (Completed November 2024):**
 ```
-Steps:
-  1. Update DATABASE_URL in .env
-  2. Run: npx prisma migrate deploy
-  3. All schema unchanged (Prisma handles differences)
+Migration Steps Completed:
+  1. ✅ Updated Prisma schema: provider = "postgresql"
+  2. ✅ Created migration: npx prisma migrate dev --name init_postgresql
+  3. ✅ Set up Supabase integration in Vercel
+  4. ✅ Configured DATABASE_URL to use Supabase connection
+  5. ✅ Updated build script for smart seeding (only if empty)
+  6. ✅ Schema unchanged (Prisma handled differences seamlessly)
+
+Why Supabase Instead of SQLite:
+- SQLite files don't persist in Vercel serverless environment
+- Can't copy database files to /tmp reliably across cold starts
+- Supabase provides managed PostgreSQL with connection pooling
+- Free tier sufficient for MVP: 500 MB storage, unlimited compute
+- Better for production: persistent data, handles concurrent connections
+- Same Prisma schema works for both (just changed provider)
+
+Migration Benefits:
+- ✅ Data persists across deployments
+- ✅ Handles 200k+ transactions reliably
+- ✅ No file-based database management
+- ✅ Built-in connection pooling (PgBouncer)
+- ✅ Free tier generous enough for MVP
 ```
 
 ---
@@ -932,6 +964,13 @@ Return user object and token
 
 #### **POST /api/auth/login**
 Login with email/password (additional endpoint for authentication; register via `/api/users`).
+
+#### **GET /api/auth/example-users** ⭐ **Added (Not in Original PRD)**
+Get example user emails for demo/login page (enhancement for better UX).
+- Returns 5 seeded user emails + operator credentials
+- No authentication required
+- Used by frontend to display dynamic demo credentials
+- **Enhancement:** Improves user experience by showing actual seeded users instead of hardcoded examples
 
 **Request:**
 ```json

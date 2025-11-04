@@ -75,7 +75,11 @@
 - [x] Serverless function handler (`api/[...path].ts`)
 - [x] CORS configuration for production
 - [x] API URL auto-detection in frontend
-- [x] Production routing fixes - **RECENT**
+- [x] Production routing fixes
+- [x] Database migration to Supabase PostgreSQL - **COMPLETE**
+- [x] Smart seeding (only on empty database) - **NEW**
+- [x] Example users endpoint (`/api/auth/example-users`) - **NEW**
+- [x] Dynamic login credentials display - **NEW**
 
 ## Gap Analysis Items Completed ✅
 
@@ -107,8 +111,18 @@
 - [x] Card number display fix (numeric digits only, e.g., "1234" not "Z7S2")
 - [x] Content count increased to 32 articles (exceeds requirement)
 
+## Database & Infrastructure
+- **Database:** Supabase PostgreSQL (managed, persistent)
+- **Local Dev:** Uses same Supabase database (via `.env`)
+- **Production:** Vercel + Supabase PostgreSQL
+- **Seeding:** Only runs if database is empty (first deployment)
+- **Data Persistence:** ✅ All data persists across deployments
+- **Migration Status:** ✅ Complete - PostgreSQL migration created and applied
+
 ## Current Blockers
 None - all critical features complete and working.
+
+**Note:** Production seed is currently running locally. Once complete, example users will appear on login page.
 
 ## Next Milestones (Optional Enhancements)
 1. Add integration tests for API routes

@@ -112,14 +112,53 @@ export async function generateRationale(
         const limit = Number(maxUtilAccount.balance_limit);
         const utilization = Math.round((balance / limit) * 100);
         const interestMonthly = creditSignal.interest_charges || 0;
+        const isOverdue = creditSignal.any_overdue || false;
+        const minimumPaymentOnly = creditSignal.minimum_payment_only || false;
+        const contentTitle = content?.title || 'this article';
+
+        // Make rationale specific to the content title/topic AND different credit signals
+        // Extract topic from title to personalize the rationale
+        const titleLower = contentTitle.toLowerCase();
+        let personalizedRationale = '';
+        
+        // Use different signals based on what's most relevant to the article topic
+        if (titleLower.includes('balance transfer')) {
+          if (interestMonthly > 0) {
+            personalizedRationale = `With your ${cardName} at ${utilization}% utilization and $${interestMonthly.toFixed(2)}/month in interest charges, "${contentTitle}" explains how balance transfers could help you save money.`;
+          } else {
+            personalizedRationale = `Your ${cardName} is at ${utilization}% utilization ($${balance.toFixed(0)} of $${limit.toFixed(0)} limit). "${contentTitle}" explains how balance transfers work and when they might be helpful.`;
+          }
+        } else if (titleLower.includes('interest') || titleLower.includes('apr')) {
+          if (interestMonthly > 0) {
+            personalizedRationale = `You're paying $${interestMonthly.toFixed(2)}/month in interest charges on your ${cardName} (${utilization}% utilization). "${contentTitle}" helps explain how credit card interest works and strategies to reduce these costs.`;
+          } else {
+            personalizedRationale = `Your ${cardName} is at ${utilization}% utilization. "${contentTitle}" explains how credit card interest works and why keeping utilization low helps avoid interest charges.`;
+          }
+        } else if (titleLower.includes('utilization') || titleLower.includes('credit score')) {
+          personalizedRationale = `We noticed your ${cardName} is at ${utilization}% utilization ($${balance.toFixed(0)} of $${limit.toFixed(0)} limit). "${contentTitle}" explains how bringing this below 30% could improve your credit score${interestMonthly > 0 ? ` and reduce interest charges of $${interestMonthly.toFixed(2)}/month` : ''}.`;
+        } else if (titleLower.includes('debt') || titleLower.includes('pay off') || titleLower.includes('payoff')) {
+          if (minimumPaymentOnly) {
+            personalizedRationale = `You're making minimum payments on your ${cardName} (${utilization}% utilization, $${balance.toFixed(0)} balance). "${contentTitle}" outlines strategies that could help you pay down your balance faster and save on interest.`;
+          } else if (interestMonthly > 0) {
+            personalizedRationale = `With your ${cardName} at ${utilization}% utilization, you're paying $${interestMonthly.toFixed(2)}/month in interest. "${contentTitle}" outlines strategies that could help you pay down your balance and reduce these charges.`;
+          } else {
+            personalizedRationale = `Your ${cardName} has a balance of $${balance.toFixed(0)} (${utilization}% utilization). "${contentTitle}" outlines strategies that could help you pay down your debt effectively.`;
+          }
+        } else if (isOverdue) {
+          personalizedRationale = `⚠️ Your ${cardName} payment is overdue. "${contentTitle}" explains why making payments on time is important and how to get back on track.`;
+        } else if (minimumPaymentOnly && interestMonthly > 0) {
+          personalizedRationale = `You're making minimum payments on your ${cardName} and paying $${interestMonthly.toFixed(2)}/month in interest. "${contentTitle}" explains how paying more than the minimum could help you save money and pay off debt faster.`;
+        } else {
+          // Generic credit rationale but vary based on available signals
+          if (interestMonthly > 0) {
+            personalizedRationale = `Your ${cardName} is at ${utilization}% utilization with $${interestMonthly.toFixed(2)}/month in interest charges. "${contentTitle}" might help you understand how to better manage your credit and reduce these costs.`;
+          } else {
+            personalizedRationale = `We noticed your ${cardName} is at ${utilization}% utilization ($${balance.toFixed(0)} of $${limit.toFixed(0)} limit). "${contentTitle}" might help you understand how to better manage your credit.`;
+          }
+        }
 
         return {
-          rationale: rationaleTemplates.credit_utilization_v1
-            .replace('{card_name}', cardName)
-            .replace('{utilization}', utilization.toString())
-            .replace('${balance}', balance.toFixed(0))
-            .replace('${limit}', limit.toFixed(0))
-            .replace('${interest_monthly}', interestMonthly.toFixed(2)),
+          rationale: personalizedRationale,
           templateId: 'credit_utilization_v1',
         };
       }
@@ -135,13 +174,11 @@ export async function generateRationale(
       const goal = savingsSignal && savingsSignal.emergency_fund_coverage < 3
         ? 'emergency fund'
         : 'other goals';
+      const contentTitle = content?.title || 'this article';
 
+      // Include content title for uniqueness
       return {
-        rationale: rationaleTemplates.subscription_v1
-          .replace('{count}', count.toString())
-          .replace('${monthly_total}', monthlyTotal.toFixed(2))
-          .replace('${potential_savings}', potentialSavings.toFixed(2))
-          .replace('{goal}', goal),
+        rationale: `You have ${count} recurring subscriptions totaling $${monthlyTotal.toFixed(2)}/month. "${contentTitle}" can help you review these and potentially free up $${potentialSavings.toFixed(2)} for your ${goal}.`,
         templateId: 'subscription_v1',
       };
     }
@@ -151,10 +188,12 @@ export async function generateRationale(
          contentTags.some((tag: string) => tag.includes('savings') || tag.includes('emergency'))) &&
         savingsSignal) {
       const growthRate = Math.round((savingsSignal.growth_rate || 0) * 100);
+      const contentTitle = content?.title || 'this article';
+      const coverage = savingsSignal.emergency_fund_coverage?.toFixed(1) || '0';
+      
+      // Include content title and coverage info for uniqueness
       return {
-        rationale: rationaleTemplates.savings_v1
-          .replace('{growth_rate}', growthRate.toString())
-          .replace('{window_days}', '180'),
+        rationale: `Your savings grew by ${growthRate}% over the last 180 days, and your emergency fund covers ${coverage} months of expenses. "${contentTitle}" explains how building a 3-6 month emergency fund could help cover unexpected costs.`,
         templateId: 'savings_v1',
       };
     }
@@ -164,9 +203,11 @@ export async function generateRationale(
          contentTags.some((tag: string) => tag.includes('income') || tag.includes('budgeting'))) &&
         incomeSignal) {
       const cashBuffer = (incomeSignal.cash_flow_buffer || 0).toFixed(1);
+      const contentTitle = content?.title || 'this article';
+      
+      // Include content title for uniqueness
       return {
-        rationale: rationaleTemplates.income_v1
-          .replace('{cash_buffer}', cashBuffer),
+        rationale: `You have ${cashBuffer} months of expenses in checking. "${contentTitle}" explains strategies for building a larger cash buffer to help manage irregular income payments.`,
         templateId: 'income_v1',
       };
     }
@@ -178,13 +219,31 @@ export async function generateRationale(
       // Use generic template with credit context and content title
       const contentTitle = content?.title || 'financial planning';
       const utilPercent = creditSignal.max_utilization ? Math.round(creditSignal.max_utilization * 100) : 0;
+      
+      // Get card info for more specificity
+      const accounts = await prisma.account.findMany({
+        where: { 
+          user_id: userId,
+          type: 'credit_card' 
+        },
+      });
+      
+      if (accounts.length > 0) {
+        const account = accounts[0];
+        const cardName = getAccountDisplayName(account.account_id, 'credit_card');
+        return {
+          rationale: `Based on your ${cardName} utilization (${utilPercent}%), "${contentTitle}" might help you understand how to better manage your finances.`,
+          templateId: 'education_v1',
+        };
+      }
+      
       return {
         rationale: `Based on your credit utilization (${utilPercent}%), "${contentTitle}" might help you understand how to better manage your finances.`,
         templateId: 'education_v1',
       };
     }
 
-    // Fallback generic template - include content title for variation
+    // Fallback generic template - ALWAYS include content title for uniqueness
     const contentTitle = content?.title || 'financial planning';
     const topicFromTitle = contentTitle.toLowerCase().includes('credit') ? 'credit management' :
                            contentTitle.toLowerCase().includes('savings') ? 'savings strategies' :
@@ -192,6 +251,7 @@ export async function generateRationale(
                            contentTitle.toLowerCase().includes('debt') ? 'debt management' :
                            'financial planning';
     
+    // Always include content title to ensure uniqueness
     return {
       rationale: `Based on your spending patterns, "${contentTitle}" might help you understand ${topicFromTitle} better.`,
       templateId: 'education_v1',

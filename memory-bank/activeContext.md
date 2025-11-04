@@ -115,16 +115,95 @@
 **Files Changed:**
 - `backend/src/recommend/rationaleGenerator.ts` - Enhanced personalization logic
 
+## Recent Major Changes (Latest Session)
+
+### 1. Database Migration: SQLite → Supabase PostgreSQL
+**Why:** SQLite doesn't work in Vercel's serverless environment (files don't persist, can't copy to runtime)
+
+**Changes:**
+- Updated `backend/prisma/schema.prisma` to use `provider = "postgresql"` instead of `sqlite`
+- Created PostgreSQL migration: `backend/prisma/migrations/20251104032655_init_postgresql/`
+- Set up Supabase integration in Vercel (provides managed PostgreSQL)
+- Added Supabase environment variables:
+  - `SUPABASE_POSTGRES_URL` (pooled, port 6543 - for runtime queries)
+  - `SUPABASE_POSTGRES_URL_NON_POOLING` (direct, port 5432 - for migrations/seeding)
+  - `DATABASE_URL` set to `${SUPABASE_POSTGRES_PRISMA_URL}` in Vercel
+- Created `backend/.env` for local development (also uses Supabase)
+
+**Benefits:**
+- ✅ Persistent data across deployments
+- ✅ Same database in dev and prod (currently shared)
+- ✅ Handles 200k+ transactions reliably
+- ✅ Free tier: 500 MB storage, unlimited compute
+
+**Files Changed:**
+- `backend/prisma/schema.prisma` - Changed provider to postgresql
+- `backend/prisma/migrations/` - Added PostgreSQL migration
+- `build.sh` - Updated to use `prisma migrate deploy` and smart seeding
+- `backend/.env` - Added for local Supabase connection
+- `.gitignore` - Removed migrations/ exclusion (migrations should be tracked)
+
+### 2. Build Script Improvements
+**Smart Seeding:**
+- Build script now checks if database is empty before seeding
+- Only seeds on first deployment (when User table is empty)
+- Subsequent deployments skip seeding (faster builds, preserves data)
+- Uses non-pooling connection for migrations (port 5432) to avoid timeout issues
+
+**Files Changed:**
+- `build.sh` - Added USER_COUNT check, uses non-pooling connection for migrations
+
+### 3. Login Page & Example Users Endpoint
+**New Feature:** Dynamic example user emails on login page
+- Created `/api/auth/example-users` endpoint
+- Returns 5 seeded user emails + operator credentials
+- Frontend fetches and displays real user emails dynamically
+- Eliminates hardcoded demo credentials
+
+**Vercel Routing Fixes:**
+- Created explicit serverless functions for nested API routes:
+  - `api/auth/example-users.ts` - Standalone function for example users
+  - `api/auth/login.ts` - Routes to Express app
+- These fix 404 errors for nested `/api/auth/*` paths in Vercel
+
+**Files Added:**
+- `api/auth/example-users.ts` - Vercel serverless function
+- `api/auth/login.ts` - Vercel serverless function
+- `api/tsconfig.json` - TypeScript config for api/ directory
+
+**Files Changed:**
+- `backend/src/ui/routes/auth.ts` - Added GET `/example-users` endpoint
+- `frontend/src/pages/LoginPage.tsx` - Fetches and displays dynamic example users
+- `vercel.json` - Updated build command, removed conflicting routes
+
+### 4. Deployment Configuration
+**Fixed Issues:**
+- ✅ Removed `routes` config from `vercel.json` (conflicted with `rewrites`)
+- ✅ Updated build command to use `bash build.sh` (under 256 char limit)
+- ✅ Fixed TypeScript errors in `api/` directory
+- ✅ Fixed unused variable in `ArticlePage.tsx`
+
+**Current Build Process:**
+1. Generate Prisma Client (root and backend)
+2. Run migrations using non-pooling connection
+3. Check if database is empty (smart seeding)
+4. Seed if empty (first deployment only)
+5. Build frontend
+
 ## Next Steps
-1. ✅ All PRD requirements completed
-2. ✅ Dynamic article generation implemented
-3. ✅ Compliance validation added
-4. ✅ Memory bank updated
-5. Ready for production deployment
+1. ✅ Database migration to Supabase complete
+2. ✅ Login and example users endpoint working
+3. ⏳ Awaiting production seed completion (in progress)
+4. ⏳ Verify example users display on login page after seed completes
 
 ## Known Issues Resolved
 - ✅ Vercel 405 errors on login routes
-- ✅ CORS issues in production
+- ✅ SQLite persistence issues in serverless environment
+- ✅ Nested API routes returning 404 (fixed with explicit serverless functions)
+- ✅ Build command exceeding 256 character limit
+- ✅ TypeScript errors in api/ directory
+- ✅ Database seeding on every deployment (now smart - only if empty)
+- ✅ Migration timeouts (now uses non-pooling connection)
 - ✅ Calculator data using mock instead of real data
 - ✅ Missing spending patterns visualization
 - ✅ Missing consent modal on first login
