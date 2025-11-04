@@ -625,11 +625,32 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       };
 
       if (rec.type === 'education' && rec.content) {
+        // Parse tags from content to determine category
+        let category = 'Education';
+        try {
+          const tags = JSON.parse(rec.content.tags || '[]');
+          if (tags.some((tag: string) => ['credit', 'utilization', 'debt'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Credit';
+          } else if (tags.some((tag: string) => ['savings', 'emergency'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Savings';
+          } else if (tags.some((tag: string) => ['budget', 'spending'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Budgeting';
+          } else if (tags.some((tag: string) => ['income', 'paycheck'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Income';
+          } else if (tags.some((tag: string) => ['subscription'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Subscriptions';
+          } else if (tags.some((tag: string) => ['invest', 'wealth'].some(t => tag.toLowerCase().includes(t)))) {
+            category = 'Investing';
+          }
+        } catch (err) {
+          // Keep default category if parsing fails
+        }
         return {
           ...base,
             title: rec.content.title || 'Untitled',
             excerpt: rec.content.excerpt || '',
             url: rec.content.url || '',
+            category,
         };
       } else if (rec.type === 'offer' && rec.offer) {
         return {
@@ -637,6 +658,7 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
             title: rec.offer.title || 'Untitled Offer',
             description: rec.offer.description || '',
             url: rec.offer.url || '',
+            category: 'Offer',
         };
       }
 

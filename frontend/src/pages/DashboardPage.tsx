@@ -367,6 +367,13 @@ export default function DashboardPage() {
   const handleAction = async (recId: string, action: string) => {
     try {
       await recommendationsApi.submitFeedback(recId, action);
+      
+      // Update the status locally
+      setRecommendations(recs => recs.map(r => 
+        r.id === recId ? { ...r, status: action } : r
+      ));
+      
+      // If dismissed or completed, remove from view
       if (action === 'dismissed' || action === 'completed') {
         setRecommendations(recs => recs.filter(r => r.id !== recId));
       }
@@ -374,6 +381,15 @@ export default function DashboardPage() {
       console.error('Error submitting feedback:', error);
     }
   };
+
+  // Sort recommendations: saved ones first, then by date
+  const sortedRecommendations = [...recommendations].sort((a, b) => {
+    // Saved items come first
+    if (a.status === 'saved' && b.status !== 'saved') return -1;
+    if (a.status !== 'saved' && b.status === 'saved') return 1;
+    // Then sort by creation date
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
@@ -420,32 +436,70 @@ export default function DashboardPage() {
           learnMoreTopic = 'budgeting';
         }
 
+        // Define alert styling based on type
+        const alertStyles = {
+          critical: {
+            gradient: 'bg-gradient-to-r from-red-50 via-red-50/80 to-red-50/60',
+            border: 'border-l-4 border-red-500',
+            icon: (
+              <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            ),
+            textColor: 'text-red-900',
+            badgeColor: 'bg-red-100 text-red-700'
+          },
+          warning: {
+            gradient: 'bg-gradient-to-r from-amber-50 via-amber-50/80 to-amber-50/60',
+            border: 'border-l-4 border-amber-500',
+            icon: (
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            ),
+            textColor: 'text-amber-900',
+            badgeColor: 'bg-amber-100 text-amber-700'
+          },
+          info: {
+            gradient: 'bg-gradient-to-r from-blue-50 via-blue-50/80 to-blue-50/60',
+            border: 'border-l-4 border-blue-500',
+            icon: (
+              <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ),
+            textColor: 'text-blue-900',
+            badgeColor: 'bg-blue-100 text-blue-700'
+          }
+        };
+
+        const style = alertStyles[alert.type];
+
         return (
           <div
             key={idx}
-            className={`p-4 rounded-md ${
-              alert.type === 'critical'
-                ? 'bg-red-50 border border-red-200 text-red-800'
-                : alert.type === 'warning'
-                ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-                : 'bg-blue-50 border border-blue-200 text-blue-800'
-            }`}
+            className={`${style.gradient} ${style.border} rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                {alert.type === 'critical' && '🔴 '}
-                {alert.type === 'warning' && '🟡 '}
-                {alert.type === 'info' && 'ℹ️ '}
-                {alert.message}
+            <div className="flex items-start gap-3">
+              {style.icon}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4">
+                  <p className={`text-sm font-medium ${style.textColor} leading-relaxed`}>
+                    {alert.message}
+                  </p>
+                  {learnMoreTopic && (
+                    <Link
+                      to={`/library?topic=${learnMoreTopic}`}
+                      className={`${style.badgeColor} px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap hover:opacity-80 transition-opacity flex items-center gap-1`}
+                    >
+                      Learn more
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  )}
+                </div>
               </div>
-              {learnMoreTopic && (
-                <Link
-                  to={`/library?topic=${learnMoreTopic}`}
-                  className="ml-4 text-sm font-medium underline hover:no-underline whitespace-nowrap"
-                >
-                  Learn more →
-                </Link>
-              )}
             </div>
           </div>
         );
@@ -500,64 +554,117 @@ export default function DashboardPage() {
             You're doing great! Check back later for new insights.
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {recommendations.map((rec) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {sortedRecommendations.map((rec) => {
+              const isSaved = rec.status === 'saved';
+              
+              // Icon and color mapping for categories
+              const getCategoryIcon = (category: string) => {
+                switch (category) {
+                  case 'Credit':
+                    return '💳';
+                  case 'Savings':
+                    return '💰';
+                  case 'Budgeting':
+                    return '📊';
+                  case 'Income':
+                    return '💵';
+                  case 'Subscriptions':
+                    return '🔄';
+                  case 'Investing':
+                    return '📈';
+                  case 'Offer':
+                    return '🎁';
+                  default:
+                    return '📚';
+                }
+              };
+              
+              return (
               <div
                 key={rec.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all duration-200 flex flex-col"
+                className={`bg-white rounded-2xl shadow-md border p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative ${
+                  isSaved ? 'border-blue-300 bg-blue-50/30' : 'border-gray-100 hover:border-blue-200'
+                }`}
               >
+                {isSaved && (
+                  <div className="absolute top-4 right-4 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    ⭐ Saved
+                  </div>
+                )}
                 <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">{rec.title}</h3>
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors pr-2">{rec.title}</h3>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 whitespace-nowrap flex-shrink-0">
+                      {getCategoryIcon(rec.category || 'Education')} {rec.category || 'Education'}
+                    </span>
+                  </div>
                   {expandedId === rec.id ? (
                     <div>
-                      <p className="text-sm text-gray-700 mb-3 leading-relaxed">{rec.rationale}</p>
-                      <p className="text-xs text-gray-500 mt-3 italic">
+                      <p className="text-sm text-gray-700 leading-relaxed">{rec.rationale}</p>
+                      <p className="text-xs text-gray-500 mt-2 italic bg-gray-50 p-2 rounded-md border-l-2 border-gray-300">
                         This is educational content, not financial advice. Consult a licensed advisor for personalized guidance.
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-600 line-clamp-3 mb-3">{rec.rationale.substring(0, 120)}...</p>
+                    <p className="text-sm text-gray-600 line-clamp-4 leading-relaxed">{rec.rationale.substring(0, 200)}...</p>
                   )}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between gap-2 flex-wrap">
+                <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2 flex-wrap">
                   {expandedId !== rec.id ? (
                     <button
                       onClick={() => setExpandedId(rec.id)}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-150 flex items-center gap-1"
                     >
-                      Expand
+                      Read more
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </button>
                   ) : (
                     <button
                       onClick={() => setExpandedId(null)}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-150 flex items-center gap-1"
                     >
-                      Collapse
+                      Show less
+                      <svg className="w-3 h-3 transform rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </button>
                   )}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleAction(rec.id, 'dismissed')}
-                      className="text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-all duration-150"
+                      className="text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all duration-150"
+                      title="Dismiss"
                     >
                       Dismiss
                     </button>
                     <button
-                      onClick={() => handleAction(rec.id, 'saved')}
-                      className="text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-md transition-all duration-150"
+                      onClick={() => handleAction(rec.id, isSaved ? 'active' : 'saved')}
+                      className={`text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-150 ${
+                        isSaved
+                          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                      title={isSaved ? 'Click to unsave' : 'Save for later'}
                     >
-                      Save
+                      {isSaved ? '✓ Saved' : 'Save'}
                     </button>
                     <Link
                       to={`/article/${rec.id}`}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-md transition-all duration-150"
+                      className="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-all duration-150 flex items-center gap-1 shadow-sm"
                     >
-                      Learn More →
+                      Learn More
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </Link>
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

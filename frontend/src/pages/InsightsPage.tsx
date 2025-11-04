@@ -175,53 +175,75 @@ export default function InsightsPage() {
               </div>
 
               {/* Category Breakdown Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b-2 border-gray-300 bg-gray-50">
-                      <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th className="px-3 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th className="px-3 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        %
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {Object.entries(spendingPatterns.categoryBreakdown)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([category, amount]) => (
-                        <tr key={category} className="hover:bg-blue-50/50 transition-colors">
-                          <td className="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
-                            {category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-semibold text-gray-900">
-                            {formatCurrency(amount)}
-                          </td>
-                          <td className="px-3 py-2 whitespace-nowrap text-xs text-right text-gray-600">
-                            {spendingPatterns.totalSpending > 0
-                              ? `${((amount / spendingPatterns.totalSpending) * 100).toFixed(1)}%`
-                              : '0%'}
-                          </td>
-                        </tr>
-                      ))}
-                    {/* Total Row */}
-                    <tr className="border-t-2 border-gray-300 bg-gray-100 font-semibold">
-                      <td className="px-3 py-2 whitespace-nowrap text-xs font-bold text-gray-900">
-                        Total
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-bold text-gray-900">
+              <div className="overflow-hidden">
+                <div className="space-y-2">
+                  {(() => {
+                    // Calculate max percentage to determine scale
+                    const categories = Object.entries(spendingPatterns.categoryBreakdown)
+                      .sort(([, a], [, b]) => b - a);
+                    
+                    const maxPercentage = Math.max(
+                      ...categories.map(([, amount]) => (amount / spendingPatterns.totalSpending) * 100)
+                    );
+                    
+                    // If all categories are under 50%, scale the bars to use more visual space
+                    const visualScale = maxPercentage < 50 ? 50 : 100;
+                    
+                    return categories.map(([category, amount]) => {
+                      const percentage = (amount / spendingPatterns.totalSpending) * 100;
+                      // Visual width scales the bar for better visibility
+                      const visualWidth = (percentage / visualScale) * 100;
+                      
+                      // Color scheme based on percentage
+                      const getBarColor = (pct: number) => {
+                        if (pct >= 50) return 'bg-blue-500';
+                        if (pct >= 20) return 'bg-green-500';
+                        if (pct >= 10) return 'bg-yellow-500';
+                        return 'bg-purple-500';
+                      };
+                      const barColor = getBarColor(percentage);
+                      
+                      return (
+                        <div key={category} className="group">
+                          <div className="flex items-center gap-3">
+                            {/* Percentage Badge */}
+                            <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full min-w-[2.5rem] text-center flex-shrink-0">
+                              {percentage.toFixed(0)}%
+                            </span>
+                            
+                            {/* Category Name */}
+                            <span className="text-sm font-medium text-gray-900 whitespace-nowrap flex-shrink-0 w-32">
+                              {category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </span>
+                            
+                            {/* Progress Bar (takes remaining space) */}
+                            <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden flex-1 min-w-[100px]">
+                              <div
+                                className={`absolute inset-y-0 left-0 ${barColor} rounded-full transition-all duration-500 ease-out group-hover:opacity-80`}
+                                style={{ width: `${visualWidth}%` }}
+                              ></div>
+                            </div>
+                            
+                            {/* Amount */}
+                            <span className="text-sm font-bold text-gray-900 whitespace-nowrap flex-shrink-0 text-right min-w-[90px]">
+                              {formatCurrency(amount)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                  
+                  {/* Total Row */}
+                  <div className="pt-3 mt-3 border-t-2 border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-900">Total Spending</span>
+                      <span className="text-base font-bold text-gray-900">
                         {formatCurrency(spendingPatterns.totalSpending)}
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap text-xs text-right font-bold text-gray-900">
-                        100.0%
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

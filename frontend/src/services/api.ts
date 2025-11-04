@@ -9,6 +9,7 @@ export interface Recommendation {
   personaType: string;
   status: string;
   createdAt: string;
+  category?: string;
 }
 
 export interface Profile {
