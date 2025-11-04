@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd backend && npx prisma generate && npx prisma migrate deploy && (npx prisma db seed || echo 'Warning: Seed failed, but continuing build. You can seed via /api/seed endpoint.') && cd ../frontend && npm run build",
+  "buildCommand": "cd backend && if [ -z \"$DATABASE_URL\" ]; then export DATABASE_URL=\"file:/tmp/spendsense.db\"; elif [ \"${DATABASE_URL#file:}\" = \"$DATABASE_URL\" ]; then export DATABASE_URL=\"file:$DATABASE_URL\"; fi && npx prisma generate && npx prisma migrate deploy && (npx prisma db seed || echo 'Warning: Seed failed, but continuing build. You can seed via /api/seed endpoint.') && cd ../frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install && cd frontend && npm install && cd ../backend && npm install",
   "functions": {

@@ -66,7 +66,10 @@ curl -X POST https://spendsense-mlx.vercel.app/api/seed \
 
 For automatic seeding to work, you need these environment variables in Vercel:
 
-- **`DATABASE_URL`** - SQLite database path (e.g., `file:/tmp/spendsense.db`)
+- **`DATABASE_URL`** - SQLite database path
+  - Can be: `/tmp/spendsense.db` or `file:/tmp/spendsense.db`
+  - The build command will automatically add `file:` prefix if missing
+  - Default (if not set): `file:/tmp/spendsense.db`
 - **`DATA_SEED`** - Seed value for deterministic data generation (default: `1337`)
 - **`JWT_SECRET`** - Secret for JWT token generation
 - **`JWT_EXPIRES_IN`** - JWT expiration (default: `24h`)
