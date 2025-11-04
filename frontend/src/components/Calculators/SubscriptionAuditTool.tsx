@@ -93,28 +93,28 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
   const annualSavings = potentialSavings * 12;
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Subscription Audit Tool</h3>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+      <h3 className="text-base font-semibold text-gray-900 mb-3">Subscription Audit Tool</h3>
       
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="text-sm text-gray-500">Total Monthly</p>
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalMonthly)}</p>
+            <p className="text-xs text-gray-500">Total Monthly</p>
+            <p className="text-lg font-bold text-gray-900">{formatCurrency(totalMonthly)}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Potential Savings</p>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(potentialSavings)}/mo</p>
+            <p className="text-xs text-gray-500">Potential Savings</p>
+            <p className="text-lg font-bold text-green-600">{formatCurrency(potentialSavings)}/mo</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Annual Savings</p>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(annualSavings)}</p>
+            <p className="text-xs text-gray-500">Annual Savings</p>
+            <p className="text-lg font-bold text-green-600">{formatCurrency(annualSavings)}</p>
           </div>
         </div>
 
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Your Subscriptions</h4>
-          <div className="space-y-2">
+        <div className="border-t pt-3">
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">Your Subscriptions</h4>
+          <div className="space-y-1.5">
             {loading ? (
               <p className="text-sm text-gray-500">Loading subscriptions...</p>
             ) : subscriptions.length === 0 ? (
@@ -123,9 +123,9 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
               subscriptions.map((sub) => (
                 <div
                   key={sub.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <input
                       type="checkbox"
                       checked={sub.keeping}
@@ -138,7 +138,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
                     </div>
                   </div>
                   <span
-                    className={`text-xs px-2 py-1 rounded ${
+                    className={`text-xs px-2 py-0.5 rounded ${
                       sub.keeping
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
@@ -153,7 +153,7 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         </div>
 
         {potentialSavings > 0 && (
-          <div className="bg-blue-50 p-4 rounded-md">
+          <div className="bg-blue-50 p-3 rounded-md">
             <p className="text-sm text-gray-700">
               By canceling the selected subscriptions, you could save{' '}
               <strong>{formatCurrency(potentialSavings)}/month</strong> or{' '}
@@ -163,11 +163,11 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         )}
 
         {/* Formula Transparency */}
-        <details className="mt-4">
+        <details className="mt-2">
           <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
-            Show calculation formula
+            ▸ Show calculation formula
           </summary>
-          <div className="mt-2 p-3 bg-gray-50 rounded text-xs font-mono space-y-1">
+          <div className="mt-2 p-2 bg-gray-50 rounded text-xs font-mono space-y-0.5">
             <p>Total Monthly = Σ(All Subscription Amounts)</p>
             <p>Potential Savings = Σ(Canceled Subscription Amounts)</p>
             <p>Annual Savings = Potential Savings × 12</p>
@@ -175,10 +175,10 @@ export default function SubscriptionAuditTool({ profile }: SubscriptionAuditTool
         </details>
 
         {/* Take Action Button */}
-        <div className="mt-4 pt-4 border-t">
+        <div className="pt-3 border-t">
           <Link
             to="/library?topic=budgeting&search=subscription"
-            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
+            className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
           >
             Learn About Subscription Management →
           </Link>

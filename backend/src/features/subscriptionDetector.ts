@@ -74,15 +74,47 @@ export async function detectSubscriptions(
   }
 
   // Detect recurring merchants: ≥3 transactions in 90 days with monthly/weekly cadence
+  // For pattern detection, we need to look back 90 days regardless of window size
+  // to see the recurring pattern, even if the window is only 30 days
   const recurringMerchants: string[] = [];
   const recurringMonthlySpend: Record<string, number> = {};
 
-  for (const [merchantName, transactions] of merchantGroups.entries()) {
+  // Get additional transactions from the last 90 days for pattern detection
+  // (even if window is smaller)
+  const patternStartDate = subDays(endDate, 90);
+  const patternTransactions = await prisma.transaction.findMany({
+    where: {
+      account_id: { in: accountIds },
+      date: { gte: patternStartDate, lte: endDate },
+      amount: { lt: 0 },
+    },
+    orderBy: { date: 'asc' },
+  });
+
+  // Group pattern transactions by merchant
+  const patternMerchantGroups = new Map<string, Array<{
+    date: Date;
+    amount: number;
+  }>>();
+
+  for (const txn of patternTransactions) {
+    const merchantName = txn.merchant_name;
+    if (!merchantName) continue;
+
+    if (!patternMerchantGroups.has(merchantName)) {
+      patternMerchantGroups.set(merchantName, []);
+    }
+    patternMerchantGroups.get(merchantName)!.push({
+      date: txn.date,
+      amount: Math.abs(Number(txn.amount)),
+    });
+  }
+
+  for (const [merchantName, transactions] of patternMerchantGroups.entries()) {
     if (transactions.length < 3) continue;
 
-    // Check last 90 days of the window
-    const recentCutoff = subDays(endDate, 90);
-    const recentTransactions = transactions.filter(t => t.date >= recentCutoff);
+    // Use all transactions from the last 90 days for pattern detection
+    const recentTransactions = transactions;
     
     if (recentTransactions.length < 3) continue;
 

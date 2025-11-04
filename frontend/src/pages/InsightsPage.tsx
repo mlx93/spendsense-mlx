@@ -287,12 +287,6 @@ export default function InsightsPage() {
                   {formatCurrency(savingsSignal?.savings_balance || 0)}
                 </p>
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-1">Subscriptions</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {subscriptionSignal?.count || 0}
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -526,9 +520,46 @@ export default function InsightsPage() {
           )}
         </div>
 
-        {/* Fourth Row: Spending Breakdown (Left) + Personas (Right) */}
+        {/* Fourth Row: Subscriptions (Left) + Spending Breakdown (Right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Spending Breakdown Stats - Left */}
+          {/* Subscriptions - Left */}
+          {subscriptionSignal && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+              <h2 className="text-base font-semibold text-gray-900 mb-3">Subscriptions</h2>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">Total</p>
+                  <p className="text-lg font-bold text-gray-900">{subscriptionSignal.count || 0}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">Monthly Spend</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatCurrency(subscriptionSignal.monthly_spend || 0)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 mb-1">Share of Spending</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {subscriptionSignal.share_of_total ? `${Math.round(subscriptionSignal.share_of_total * 100)}%` : '0%'}
+                  </p>
+                </div>
+              </div>
+              {subscriptionSignal.recurring_merchants && subscriptionSignal.recurring_merchants.length > 0 && (
+                <div className="pt-3 mt-3 border-t border-gray-200">
+                  <p className="text-xs text-gray-600 mb-2">Recurring Merchants:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {subscriptionSignal.recurring_merchants.map((merchant: string, idx: number) => (
+                      <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded-md text-xs text-gray-700">
+                        {merchant}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Spending Breakdown Stats - Right */}
           {spendingPatterns && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
               <h2 className="text-base font-semibold text-gray-900 mb-3">Spending Breakdown</h2>
@@ -554,73 +585,8 @@ export default function InsightsPage() {
               </div>
             </div>
           )}
-
-          {/* Personas - Right */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <h2 className="text-base font-semibold text-gray-900 mb-3">Your Personas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {profile.personas['30d'].primary && (
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-                  <p className="text-xs text-blue-600 uppercase tracking-wide font-semibold mb-1">Primary</p>
-                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
-                    {profile.personas['30d'].primary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Score: {Math.round((profile.personas['30d'].primary?.score || 0) * 100)}%
-                  </p>
-                </div>
-              )}
-              {profile.personas['30d'].secondary && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-1">Secondary</p>
-                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
-                    {profile.personas['30d'].secondary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Score: {Math.round((profile.personas['30d'].secondary?.score || 0) * 100)}%
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Subscription Details */}
-        {subscriptionSignal && subscriptionSignal.count > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <h2 className="text-base font-semibold text-gray-900 mb-3">Subscriptions</h2>
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="bg-gray-50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-600 mb-0.5">Total</p>
-                <p className="text-sm font-semibold text-gray-900">{subscriptionSignal.count}</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-600 mb-0.5">Monthly Spend</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {formatCurrency(subscriptionSignal.monthly_spend || 0)}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-600 mb-0.5">Share of Spending</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {subscriptionSignal.share_of_total ? `${Math.round(subscriptionSignal.share_of_total * 100)}%` : '0%'}
-                </p>
-              </div>
-            </div>
-            {subscriptionSignal.recurring_merchants && subscriptionSignal.recurring_merchants.length > 0 && (
-              <div className="pt-2 border-t border-gray-200">
-                <p className="text-xs text-gray-600 mb-2">Recurring Merchants:</p>
-                <div className="flex flex-wrap gap-2">
-                  {subscriptionSignal.recurring_merchants.map((merchant: string, idx: number) => (
-                    <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded-md text-xs text-gray-700">
-                      {merchant}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Interactive Calculators */}
         <div className="space-y-4">
@@ -630,10 +596,44 @@ export default function InsightsPage() {
             <EmergencyFundCalculator profile={profile} />
             <DebtPayoffSimulator profile={profile} />
           </div>
-          
+        </div>
+
+        {/* Subscription Audit Tool + Personas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Subscription Audit Tool - Left */}
           {subscriptionSignal && subscriptionSignal.count > 0 && (
             <SubscriptionAuditTool profile={profile} />
           )}
+
+          {/* Personas - Right (stacked vertically) */}
+          <div className="space-y-3">
+            {profile.personas['30d'].primary && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                  <p className="text-xs text-blue-600 uppercase tracking-wide font-semibold mb-1">Primary Persona</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    {profile.personas['30d'].primary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Score: {Math.round((profile.personas['30d'].primary?.score || 0) * 100)}%
+                  </p>
+                </div>
+              </div>
+            )}
+            {profile.personas['30d'].secondary && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-1">Secondary Persona</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                    {profile.personas['30d'].secondary.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Score: {Math.round((profile.personas['30d'].secondary?.score || 0) * 100)}%
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
