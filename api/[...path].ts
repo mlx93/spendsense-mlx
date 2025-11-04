@@ -41,16 +41,28 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     path = '/' + path;
   }
   
+  // Preserve query string for Express (e.g., ?status=active&refresh=true)
+  const originalUrl = req.url || '';
+  const queryString = originalUrl.includes('?') ? originalUrl.substring(originalUrl.indexOf('?')) : '';
+  const pathWithQuery = path + queryString;
+  
   // Log for debugging
-  console.log(`[api/[...path]] ${req.method} ${req.url} -> ${path}`);
-  console.log(`[api/[...path]] Query:`, JSON.stringify(req.query));
+  console.log(`[api/[...path]] ${req.method} ${req.url}`);
+  console.log(`[api/[...path]] Extracted path: ${path}`);
+  console.log(`[api/[...path]] Path with query: ${pathWithQuery}`);
+  console.log(`[api/[...path]] Query object:`, JSON.stringify(req.query));
   
   // Update request properties for Express routing
   // Express uses these properties to match routes
-  (req as any).url = path;
-  (req as any).originalUrl = path;
+  (req as any).url = pathWithQuery;
+  (req as any).originalUrl = pathWithQuery;
   (req as any).path = path;
   (req as any).baseUrl = '';
+  
+  // Ensure query object is preserved
+  if (!(req as any).query) {
+    (req as any).query = req.query || {};
+  }
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
