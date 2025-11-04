@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/authContext';
-import { recommendationsApi, profileApi, Recommendation, Profile } from '../services/api';
+import { recommendationsApi, profileApi, Recommendation } from '../services/api';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Array<{ type: 'critical' | 'warning' | 'info'; message: string }>>([]);
@@ -24,7 +23,6 @@ export default function DashboardPage() {
       
       // Load profile to check alerts
       const profileResponse = await profileApi.getProfile(user.id);
-      setProfile(profileResponse.data);
 
       // Generate alerts based on profile
       const newAlerts: Array<{ type: 'critical' | 'warning' | 'info'; message: string }> = [];
