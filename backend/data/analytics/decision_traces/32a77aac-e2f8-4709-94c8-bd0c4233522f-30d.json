@@ -1,0 +1,26 @@
+{
+  "userId": "32a77aac-e2f8-4709-94c8-bd0c4233522f",
+  "windowDays": 30,
+  "signals": {
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 0,
+      "savings_balance": 0
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "high_utilization",
+      "score": 0.3,
+      "rank": 1
+    }
+  ],
+  "recommendations": []
+}

@@ -1,0 +1,434 @@
+{
+  "userId": "88881075-7f1d-49a4-a8a0-4652355fa3c0",
+  "windowDays": 180,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.30339385515803213,
+      "avg_utilization": 0.30339385515803213,
+      "utilization_flag": "medium",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 1.5993962136110372e-16,
+      "cash_flow_buffer": 0.6725636236229636,
+      "average_monthly_income": 6160.361757366818
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 0.025840283288252344,
+      "savings_balance": 145.31525440720975
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "variable_income",
+      "score": 0.3,
+      "rank": 1
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "d63569fa-1001-464b-b8ca-c0ba4301f5be",
+      "type": "education",
+      "contentId": "edu_expense_prioritization",
+      "rationale": "You have 0 recurring subscriptions totaling 0.00/month. Reviewing these could free up 0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T04:04:41.661Z"
+      },
+      "createdAt": "2025-11-04T04:04:41.662Z"
+    },
+    {
+      "id": "aabff837-b9d0-46a0-ac5e-5b7af77c052e",
+      "type": "education",
+      "contentId": "edu_budgeting_irregular_income",
+      "rationale": "You have 0 recurring subscriptions totaling 0.00/month. Reviewing these could free up 0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T04:04:41.760Z"
+      },
+      "createdAt": "2025-11-04T04:04:41.761Z"
+    },
+    {
+      "id": "f6d31370-af32-4123-99a7-845130d4ade3",
+      "type": "education",
+      "contentId": "edu_emergency_fund_basics",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:04:41.876Z"
+      },
+      "createdAt": "2025-11-04T04:04:41.877Z"
+    },
+    {
+      "id": "ad693ddd-8ae5-4afe-88c6-a9a6fea4ce43",
+      "type": "education",
+      "contentId": "edu_income_smoothing",
+      "rationale": "You have 0.7 months of expenses in checking. Building a larger cash buffer could help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "generated_at": "2025-11-04T04:04:41.972Z"
+      },
+      "createdAt": "2025-11-04T04:04:41.973Z"
+    },
+    {
+      "id": "3f7ac1eb-5968-4195-8353-e5fb529cc3dc",
+      "type": "education",
+      "contentId": "edu_multiple_income_streams",
+      "rationale": "You have 0.7 months of expenses in checking. Building a larger cash buffer could help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "generated_at": "2025-11-04T04:04:42.100Z"
+      },
+      "createdAt": "2025-11-04T04:04:42.101Z"
+    },
+    {
+      "id": "8f8807f7-4fde-467b-8f14-966aa6e24f6b",
+      "type": "education",
+      "contentId": "edu_cash_flow_management",
+      "rationale": "You have 0 recurring subscriptions totaling 0.00/month. Reviewing these could free up 0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T04:04:42.218Z"
+      },
+      "createdAt": "2025-11-04T04:04:42.219Z"
+    },
+    {
+      "id": "8fdd6c39-6c4f-4d10-b115-949e1b67ab56",
+      "type": "offer",
+      "offerId": "financial_education_platform",
+      "rationale": "Based on your low emergency fund coverage, Financial Education Platform Access could help you build your emergency savings faster.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.027281476935637927,
+            "savings_balance": 145.31525440720975
+          },
+          "credit": {
+            "max_utilization": 0.30339385515803213,
+            "avg_utilization": 0.30339385515803213,
+            "utilization_flag": "medium",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.7100746064173632,
+            "average_monthly_income": 5686.487776030909
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.3
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T04:04:42.509Z"
+      },
+      "createdAt": "2025-11-04T04:04:42.510Z"
+    }
+  ]
+}

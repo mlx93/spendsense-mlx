@@ -1,0 +1,590 @@
+{
+  "userId": "b8315341-4300-4315-8b58-ad35dd338020",
+  "windowDays": 30,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.6945505398449727,
+      "avg_utilization": 0.6359099178974146,
+      "utilization_flag": "high",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 0,
+      "cash_flow_buffer": 0.27940947237438357,
+      "average_monthly_income": 5308.14886370442
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 0,
+      "savings_balance": 0,
+      "savingsByMonth": {}
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "high_utilization",
+      "score": 0.3,
+      "rank": 1
+    },
+    {
+      "type": "variable_income",
+      "score": 0.3,
+      "rank": 2
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "4e04a83d-c31e-4f84-89fc-55d21bc7f6a7",
+      "type": "education",
+      "contentId": "edu_credit_card_interest",
+      "rationale": "You're paying $159.75/month in interest charges on your Visa ending in 0020 (69% utilization). \"How Credit Card Interest Works\" helps explain how credit card interest works and strategies to reduce these costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T20:49:21.358Z"
+      },
+      "createdAt": "2025-11-04T20:49:21.359Z"
+    },
+    {
+      "id": "b4538093-c8ee-4317-a154-255cb49e90dc",
+      "type": "education",
+      "contentId": "edu_balance_transfer_guide",
+      "rationale": "With your Visa ending in 0020 at 69% utilization and $159.75/month in interest charges, \"Balance Transfer Credit Cards: A Complete Guide\" explains how balance transfers could help you save money.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T20:49:22.061Z"
+      },
+      "createdAt": "2025-11-04T20:49:22.062Z"
+    },
+    {
+      "id": "ca96358b-18e6-4c27-94ad-303b06b646db",
+      "type": "education",
+      "contentId": "edu_credit_utilization_basics",
+      "rationale": "We noticed your Visa ending in 0020 is at 69% utilization ($3066 of $4414 limit). \"Understanding Credit Utilization\" explains how bringing this below 30% could improve your credit score and reduce interest charges of $159.75/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T20:49:22.836Z"
+      },
+      "createdAt": "2025-11-04T20:49:22.837Z"
+    },
+    {
+      "id": "1205ce91-a28f-4fed-b79f-95496a1325e7",
+      "type": "education",
+      "contentId": "edu_debt_paydown_strategies",
+      "rationale": "With your Visa ending in 0020 at 69% utilization, you're paying $159.75/month in interest. \"How to Pay Off Credit Card Debt: 5 Strategies That Work\" outlines strategies that could help you pay down your balance and reduce these charges.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.67",
+          "content_filter:relevance_score=0.90"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T20:49:23.624Z"
+      },
+      "createdAt": "2025-11-04T20:49:23.625Z"
+    },
+    {
+      "id": "0b2702a0-99fe-4ceb-8d42-51db46e17889",
+      "type": "education",
+      "contentId": "edu_debt_payoff_methods",
+      "rationale": "With your Visa ending in 0020 at 69% utilization, you're paying $159.75/month in interest. \"Debt Snowball vs. Debt Avalanche: Which Method Works Best?\" outlines strategies that could help you pay down your balance and reduce these charges.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T20:49:24.378Z"
+      },
+      "createdAt": "2025-11-04T20:49:24.379Z"
+    },
+    {
+      "id": "05de1f4e-304c-4b14-a8de-bf014100dcfa",
+      "type": "offer",
+      "offerId": "balance_transfer_premium",
+      "rationale": "With your credit card at 69% utilization, 0% APR Balance Transfer Card could help you reduce interest charges and get back on track.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=high_utilization",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_credit_v1",
+        "generated_at": "2025-11-04T20:49:25.432Z"
+      },
+      "createdAt": "2025-11-04T20:49:25.433Z"
+    },
+    {
+      "id": "475c68b0-5489-4917-97d4-08e5e8243b3b",
+      "type": "offer",
+      "offerId": "credit_builder_loan",
+      "rationale": "Based on your credit card at 69% utilization, Credit Builder Loan could help you reduce interest charges and improve your credit score.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=high_utilization",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T20:49:25.957Z"
+      },
+      "createdAt": "2025-11-04T20:49:25.959Z"
+    },
+    {
+      "id": "91549af8-4bda-4770-95af-0bb63287595f",
+      "type": "offer",
+      "offerId": "credit_monitoring_service",
+      "rationale": "With your credit card at 69% utilization, Credit Monitoring Service could help you reduce interest charges and get back on track.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 159.74624146560114,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.3917211232750976,
+            "average_monthly_income": 5165.997782469454
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=high_utilization",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_credit_v1",
+        "generated_at": "2025-11-04T20:49:26.477Z"
+      },
+      "createdAt": "2025-11-04T20:49:26.478Z"
+    },
+    {
+      "id": "24fcaeaa-0943-4541-9bec-d30c7af385b5",
+      "type": "education",
+      "contentId": "edu_credit_card_interest",
+      "relevanceScore": 0.85,
+      "rationale": "Your Visa ending in 0020 is at 69% utilization. \"How Credit Card Interest Works\" explains how credit card interest works and why keeping utilization low helps avoid interest charges.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6945505398449727,
+            "avg_utilization": 0.6359099178974146,
+            "utilization_flag": "high",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0,
+            "savingsByMonth": {}
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27940947237438357,
+            "average_monthly_income": 5308.14886370442
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.3
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "relevance_score": 0.85,
+        "generated_at": "2025-11-04T23:30:21.597Z"
+      },
+      "createdAt": "2025-11-04T23:30:21.598Z"
+    }
+  ]
+}

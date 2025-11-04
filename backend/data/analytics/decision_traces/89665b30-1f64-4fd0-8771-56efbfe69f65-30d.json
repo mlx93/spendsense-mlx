@@ -1,0 +1,342 @@
+{
+  "userId": "89665b30-1f64-4fd0-8771-56efbfe69f65",
+  "windowDays": 30,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.6433358257910602,
+      "avg_utilization": 0.605069744369261,
+      "utilization_flag": "high",
+      "interest_charges": 162.03904004135322,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 0,
+      "cash_flow_buffer": 0.34035972006103177,
+      "average_monthly_income": 3950.4550643374255
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 0,
+      "savings_balance": 0
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "high_utilization",
+      "score": 0.5,
+      "rank": 1
+    },
+    {
+      "type": "variable_income",
+      "score": 0.3,
+      "rank": 2
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "18108ee4-a2d3-4b2d-b525-07f716999c3c",
+      "type": "education",
+      "contentId": "edu_credit_card_interest",
+      "rationale": "We noticed your Visa ending in 0000 is at 64% utilization (4769 of 7413 limit). Bringing this below 30% could improve your credit score and reduce interest charges of 162.04/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "credit": {
+            "max_utilization": 0.6433358257910602,
+            "avg_utilization": 0.605069744369261,
+            "utilization_flag": "high",
+            "interest_charges": 162.03904004135322,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.34035972006103177,
+            "average_monthly_income": 3950.4550643374255
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T04:03:56.495Z"
+      },
+      "createdAt": "2025-11-04T04:03:56.499Z"
+    },
+    {
+      "id": "27d1e051-07ec-46a1-968a-22c230d12bc2",
+      "type": "education",
+      "contentId": "edu_balance_transfer_guide",
+      "rationale": "We noticed your Visa ending in 0000 is at 64% utilization (4769 of 7413 limit). Bringing this below 30% could improve your credit score and reduce interest charges of 162.04/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "credit": {
+            "max_utilization": 0.6433358257910602,
+            "avg_utilization": 0.605069744369261,
+            "utilization_flag": "high",
+            "interest_charges": 162.03904004135322,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.34035972006103177,
+            "average_monthly_income": 3950.4550643374255
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T04:03:57.086Z"
+      },
+      "createdAt": "2025-11-04T04:03:57.087Z"
+    },
+    {
+      "id": "f622a2ed-4e7b-4c98-8084-e4ec91f05494",
+      "type": "education",
+      "contentId": "edu_credit_utilization_basics",
+      "rationale": "We noticed your Visa ending in 0000 is at 64% utilization (4769 of 7413 limit). Bringing this below 30% could improve your credit score and reduce interest charges of 162.04/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "credit": {
+            "max_utilization": 0.6433358257910602,
+            "avg_utilization": 0.605069744369261,
+            "utilization_flag": "high",
+            "interest_charges": 162.03904004135322,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.34035972006103177,
+            "average_monthly_income": 3950.4550643374255
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T04:03:57.620Z"
+      },
+      "createdAt": "2025-11-04T04:03:57.621Z"
+    },
+    {
+      "id": "95beaa58-c639-4bd3-86e5-8ae651c39d1a",
+      "type": "education",
+      "contentId": "edu_debt_paydown_strategies",
+      "rationale": "We noticed your Visa ending in 0000 is at 64% utilization (4769 of 7413 limit). Bringing this below 30% could improve your credit score and reduce interest charges of 162.04/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "credit": {
+            "max_utilization": 0.6433358257910602,
+            "avg_utilization": 0.605069744369261,
+            "utilization_flag": "high",
+            "interest_charges": 162.03904004135322,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.34035972006103177,
+            "average_monthly_income": 3950.4550643374255
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.67",
+          "content_filter:relevance_score=0.90"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T04:03:58.441Z"
+      },
+      "createdAt": "2025-11-04T04:03:58.442Z"
+    },
+    {
+      "id": "7c5753d3-271f-412f-92a7-4b3e60c9d385",
+      "type": "offer",
+      "offerId": "balance_transfer_premium",
+      "rationale": "With your credit card at 64% utilization, 0% APR Balance Transfer Card could help you reduce interest charges and get back on track.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "credit": {
+            "max_utilization": 0.6433358257910602,
+            "avg_utilization": 0.605069744369261,
+            "utilization_flag": "high",
+            "interest_charges": 162.03904004135322,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.34035972006103177,
+            "average_monthly_income": 3950.4550643374255
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=high_utilization",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_credit_v1",
+        "generated_at": "2025-11-04T04:03:59.267Z"
+      },
+      "createdAt": "2025-11-04T04:03:59.268Z"
+    }
+  ]
+}

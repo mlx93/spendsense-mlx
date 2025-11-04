@@ -6,19 +6,27 @@
     "totalUsers": 100
   },
   "explainability": {
-    "recommendationsWithRationales": 586,
+    "recommendationsWithRationales": 632,
     "explainabilityPercentage": 100,
-    "totalRecommendations": 586
+    "totalRecommendations": 632
+  },
+  "relevance": {
+    "averageRelevance": 0.8511904761904767,
+    "p50Relevance": 0.85,
+    "p95Relevance": 1,
+    "recommendationsWithScore": 42,
+    "totalRecommendations": 632,
+    "targetMet": true
   },
   "latency": {
-    "averageLatencyMs": 541,
-    "p50LatencyMs": 454,
-    "p95LatencyMs": 884,
+    "averageLatencyMs": 459.4,
+    "p50LatencyMs": 359,
+    "p95LatencyMs": 752,
     "targetMet": true
   },
   "auditability": {
-    "recommendationsWithTraces": 586,
+    "recommendationsWithTraces": 632,
     "auditabilityPercentage": 100,
-    "totalRecommendations": 586
+    "totalRecommendations": 632
   }
 }

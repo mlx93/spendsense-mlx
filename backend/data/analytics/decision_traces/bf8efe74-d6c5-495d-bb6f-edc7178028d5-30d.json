@@ -1,0 +1,322 @@
+{
+  "userId": "bf8efe74-d6c5-495d-bb6f-edc7178028d5",
+  "windowDays": 30,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.000449077824578761,
+      "avg_utilization": 0.000449077824578761,
+      "utilization_flag": "low",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 0,
+      "cash_flow_buffer": 4.881618260711494,
+      "average_monthly_income": 9656.580755645147
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 35.12001364363411,
+      "savings_balance": 187777.7445051747
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "savings_builder",
+      "score": 0.1,
+      "rank": 1
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "3ecb01e9-abf6-45cd-9e7c-e4eb8e6c4055",
+      "type": "education",
+      "contentId": "edu_high_yield_savings",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 35.12001364363411,
+            "savings_balance": 187777.7445051747
+          },
+          "credit": {
+            "max_utilization": 0.000449077824578761,
+            "avg_utilization": 0.000449077824578761,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 4.881618260711494,
+            "average_monthly_income": 9656.580755645147
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:05:40.306Z"
+      },
+      "createdAt": "2025-11-04T04:05:40.307Z"
+    },
+    {
+      "id": "1c8fada4-75ba-421a-85d0-cd592ccacb2f",
+      "type": "education",
+      "contentId": "edu_cut_expenses",
+      "rationale": "You have 0 recurring subscriptions totaling 0.00/month. Reviewing these could free up 0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 35.12001364363411,
+            "savings_balance": 187777.7445051747
+          },
+          "credit": {
+            "max_utilization": 0.000449077824578761,
+            "avg_utilization": 0.000449077824578761,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 4.881618260711494,
+            "average_monthly_income": 9656.580755645147
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T04:05:40.403Z"
+      },
+      "createdAt": "2025-11-04T04:05:40.404Z"
+    },
+    {
+      "id": "e0ef10bc-1b70-4ccb-b64e-793bcac7bb00",
+      "type": "education",
+      "contentId": "edu_savings_goals",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 35.12001364363411,
+            "savings_balance": 187777.7445051747
+          },
+          "credit": {
+            "max_utilization": 0.000449077824578761,
+            "avg_utilization": 0.000449077824578761,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 4.881618260711494,
+            "average_monthly_income": 9656.580755645147
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:05:40.501Z"
+      },
+      "createdAt": "2025-11-04T04:05:40.502Z"
+    },
+    {
+      "id": "0e34cfe2-b062-4081-9b11-4a5e81adf14b",
+      "type": "education",
+      "contentId": "edu_50_30_20_budget",
+      "rationale": "You have 0 recurring subscriptions totaling 0.00/month. Reviewing these could free up 0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 35.12001364363411,
+            "savings_balance": 187777.7445051747
+          },
+          "credit": {
+            "max_utilization": 0.000449077824578761,
+            "avg_utilization": 0.000449077824578761,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 4.881618260711494,
+            "average_monthly_income": 9656.580755645147
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T04:05:40.603Z"
+      },
+      "createdAt": "2025-11-04T04:05:40.604Z"
+    },
+    {
+      "id": "ed37c28e-bb9a-4a01-86de-8b2fcb02be07",
+      "type": "offer",
+      "offerId": "financial_education_platform",
+      "rationale": "Based on your financial profile, Financial Education Platform Access could help you improve your financial situation.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 35.12001364363411,
+            "savings_balance": 187777.7445051747
+          },
+          "credit": {
+            "max_utilization": 0.000449077824578761,
+            "avg_utilization": 0.000449077824578761,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 4.881618260711494,
+            "average_monthly_income": 9656.580755645147
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T04:05:40.884Z"
+      },
+      "createdAt": "2025-11-04T04:05:40.885Z"
+    }
+  ]
+}

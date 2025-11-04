@@ -1,0 +1,271 @@
+{
+  "userId": "d8d591ef-45c0-46fa-8730-7ec1a478e867",
+  "windowDays": 180,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.06135411389722484,
+      "avg_utilization": 0.06135411389722484,
+      "utilization_flag": "low",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 1.7114259975436331e-16,
+      "cash_flow_buffer": 7.667785877335708,
+      "average_monthly_income": 11514.210118752764
+    },
+    "savings": {
+      "net_inflow": 87.06804855650131,
+      "growth_rate": 0.006167246043366363,
+      "emergency_fund_coverage": 13.344118262800677,
+      "savings_balance": 85229.30788081071
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "net_worth_maximizer",
+      "score": 0.9,
+      "rank": 1
+    },
+    {
+      "type": "savings_builder",
+      "score": 0.4,
+      "rank": 2
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "83025aee-ffe8-4ae4-b6f1-7eb7a3f51a98",
+      "type": "education",
+      "contentId": "edu_high_yield_savings",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 19.865526833997055,
+            "savings_balance": 85229.30788081071
+          },
+          "credit": {
+            "max_utilization": 0.06135411389722484,
+            "avg_utilization": 0.06135411389722484,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 11.415112119336548,
+            "average_monthly_income": 10628.501648079477
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "net_worth_maximizer",
+            "score": 0.9
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:05:45.271Z"
+      },
+      "createdAt": "2025-11-04T04:05:45.272Z"
+    },
+    {
+      "id": "28de6a44-fcc3-4c68-a07f-6b659574af08",
+      "type": "education",
+      "contentId": "edu_diversification",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 19.865526833997055,
+            "savings_balance": 85229.30788081071
+          },
+          "credit": {
+            "max_utilization": 0.06135411389722484,
+            "avg_utilization": 0.06135411389722484,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 11.415112119336548,
+            "average_monthly_income": 10628.501648079477
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "net_worth_maximizer",
+            "score": 0.9
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:05:45.400Z"
+      },
+      "createdAt": "2025-11-04T04:05:45.401Z"
+    },
+    {
+      "id": "c2f62b00-4992-456a-83ab-39bcd2e45e09",
+      "type": "education",
+      "contentId": "edu_asset_allocation",
+      "rationale": "Your savings grew by 0% over the last 180 days. Building an emergency fund of 3-6 months expenses could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 19.865526833997055,
+            "savings_balance": 85229.30788081071
+          },
+          "credit": {
+            "max_utilization": 0.06135411389722484,
+            "avg_utilization": 0.06135411389722484,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 11.415112119336548,
+            "average_monthly_income": 10628.501648079477
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "net_worth_maximizer",
+            "score": 0.9
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T04:05:45.603Z"
+      },
+      "createdAt": "2025-11-04T04:05:45.604Z"
+    },
+    {
+      "id": "0b082ced-9b72-4a66-91dd-75d68eddcd29",
+      "type": "offer",
+      "offerId": "financial_education_platform",
+      "rationale": "Based on your financial profile, Financial Education Platform Access could help you improve your financial situation.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 19.865526833997055,
+            "savings_balance": 85229.30788081071
+          },
+          "credit": {
+            "max_utilization": 0.06135411389722484,
+            "avg_utilization": 0.06135411389722484,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 11.415112119336548,
+            "average_monthly_income": 10628.501648079477
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "net_worth_maximizer",
+            "score": 0.9
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T04:05:46.274Z"
+      },
+      "createdAt": "2025-11-04T04:05:46.275Z"
+    }
+  ]
+}

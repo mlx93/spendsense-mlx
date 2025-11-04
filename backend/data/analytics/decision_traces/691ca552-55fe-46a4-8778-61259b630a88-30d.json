@@ -1,0 +1,776 @@
+{
+  "userId": "691ca552-55fe-46a4-8778-61259b630a88",
+  "windowDays": 30,
+  "signals": {
+    "credit": {
+      "max_utilization": 0,
+      "avg_utilization": 0,
+      "utilization_flag": "none",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "irregular",
+      "median_gap_days": 0,
+      "income_variability": 0,
+      "cash_flow_buffer": 0.27971393700647684,
+      "average_monthly_income": 7582.306264473746
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 0.36157106343825657,
+      "savings_balance": 748.8295493434731,
+      "savingsByMonth": {
+        "2025-11": 748.8295493434731,
+        "2025-10": 748.8295493434731,
+        "2025-09": 748.8295493434731,
+        "2025-08": 748.8295493434731,
+        "2025-07": 748.8295493434731,
+        "2025-06": 748.8295493434731,
+        "2025-05": 748.8295493434731
+      }
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "variable_income",
+      "score": 0.5,
+      "rank": 1
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "6993aa81-af8e-406d-95ba-f1edc4675331",
+      "type": "education",
+      "contentId": "edu_income_smoothing",
+      "rationale": "You have 0.2 months of expenses in checking. \"Income Smoothing: Managing Irregular Pay Cycles\" explains strategies for building a larger cash buffer to help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "generated_at": "2025-11-04T20:49:18.123Z"
+      },
+      "createdAt": "2025-11-04T20:49:18.123Z"
+    },
+    {
+      "id": "dbf2b928-8de6-4fda-ad8d-edfbd9f2114b",
+      "type": "education",
+      "contentId": "edu_expense_prioritization",
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"How to Prioritize Expenses When Income Is Unpredictable\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T20:49:18.631Z"
+      },
+      "createdAt": "2025-11-04T20:49:18.632Z"
+    },
+    {
+      "id": "3fb8ed56-b223-42de-b0c8-c361275130ca",
+      "type": "education",
+      "contentId": "edu_multiple_income_streams",
+      "rationale": "You have 0.2 months of expenses in checking. \"Building Multiple Income Streams for Financial Stability\" explains strategies for building a larger cash buffer to help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "generated_at": "2025-11-04T20:49:19.156Z"
+      },
+      "createdAt": "2025-11-04T20:49:19.157Z"
+    },
+    {
+      "id": "a4f2b9b2-f290-4499-9e64-045c74e9cc0a",
+      "type": "education",
+      "contentId": "edu_cash_flow_management",
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"Cash Flow Management for Irregular Income\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T20:49:19.674Z"
+      },
+      "createdAt": "2025-11-04T20:49:19.675Z"
+    },
+    {
+      "id": "15321634-f3a3-4696-b938-41979a42972a",
+      "type": "education",
+      "contentId": "edu_freelance_budgeting",
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"Budgeting for Freelancers: A Complete Guide\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T20:49:20.216Z"
+      },
+      "createdAt": "2025-11-04T20:49:20.217Z"
+    },
+    {
+      "id": "6fc20920-604b-4a22-bb06-95dac9266298",
+      "type": "offer",
+      "offerId": "financial_education_platform",
+      "rationale": "Based on your low emergency fund coverage, Financial Education Platform Access could help you build your emergency savings faster.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.25138522254166634,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.1944733896394513,
+            "average_monthly_income": 2780.235312172845
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T20:49:21.631Z"
+      },
+      "createdAt": "2025-11-04T20:49:21.633Z"
+    },
+    {
+      "id": "e7b402d6-d2ef-4159-b4db-4c622a312075",
+      "type": "education",
+      "contentId": "edu_income_smoothing",
+      "relevanceScore": 1,
+      "rationale": "You have 0.3 months of expenses in checking. \"Income Smoothing: Managing Irregular Pay Cycles\" explains strategies for building a larger cash buffer to help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.36157106343825657,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27971393700647684,
+            "average_monthly_income": 7582.306264473746
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "relevance_score": 1,
+        "generated_at": "2025-11-04T23:30:17.594Z"
+      },
+      "createdAt": "2025-11-04T23:30:17.595Z"
+    },
+    {
+      "id": "513c81c1-f0e8-4bf5-a782-f9d2ae591b41",
+      "type": "education",
+      "contentId": "edu_expense_prioritization",
+      "relevanceScore": 1,
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"How to Prioritize Expenses When Income Is Unpredictable\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.36157106343825657,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27971393700647684,
+            "average_monthly_income": 7582.306264473746
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "relevance_score": 1,
+        "generated_at": "2025-11-04T23:30:18.105Z"
+      },
+      "createdAt": "2025-11-04T23:30:18.106Z"
+    },
+    {
+      "id": "168a737e-419d-4e85-b3b2-52eaf7542d35",
+      "type": "education",
+      "contentId": "edu_multiple_income_streams",
+      "relevanceScore": 1,
+      "rationale": "You have 0.3 months of expenses in checking. \"Building Multiple Income Streams for Financial Stability\" explains strategies for building a larger cash buffer to help manage irregular income payments.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.36157106343825657,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27971393700647684,
+            "average_monthly_income": 7582.306264473746
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "income_v1",
+        "relevance_score": 1,
+        "generated_at": "2025-11-04T23:30:18.967Z"
+      },
+      "createdAt": "2025-11-04T23:30:18.969Z"
+    },
+    {
+      "id": "9e46ec88-262f-47a4-aa8e-711bf47aef6d",
+      "type": "education",
+      "contentId": "edu_cash_flow_management",
+      "relevanceScore": 1,
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"Cash Flow Management for Irregular Income\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.36157106343825657,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27971393700647684,
+            "average_monthly_income": 7582.306264473746
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "relevance_score": 1,
+        "generated_at": "2025-11-04T23:30:19.479Z"
+      },
+      "createdAt": "2025-11-04T23:30:19.480Z"
+    },
+    {
+      "id": "d11a08f5-43b8-45aa-94f1-02be230eac43",
+      "type": "education",
+      "contentId": "edu_freelance_budgeting",
+      "relevanceScore": 1,
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"Budgeting for Freelancers: A Complete Guide\" can help you review these and potentially free up $0.00 for your emergency fund.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0,
+            "avg_utilization": 0,
+            "utilization_flag": "none",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0.36157106343825657,
+            "savings_balance": 748.8295493434731,
+            "savingsByMonth": {
+              "2025-11": 748.8295493434731,
+              "2025-10": 748.8295493434731,
+              "2025-09": 748.8295493434731,
+              "2025-08": 748.8295493434731,
+              "2025-07": 748.8295493434731,
+              "2025-06": 748.8295493434731,
+              "2025-05": 748.8295493434731
+            }
+          },
+          "income": {
+            "frequency": "irregular",
+            "median_gap_days": 0,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.27971393700647684,
+            "average_monthly_income": 7582.306264473746
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "variable_income",
+            "score": 0.5
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "relevance_score": 1,
+        "generated_at": "2025-11-04T23:30:20.040Z"
+      },
+      "createdAt": "2025-11-04T23:30:20.040Z"
+    }
+  ]
+}

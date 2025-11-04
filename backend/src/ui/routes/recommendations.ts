@@ -402,6 +402,7 @@ export async function generateUserData(userId: string): Promise<void> {
             failed_rules: [],
           },
           rationale_template_id: rationaleResult.templateId,
+          relevance_score: match.relevanceScore, // Store relevance score for metrics aggregation
           generated_at: new Date().toISOString(),
         };
 
@@ -474,6 +475,16 @@ export async function generateUserData(userId: string): Promise<void> {
         });
 
         // Build complete decision trace
+        // For offers, calculate relevance score based on persona fit and signal match
+        // Similar to content matching: persona_fit * 0.7 + signal_match * 0.3
+        const offer = await prisma.offer.findUnique({ where: { id: match.offerId } });
+        const requiredSignals = offer ? JSON.parse(offer.required_signals || '[]') : [];
+        const offerRelevanceScore = match.personaFit ? 0.7 : 0;
+        const signalMatchRatio = requiredSignals.length > 0
+          ? (match.signalsUsed?.length || 0) / requiredSignals.length
+          : (match.signalsUsed?.length || 0) > 0 ? 1 : 0;
+        const calculatedRelevanceScore = offerRelevanceScore + (signalMatchRatio * 0.3);
+        
         const decisionTrace = {
           signals_snapshot: {
             credit: signalsMap['credit'] || null,
@@ -504,6 +515,7 @@ export async function generateUserData(userId: string): Promise<void> {
             failed_rules: match.failedRules || [],
           },
           rationale_template_id: rationaleResult.templateId,
+          relevance_score: calculatedRelevanceScore, // Store relevance score for metrics aggregation
           generated_at: new Date().toISOString(),
         };
 

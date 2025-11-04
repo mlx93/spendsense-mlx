@@ -20,9 +20,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
   
-  // Vercel's catch-all route: /api/profile/:userId
-  // Extract path from req.url (more reliable than req.query.path)
-  let path = req.url || '';
+  // Vercel's catch-all route: /api/profile/:userId or /api/operator/review
+  // Extract path from multiple sources for reliability
+  let path = '';
+  
+  // Method 1: Try req.url (most reliable for catch-all)
+  if (req.url) {
+    path = req.url;
+  }
+  // Method 2: Try req.query.path (Vercel catch-all pattern)
+  else if ((req.query as any)?.path) {
+    const pathSegments = (req.query as any).path;
+    path = Array.isArray(pathSegments) 
+      ? '/' + pathSegments.join('/')
+      : '/' + pathSegments;
+  }
+  // Method 3: Fallback to empty path
+  else {
+    path = '/';
+  }
   
   // Remove query string if present (e.g., ?status=active&refresh=true)
   const queryIndex = path.indexOf('?');
@@ -53,7 +69,6 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`[api/[...path]] Extracted path: ${path}`);
   console.log(`[api/[...path]] Path with query: ${pathWithQuery}`);
   console.log(`[api/[...path]] Query object:`, JSON.stringify(req.query));
-  console.log(`[api/[...path]] Headers:`, JSON.stringify(req.headers));
   
   // Update request properties for Express routing
   // Express uses these properties to match routes
@@ -67,9 +82,23 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     (req as any).query = req.query || {};
   }
   
+  // Ensure method is set correctly
+  if (!(req as any).method) {
+    (req as any).method = req.method;
+  }
+  
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
-  return app(req as any, res as any);
+  return app(req as any, res as any).catch((error: any) => {
+    console.error(`[api/[...path]] Express handler error:`, error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Internal server error',
+        code: 'INTERNAL_ERROR',
+        details: { message: error.message },
+      });
+    }
+  });
 }
 
 // Export the handler

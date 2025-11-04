@@ -1,0 +1,13 @@
+{
+  "userId": "32a77aac-e2f8-4709-94c8-bd0c4233522f",
+  "windowDays": 180,
+  "signals": {},
+  "personas": [
+    {
+      "type": "high_utilization",
+      "score": 0.3,
+      "rank": 1
+    }
+  ],
+  "recommendations": []
+}

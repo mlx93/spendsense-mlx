@@ -1,0 +1,709 @@
+{
+  "userId": "6c6f3cca-e1d7-409b-96d4-f1242b7360f9",
+  "windowDays": 30,
+  "signals": {
+    "credit": {
+      "max_utilization": 0.05460635537363353,
+      "avg_utilization": 0.05460635537363353,
+      "utilization_flag": "low",
+      "interest_charges": 0,
+      "minimum_payment_only": false,
+      "any_overdue": false
+    },
+    "income": {
+      "frequency": "bi_weekly",
+      "median_gap_days": 14,
+      "income_variability": 0,
+      "cash_flow_buffer": 3.472684057833024,
+      "average_monthly_income": 12204.151315262427
+    },
+    "savings": {
+      "net_inflow": 0,
+      "growth_rate": 0,
+      "emergency_fund_coverage": 38.19587609695169,
+      "savings_balance": 266023.2741092178,
+      "savingsByMonth": {
+        "2025-11": 266023.2741092178,
+        "2025-10": 266023.2741092178,
+        "2025-09": 266023.2741092178,
+        "2025-08": 266023.2741092178,
+        "2025-07": 266023.2741092178,
+        "2025-06": 266023.2741092178,
+        "2025-05": 266023.2741092178
+      }
+    },
+    "subscription": {
+      "count": 0,
+      "monthly_spend": 0,
+      "share_of_total": 0,
+      "recurring_merchants": []
+    }
+  },
+  "personas": [
+    {
+      "type": "savings_builder",
+      "score": 0.1,
+      "rank": 1
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "4e22c020-b1fd-4ebd-b4c4-7cd117c4a517",
+      "type": "education",
+      "contentId": "edu_high_yield_savings",
+      "rationale": "Your savings grew by 0% over the last 180 days, and your emergency fund covers 33.8 months of expenses. \"High-Yield Savings Accounts: What You Need to Know\" explains how building a 3-6 month emergency fund could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T20:49:19.723Z"
+      },
+      "createdAt": "2025-11-04T20:49:19.724Z"
+    },
+    {
+      "id": "13e59fe0-2acf-40d4-a198-050cd2748cc3",
+      "type": "education",
+      "contentId": "edu_cut_expenses",
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"50 Ways to Cut Expenses and Save More Money\" can help you review these and potentially free up $0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T20:49:20.209Z"
+      },
+      "createdAt": "2025-11-04T20:49:20.210Z"
+    },
+    {
+      "id": "c8d6d79c-54d0-46a7-b64d-f7d9a8ea7765",
+      "type": "education",
+      "contentId": "edu_savings_goals",
+      "rationale": "Your savings grew by 0% over the last 180 days, and your emergency fund covers 33.8 months of expenses. \"How to Set and Achieve Savings Goals\" explains how building a 3-6 month emergency fund could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T20:49:20.743Z"
+      },
+      "createdAt": "2025-11-04T20:49:20.743Z"
+    },
+    {
+      "id": "52fb01c8-78eb-4874-8142-4b8039f75d52",
+      "type": "education",
+      "contentId": "edu_50_30_20_budget",
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"The 50/30/20 Budget Rule: A Simple Way to Manage Money\" can help you review these and potentially free up $0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "generated_at": "2025-11-04T20:49:21.267Z"
+      },
+      "createdAt": "2025-11-04T20:49:21.268Z"
+    },
+    {
+      "id": "3f24e238-075d-48ec-94f2-5db52fdb19f5",
+      "type": "education",
+      "contentId": "edu_savings_account_types",
+      "rationale": "Your savings grew by 0% over the last 180 days, and your emergency fund covers 33.8 months of expenses. \"Types of Savings Accounts: Which One Is Right for You?\" explains how building a 3-6 month emergency fund could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "generated_at": "2025-11-04T20:49:21.730Z"
+      },
+      "createdAt": "2025-11-04T20:49:21.731Z"
+    },
+    {
+      "id": "74829c46-f868-4c0a-ac89-4dfebf1aa739",
+      "type": "offer",
+      "offerId": "financial_education_platform",
+      "rationale": "Based on your financial profile, Financial Education Platform Access could help you improve your financial situation.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 33.794184282913996,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 265155.18276208773,
+              "2025-07": 265155.18276208773,
+              "2025-06": 265155.18276208773,
+              "2025-05": 265155.18276208773
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.0724920331415744,
+            "average_monthly_income": 10521.382921348899
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "offer_filter:persona_fit=true",
+          "offer_filter:required_signals=",
+          "eligibility:passed=true"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "offer_v1",
+        "generated_at": "2025-11-04T20:49:23.248Z"
+      },
+      "createdAt": "2025-11-04T20:49:23.249Z"
+    },
+    {
+      "id": "82617586-3210-4a4b-ad8e-0ed58052eec6",
+      "type": "education",
+      "contentId": "edu_high_yield_savings",
+      "relevanceScore": 0.85,
+      "rationale": "Your savings grew by 0% over the last 180 days, and your emergency fund covers 38.2 months of expenses. \"High-Yield Savings Accounts: What You Need to Know\" explains how building a 3-6 month emergency fund could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 38.19587609695169,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 266023.2741092178,
+              "2025-07": 266023.2741092178,
+              "2025-06": 266023.2741092178,
+              "2025-05": 266023.2741092178
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.472684057833024,
+            "average_monthly_income": 12204.151315262427
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "relevance_score": 0.85,
+        "generated_at": "2025-11-04T23:30:19.480Z"
+      },
+      "createdAt": "2025-11-04T23:30:19.480Z"
+    },
+    {
+      "id": "af90da54-9dcb-4062-a8c9-4435e2dc1838",
+      "type": "education",
+      "contentId": "edu_cut_expenses",
+      "relevanceScore": 0.7,
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"50 Ways to Cut Expenses and Save More Money\" can help you review these and potentially free up $0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 38.19587609695169,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 266023.2741092178,
+              "2025-07": 266023.2741092178,
+              "2025-06": 266023.2741092178,
+              "2025-05": 266023.2741092178
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.472684057833024,
+            "average_monthly_income": 12204.151315262427
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "relevance_score": 0.7,
+        "generated_at": "2025-11-04T23:30:19.993Z"
+      },
+      "createdAt": "2025-11-04T23:30:19.994Z"
+    },
+    {
+      "id": "88599418-c459-4c0d-a548-6b5825297ae9",
+      "type": "education",
+      "contentId": "edu_savings_goals",
+      "relevanceScore": 0.7,
+      "rationale": "Your savings grew by 0% over the last 180 days, and your emergency fund covers 38.2 months of expenses. \"How to Set and Achieve Savings Goals\" explains how building a 3-6 month emergency fund could help cover unexpected costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 38.19587609695169,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 266023.2741092178,
+              "2025-07": 266023.2741092178,
+              "2025-06": 266023.2741092178,
+              "2025-05": 266023.2741092178
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.472684057833024,
+            "average_monthly_income": 12204.151315262427
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "savings_v1",
+        "relevance_score": 0.7,
+        "generated_at": "2025-11-04T23:30:20.514Z"
+      },
+      "createdAt": "2025-11-04T23:30:20.515Z"
+    },
+    {
+      "id": "2e26981e-971b-4fa6-8069-55f57e52e491",
+      "type": "education",
+      "contentId": "edu_50_30_20_budget",
+      "relevanceScore": 0.7,
+      "rationale": "You have 0 recurring subscriptions totaling $0.00/month. \"The 50/30/20 Budget Rule: A Simple Way to Manage Money\" can help you review these and potentially free up $0.00 for your other goals.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.05460635537363353,
+            "avg_utilization": 0.05460635537363353,
+            "utilization_flag": "low",
+            "interest_charges": 0,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 38.19587609695169,
+            "savings_balance": 266023.2741092178,
+            "savingsByMonth": {
+              "2025-11": 266023.2741092178,
+              "2025-10": 266023.2741092178,
+              "2025-09": 266023.2741092178,
+              "2025-08": 266023.2741092178,
+              "2025-07": 266023.2741092178,
+              "2025-06": 266023.2741092178,
+              "2025-05": 266023.2741092178
+            }
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 3.472684057833024,
+            "average_monthly_income": 12204.151315262427
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "savings_builder",
+            "score": 0.1
+          },
+          "secondary": null
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.00",
+          "content_filter:relevance_score=0.70"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "subscription_v1",
+        "relevance_score": 0.7,
+        "generated_at": "2025-11-04T23:30:21.028Z"
+      },
+      "createdAt": "2025-11-04T23:30:21.029Z"
+    }
+  ]
+}

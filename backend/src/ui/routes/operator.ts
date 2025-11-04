@@ -226,6 +226,17 @@ router.get('/user/:userId', async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Get accounts for credit card details
+    const accounts = await prisma.account.findMany({
+      where: { user_id: userId },
+      select: {
+        account_id: true,
+        type: true,
+        balance_current: true,
+        balance_limit: true,
+      },
+    });
+
     // Get signals
     const signals30d = await prisma.signal.findMany({
       where: { user_id: userId, window_days: 30 },
@@ -294,8 +305,19 @@ router.get('/user/:userId', async (req: AuthRequest, res: Response) => {
       orderBy: { created_at: 'desc' },
     });
 
+    // Format accounts for credit card details
+    const creditAccounts = accounts
+      .filter(a => a.type === 'credit_card')
+      .map(a => ({
+        accountId: a.account_id,
+        balance: Number(a.balance_current),
+        limit: a.balance_limit ? Number(a.balance_limit) : null,
+        utilization: a.balance_limit ? Number(a.balance_current) / Number(a.balance_limit) : null,
+      }));
+
     res.json({
       user,
+      accounts: creditAccounts,
       signals: {
         '30d': formatSignals(signals30d),
         '180d': formatSignals(signals180d),

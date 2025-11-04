@@ -1,0 +1,303 @@
+{
+  "userId": "37ea6012-21a4-4b66-8a21-0f623ef1e70d",
+  "windowDays": 30,
+  "signals": {},
+  "personas": [],
+  "recommendations": [
+    {
+      "id": "c3ddc38d-c2a8-44cb-aede-944e5e663896",
+      "type": "education",
+      "contentId": "edu_credit_card_interest",
+      "rationale": "You're paying $72.66/month in interest charges on your Visa ending in 0072 (70% utilization). \"How Credit Card Interest Works\" helps explain how credit card interest works and strategies to reduce these costs.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6967678409899182,
+            "avg_utilization": 0.6448526316975487,
+            "utilization_flag": "high",
+            "interest_charges": 72.6605666531149,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.2854261396298931,
+            "average_monthly_income": 4117.133466424904
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T15:08:41.830Z"
+      },
+      "createdAt": "2025-11-04T15:08:41.831Z"
+    },
+    {
+      "id": "8d2e8262-a51c-40ea-9d37-3931ef1d2448",
+      "type": "education",
+      "contentId": "edu_balance_transfer_guide",
+      "rationale": "With your Visa ending in 0072 at 70% utilization and $72.66/month in interest charges, \"Balance Transfer Credit Cards: A Complete Guide\" explains how balance transfers could help you save money.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6967678409899182,
+            "avg_utilization": 0.6448526316975487,
+            "utilization_flag": "high",
+            "interest_charges": 72.6605666531149,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.2854261396298931,
+            "average_monthly_income": 4117.133466424904
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T15:08:41.999Z"
+      },
+      "createdAt": "2025-11-04T15:08:42.000Z"
+    },
+    {
+      "id": "d7579bca-1600-45db-93d3-a36bed3cbf77",
+      "type": "education",
+      "contentId": "edu_credit_utilization_basics",
+      "rationale": "We noticed your Visa ending in 0072 is at 70% utilization ($1620 of $2326 limit). \"Understanding Credit Utilization\" explains how bringing this below 30% could improve your credit score and reduce interest charges of $72.66/month.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6967678409899182,
+            "avg_utilization": 0.6448526316975487,
+            "utilization_flag": "high",
+            "interest_charges": 72.6605666531149,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.2854261396298931,
+            "average_monthly_income": 4117.133466424904
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=1.00",
+          "content_filter:relevance_score=1.00"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T15:08:42.208Z"
+      },
+      "createdAt": "2025-11-04T15:08:42.209Z"
+    },
+    {
+      "id": "70499abf-3956-4f95-a711-138d2caf0470",
+      "type": "education",
+      "contentId": "edu_debt_paydown_strategies",
+      "rationale": "With your Visa ending in 0072 at 70% utilization, you're paying $72.66/month in interest. \"How to Pay Off Credit Card Debt: 5 Strategies That Work\" outlines strategies that could help you pay down your balance and reduce these charges.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6967678409899182,
+            "avg_utilization": 0.6448526316975487,
+            "utilization_flag": "high",
+            "interest_charges": 72.6605666531149,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.2854261396298931,
+            "average_monthly_income": 4117.133466424904
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.67",
+          "content_filter:relevance_score=0.90"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T15:08:42.355Z"
+      },
+      "createdAt": "2025-11-04T15:08:42.357Z"
+    },
+    {
+      "id": "eb6d177b-a1b5-4792-95ff-5bac0ffb9897",
+      "type": "education",
+      "contentId": "edu_debt_payoff_methods",
+      "rationale": "With your Visa ending in 0072 at 70% utilization, you're paying $72.66/month in interest. \"Debt Snowball vs. Debt Avalanche: Which Method Works Best?\" outlines strategies that could help you pay down your balance and reduce these charges.",
+      "decisionTrace": {
+        "signals_snapshot": {
+          "credit": {
+            "max_utilization": 0.6967678409899182,
+            "avg_utilization": 0.6448526316975487,
+            "utilization_flag": "high",
+            "interest_charges": 72.6605666531149,
+            "minimum_payment_only": false,
+            "any_overdue": false
+          },
+          "subscription": {
+            "count": 0,
+            "monthly_spend": 0,
+            "share_of_total": 0,
+            "recurring_merchants": []
+          },
+          "savings": {
+            "net_inflow": 0,
+            "growth_rate": 0,
+            "emergency_fund_coverage": 0,
+            "savings_balance": 0
+          },
+          "income": {
+            "frequency": "bi_weekly",
+            "median_gap_days": 14,
+            "income_variability": 0,
+            "cash_flow_buffer": 0.2854261396298931,
+            "average_monthly_income": 4117.133466424904
+          }
+        },
+        "persona_scores": {
+          "primary": {
+            "type": "high_utilization",
+            "score": 0.5
+          },
+          "secondary": {
+            "type": "variable_income",
+            "score": 0.3
+          }
+        },
+        "rule_path": [
+          "content_filter:persona_fit=true",
+          "content_filter:signal_overlap=0.50",
+          "content_filter:relevance_score=0.85"
+        ],
+        "eligibility_results": {
+          "passed": true,
+          "failed_rules": []
+        },
+        "rationale_template_id": "credit_utilization_v1",
+        "generated_at": "2025-11-04T15:08:42.566Z"
+      },
+      "createdAt": "2025-11-04T15:08:42.567Z"
+    }
+  ]
+}
