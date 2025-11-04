@@ -53,28 +53,91 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get Prisma Client (initializes with current DATABASE_URL)
     const prismaClient = getPrismaClient();
     
-    // Get 5 random regular users (exclude operator)
-    const users = await prismaClient.user.findMany({
-      where: {
-        role: 'user',
-      },
-      select: {
-        email: true,
-      },
-      take: 5,
-      orderBy: {
-        created_at: 'asc', // Deterministic order (seeded users created in order)
-      },
-    });
-
-    console.log(`Found ${users.length} users`);
-
-    // If we have fewer than 5 users, return all we have
-    const exampleEmails = users.map(u => u.email);
-
+    // Use hardcoded mapping based on seed 1337 (same as Express route)
+    const { EXAMPLE_USERS_MAPPING } = await import('../../backend/src/utils/exampleUsersMapping');
+    
+    const personaTypes = ['high_utilization', 'variable_income', 'subscription_heavy', 'savings_builder', 'net_worth_maximizer'];
+    const exampleUsers: Array<{ email: string; persona: string }> = [];
+    
+    // Build example users from hardcoded mapping
+    for (const personaType of personaTypes) {
+      const email = Object.keys(EXAMPLE_USERS_MAPPING).find(
+        email => EXAMPLE_USERS_MAPPING[email] === personaType
+      );
+      if (email) {
+        exampleUsers.push({ email, persona: personaType });
+      }
+    }
+    
+    // Verify these users exist in database
+    if (exampleUsers.length > 0) {
+      const emails = exampleUsers.map(u => u.email);
+      const existingUsers = await prismaClient.user.findMany({
+        where: {
+          email: { in: emails },
+          role: 'user',
+        },
+        select: { email: true },
+      });
+      const existingEmails = new Set(existingUsers.map(u => u.email));
+      
+      // Filter to only show users that exist in database
+      const validExampleUsers = exampleUsers.filter(u => existingEmails.has(u.email));
+      
+      console.log(`[example-users] Found ${validExampleUsers.length} valid example users`);
+      
+      // If no valid users found, use fallback
+      if (validExampleUsers.length === 0) {
+        console.warn('[example-users] No hardcoded users found, using fallback');
+        const allUsers = await prismaClient.user.findMany({
+          where: { role: 'user' },
+          select: { 
+            id: true,
+            email: true,
+          },
+          take: 5,
+          orderBy: { created_at: 'asc' },
+        });
+        
+        const userIds = allUsers.map(u => u.id);
+        const personas = await prismaClient.persona.findMany({
+          where: {
+            user_id: { in: userIds },
+            window_days: 30,
+            rank: 1,
+          },
+          select: { 
+            user_id: true,
+            persona_type: true,
+          },
+        });
+        
+        const personaMap = new Map(personas.map(p => [p.user_id, p.persona_type]));
+        const fallbackUsers = allUsers.map((u) => ({
+          email: u.email,
+          persona: personaMap.get(u.id) || 'unknown',
+        }));
+        
+        return res.status(200).json({
+          exampleUsers: fallbackUsers,
+          password: 'password123',
+          operatorEmail: 'operator@spendsense.com',
+          operatorPassword: 'operator123',
+        });
+      }
+      
+      return res.status(200).json({
+        exampleUsers: validExampleUsers,
+        password: 'password123',
+        operatorEmail: 'operator@spendsense.com',
+        operatorPassword: 'operator123',
+      });
+    }
+    
+    // Fallback if mapping is empty
     return res.status(200).json({
-      exampleEmails,
-      password: 'password123', // All seeded users have the same password
+      exampleUsers: [],
+      password: 'password123',
       operatorEmail: 'operator@spendsense.com',
       operatorPassword: 'operator123',
     });

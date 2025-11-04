@@ -51,8 +51,58 @@ router.get('/example-users', async (req: Request, res: Response) => {
       // Filter to only show users that exist in database
       const validExampleUsers = exampleUsers.filter(u => existingEmails.has(u.email));
       
-      console.log('[example-users] Found', validExampleUsers.length, 'example users from hardcoded mapping');
+      console.log('[example-users] Hardcoded emails:', emails);
+      console.log('[example-users] Found in database:', existingUsers.map(u => u.email));
+      console.log('[example-users] Valid example users:', validExampleUsers.length);
       console.log('[example-users] Personas:', validExampleUsers.map(u => `${u.email}: ${u.persona}`).join(', '));
+      
+      // If no valid users found, but we have hardcoded mapping, check if database has different emails
+      // This can happen if production was seeded differently than dev
+      if (validExampleUsers.length === 0 && exampleUsers.length > 0) {
+        console.warn('[example-users] No hardcoded users found in database. Returning first 5 users from database instead.');
+        // Fallback: get first 5 users from database with their personas
+        const allUsers = await prisma.user.findMany({
+          where: { role: 'user' },
+          select: { 
+            id: true,
+            email: true,
+          },
+          take: 5,
+          orderBy: { created_at: 'asc' },
+        });
+        
+        const userIds = allUsers.map(u => u.id);
+        
+        // Get personas for these users in one query
+        const personas = await prisma.persona.findMany({
+          where: {
+            user_id: { in: userIds },
+            window_days: 30,
+            rank: 1,
+          },
+          select: { 
+            user_id: true,
+            persona_type: true,
+          },
+        });
+        
+        const personaMap = new Map(personas.map(p => [p.user_id, p.persona_type]));
+        
+        const fallbackUsers = allUsers.map((u) => ({
+          email: u.email,
+          persona: personaMap.get(u.id) || 'unknown',
+        }));
+        
+        console.log('[example-users] Fallback users:', fallbackUsers.map(u => `${u.email}: ${u.persona}`).join(', '));
+        
+        res.json({
+          exampleUsers: fallbackUsers,
+          password: 'password123',
+          operatorEmail: 'operator@spendsense.com',
+          operatorPassword: 'operator123',
+        });
+        return;
+      }
       
       res.json({
         exampleUsers: validExampleUsers,
