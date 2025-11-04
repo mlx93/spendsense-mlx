@@ -25,6 +25,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   let path = '';
   
   // Check if path is in query (catch-all segments)
+  // For /api/profile/:userId, req.query.path should be ['profile', ':userId']
   if (req.query && req.query.path) {
     const pathSegments = Array.isArray(req.query.path) 
       ? req.query.path 
@@ -34,16 +35,16 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // Fallback to req.url
     let fullPath = req.url || '';
   
-  // Remove query string if present
-  const queryIndex = fullPath.indexOf('?');
-  if (queryIndex !== -1) {
-    fullPath = fullPath.substring(0, queryIndex);
-  }
+    // Remove query string if present
+    const queryIndex = fullPath.indexOf('?');
+    if (queryIndex !== -1) {
+      fullPath = fullPath.substring(0, queryIndex);
+    }
   
     path = fullPath;
     
     // Strip /api prefix if present
-  if (path.startsWith('/api')) {
+    if (path.startsWith('/api')) {
       path = path.substring(4) || '/';
     }
   }
@@ -53,10 +54,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     path = '/' + path;
   }
   
+  // Log for debugging (remove in production if needed)
+  console.log(`[api/[...path]] Incoming request: ${req.method} ${req.url}`);
+  console.log(`[api/[...path]] Extracted path: ${path}`);
+  console.log(`[api/[...path]] Query path:`, req.query?.path);
+  
   // Update request properties for Express routing
+  // Express uses these properties to match routes
   (req as any).url = path;
   (req as any).originalUrl = path;
   (req as any).path = path;
+  (req as any).baseUrl = '';
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)

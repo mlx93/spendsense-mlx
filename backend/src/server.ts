@@ -100,6 +100,21 @@ if (!isVercel) {
   app.use('/api/articles', articlesRoutes);
 }
 
+// 404 handler for unmatched routes (before error handler)
+app.use((req, res, next) => {
+  console.log(`[server] 404 - No route matched: ${req.method} ${req.path}`);
+  console.log(`[server] Original URL: ${req.originalUrl}`);
+  console.log(`[server] Base URL: ${req.baseUrl}`);
+  res.status(404).json({
+    error: 'Route not found',
+    code: 'NOT_FOUND',
+    method: req.method,
+    path: req.path,
+    originalUrl: req.originalUrl,
+    details: {},
+  });
+});
+
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
