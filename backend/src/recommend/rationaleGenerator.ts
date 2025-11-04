@@ -27,7 +27,11 @@ const rationaleTemplates: Record<string, string> = {
 
 // Get account display name for credit cards
 function getAccountDisplayName(accountId: string, type: string): string {
-  const lastFour = accountId.slice(-4);
+  // Extract only numeric digits from account ID, then take last 4
+  // This ensures we show "1234" instead of "Z7S2" for credit cards
+  const numericDigits = accountId.replace(/\D/g, ''); // Remove all non-digits
+  const lastFour = numericDigits.slice(-4).padStart(4, '0'); // Ensure 4 digits, pad with zeros if needed
+  
   if (type === 'credit_card') {
     return `Visa ending in ${lastFour}`;
   }
@@ -186,26 +190,71 @@ export async function generateRationale(
       templateId: 'education_v1',
     };
   } else {
-    // Generate rationale for offers
-    let signalDescription = '';
-    if (creditSignal && creditSignal.max_utilization >= 0.5) {
-      signalDescription = `credit card at ${Math.round(creditSignal.max_utilization * 100)}% utilization`;
-    } else if (subscriptionSignal && subscriptionSignal.count >= 3) {
-      signalDescription = `${subscriptionSignal.count} active subscriptions`;
-    } else {
-      signalDescription = 'financial profile';
+    // Generate rationale for offers - make it specific to the offer being recommended
+    const offerId = match.offerId;
+    let offer = null;
+    if (offerId) {
+      try {
+        offer = await prisma.offer.findUnique({
+          where: { id: offerId },
+        });
+      } catch (e) {
+        // Offer might not exist, continue with generic rationale
+      }
     }
 
-    const offerType = 'product';
-    const benefit = personaType === 'high_utilization'
-      ? 'reduce interest charges'
-      : 'improve your financial situation';
+    // Build personalized rationale based on offer category and user signals
+    let signalDescription = '';
+    let benefit = '';
+    
+    if (creditSignal && creditSignal.max_utilization >= 0.5) {
+      signalDescription = `credit card at ${Math.round(creditSignal.max_utilization * 100)}% utilization`;
+      benefit = 'reduce interest charges and improve your credit score';
+    } else if (subscriptionSignal && subscriptionSignal.count >= 3) {
+      signalDescription = `${subscriptionSignal.count} active subscriptions`;
+      benefit = 'save money on recurring expenses';
+    } else if (savingsSignal && savingsSignal.emergency_fund_coverage < 3) {
+      signalDescription = 'low emergency fund coverage';
+      benefit = 'build your emergency savings faster';
+    } else {
+      signalDescription = 'financial profile';
+      benefit = 'improve your financial situation';
+    }
 
+    // Make rationale specific to the offer title/category
+    const offerTitle = offer?.title || 'this product';
+    const offerCategory = offer?.category || 'product';
+    
+    // Customize based on offer category
+    if (offerCategory.includes('credit') || offerCategory.includes('balance')) {
+      if (creditSignal && creditSignal.max_utilization >= 0.5) {
+        const utilPercent = Math.round(creditSignal.max_utilization * 100);
+        return {
+          rationale: `With your credit card at ${utilPercent}% utilization, ${offerTitle} could help you reduce interest charges and get back on track.`,
+          templateId: 'offer_credit_v1',
+        };
+      }
+    } else if (offerCategory.includes('savings')) {
+      if (savingsSignal) {
+        const coverage = savingsSignal.emergency_fund_coverage?.toFixed(1) || '0';
+        return {
+          rationale: `Your emergency fund currently covers ${coverage} months of expenses. ${offerTitle} could help you build savings faster.`,
+          templateId: 'offer_savings_v1',
+        };
+      }
+    } else if (offerCategory.includes('subscription') || offerCategory.includes('budget')) {
+      if (subscriptionSignal && subscriptionSignal.count >= 3) {
+        const monthlySpend = subscriptionSignal.monthly_spend?.toFixed(2) || '0';
+        return {
+          rationale: `You're spending $${monthlySpend}/month on subscriptions. ${offerTitle} could help you track and optimize these expenses.`,
+          templateId: 'offer_subscription_v1',
+        };
+      }
+    }
+
+    // Generic fallback
     return {
-      rationale: rationaleTemplates.offer_v1
-        .replace('{signal_description}', signalDescription)
-        .replace('{offer_type}', offerType)
-        .replace('{benefit}', benefit),
+      rationale: `Based on your ${signalDescription}, ${offerTitle} could help you ${benefit}.`,
       templateId: 'offer_v1',
     };
   }
