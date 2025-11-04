@@ -3,11 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import api from '../lib/apiClient';
 
+interface ExampleUser {
+  email: string;
+  persona: string;
+}
+
 interface ExampleUsers {
-  exampleEmails: string[];
+  exampleUsers: ExampleUser[];
   password: string;
   operatorEmail: string;
   operatorPassword: string;
+}
+
+// Helper to format persona name for display
+function formatPersonaName(persona: string): string {
+  const names: Record<string, string> = {
+    'high_utilization': 'High Utilization',
+    'variable_income': 'Variable Income',
+    'subscription_heavy': 'Subscription Heavy',
+    'savings_builder': 'Savings Builder',
+    'net_worth_maximizer': 'Net Worth Maximizer',
+    'unknown': 'No Persona',
+  };
+  return names[persona] || persona.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 export default function LoginPage() {
@@ -30,7 +48,7 @@ export default function LoginPage() {
         console.error('Failed to fetch example users:', err);
         // Fallback if API call fails
         setExampleUsers({
-          exampleEmails: [],
+          exampleUsers: [],
           password: 'password123',
           operatorEmail: 'operator@spendsense.com',
           operatorPassword: 'operator123',
@@ -131,7 +149,7 @@ export default function LoginPage() {
             <div className="text-center text-sm text-gray-600 space-y-1">
               <p className="font-semibold">Demo credentials:</p>
               <div className="mt-2 space-y-1">
-                {exampleUsers && (
+                {exampleUsers ? (
                   <>
                     <p>
                       <span className="font-medium">Operator:</span>{' '}
@@ -141,20 +159,36 @@ export default function LoginPage() {
                       <span className="font-medium">Regular users:</span> Use any seeded email (case-insensitive) +{' '}
                       <span className="font-mono">{exampleUsers.password}</span>
                     </p>
-                    {exampleUsers.exampleEmails.length > 0 && (
-                      <div className="text-xs text-gray-400 mt-1">
-                        <p className="font-medium mb-1">Example emails:</p>
-                        <div className="space-y-0.5">
-                          {exampleUsers.exampleEmails.map((exampleEmail, idx) => (
-                            <p key={idx} className="font-mono">
-                              {exampleEmail}
-                            </p>
+                    {exampleUsers.exampleUsers && Array.isArray(exampleUsers.exampleUsers) && exampleUsers.exampleUsers.length > 0 && (
+                      <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                        <p className="font-medium text-xs text-gray-700 mb-2">Example Users (One per Persona):</p>
+                        <div className="space-y-1.5">
+                          {exampleUsers.exampleUsers.map((user, idx) => (
+                            <div key={idx} className="flex items-start justify-between text-xs">
+                              <div className="flex-1">
+                                <p className="font-mono text-gray-800">{user.email}</p>
+                              </div>
+                              <div className="ml-2">
+                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                  user.persona === 'high_utilization' ? 'bg-red-100 text-red-800' :
+                                  user.persona === 'variable_income' ? 'bg-yellow-100 text-yellow-800' :
+                                  user.persona === 'subscription_heavy' ? 'bg-purple-100 text-purple-800' :
+                                  user.persona === 'savings_builder' ? 'bg-green-100 text-green-800' :
+                                  user.persona === 'net_worth_maximizer' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {formatPersonaName(user.persona)}
+                                </span>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
                     )}
-                <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
+                    <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
                   </>
+                ) : (
+                  <p className="text-xs text-gray-400">Unable to load example users. Please ensure the backend server is running.</p>
                 )}
                 {loadingExamples && (
                   <p className="text-xs text-gray-400">Loading example users...</p>

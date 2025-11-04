@@ -83,13 +83,35 @@ export default function OperatorPage() {
     }
   };
 
+  const handleResetConsent = async () => {
+    if (!confirm('Are you sure you want to reset consent for ALL users? This will require them to consent again.')) {
+      return;
+    }
+    try {
+      const response = await operatorApi.resetConsent();
+      alert(`Successfully reset consent for ${response.data.usersAffected} users`);
+      loadData(); // Reload to see updated consent statuses
+    } catch (error) {
+      console.error('Error resetting consent:', error);
+      alert('Failed to reset consent. Please try again.');
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Operator Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Operator Dashboard</h1>
+        <button
+          onClick={handleResetConsent}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          Reset All User Consent
+        </button>
+      </div>
 
       {/* Stats */}
       {stats && (

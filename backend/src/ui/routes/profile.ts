@@ -61,12 +61,34 @@ router.post('/consent', authenticateToken, async (req: AuthRequest, res: Respons
         },
       });
     } else if (isNewConsent) {
-      // If this is a new consent grant, automatically generate signals, personas, and recommendations
-      // Run in background - don't wait for completion to return response
-      generateUserData(userId).catch((error) => {
-        console.error(`Error generating user data for user ${userId} after consent:`, error);
-        // Don't throw - user consent is already saved, generation can retry later via refresh
-      });
+      // If this is a new consent grant, first check if user has accounts/transactions
+      // If not, wait a bit for seeding to complete (if user just registered)
+      const accountsCount = await prisma.account.count({ where: { user_id: userId } });
+      
+      if (accountsCount === 0) {
+        console.log(`[consent] No accounts found for user ${userId}, waiting for seeding...`);
+        // Wait up to 5 seconds for seeding to complete
+        for (let i = 0; i < 10; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const checkCount = await prisma.account.count({ where: { user_id: userId } });
+          if (checkCount > 0) {
+            console.log(`[consent] Accounts found after ${(i + 1) * 0.5}s, proceeding with generation`);
+            break;
+          }
+        }
+      }
+      
+      // Generate signals, personas, and recommendations
+      // Wait for completion - frontend will show progress bar during this
+      try {
+        await generateUserData(userId);
+        console.log(`[consent] Successfully generated user data for user ${userId}`);
+      } catch (error) {
+        console.error(`[consent] Error generating user data for user ${userId} after consent:`, error);
+        console.error(`[consent] Error stack:`, (error as any)?.stack);
+        // Still return success - user consent is saved, generation can retry via refresh
+        // But log the error so we know what went wrong
+      }
     }
 
     // Generate new JWT token with updated consent status
@@ -113,6 +135,25 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
         code: 'FORBIDDEN',
         details: {},
       });
+    }
+
+    // Check if user has signals/personas - if not, data hasn't been generated yet
+    // This can happen if user consented but generation failed or is still in progress
+    const [signalsCount, personasCount] = await Promise.all([
+      prisma.signal.count({ where: { user_id: userId } }),
+      prisma.persona.count({ where: { user_id: userId } }),
+    ]);
+
+    // If no data exists, generate it now (this ensures data is ready before frontend loads)
+    if (signalsCount === 0 || personasCount === 0) {
+      console.log(`[profile] No data found for user ${userId}, generating now...`);
+      try {
+        await generateUserData(userId);
+        console.log(`[profile] Successfully generated user data for user ${userId}`);
+      } catch (error) {
+        console.error(`[profile] Error generating user data for user ${userId}:`, error);
+        // Continue anyway - we'll return empty signals/personas rather than failing
+      }
     }
 
     // Get user accounts with liability data
@@ -168,7 +209,7 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
       for (const signal of signals) {
         try {
           if (signal.data) {
-            result[signal.signal_type] = JSON.parse(signal.data);
+        result[signal.signal_type] = JSON.parse(signal.data);
           }
         } catch (error) {
           console.error(`Error parsing signal ${signal.signal_type} for user ${userId}:`, error);
@@ -198,34 +239,41 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
     });
 
     const formatPersonas = (personas: any[]) => {
-      const primary = personas.find(p => p.rank === 1);
-      const secondary = personas.find(p => p.rank === 2);
-      return {
-        primary: primary ? {
-          type: primary.persona_type,
-          score: Number(primary.score),
-          criteria_met: (() => {
-            try {
-              return primary.criteria_met ? JSON.parse(primary.criteria_met) : [];
-            } catch (error) {
-              console.error(`Error parsing criteria_met for persona ${primary.persona_type}:`, error);
-              return [];
-            }
-          })(),
-        } : null,
-        secondary: secondary ? {
-          type: secondary.persona_type,
-          score: Number(secondary.score),
-          criteria_met: (() => {
-            try {
-              return secondary.criteria_met ? JSON.parse(secondary.criteria_met) : [];
-            } catch (error) {
-              console.error(`Error parsing criteria_met for persona ${secondary.persona_type}:`, error);
-              return [];
-            }
-          })(),
-        } : null,
-      };
+      try {
+        const primary = personas.find(p => p.rank === 1);
+        const secondary = personas.find(p => p.rank === 2);
+        return {
+          primary: primary ? {
+            type: primary.persona_type,
+            score: Number(primary.score) || 0,
+            criteria_met: (() => {
+              try {
+                if (!primary.criteria_met) return [];
+                return JSON.parse(primary.criteria_met);
+              } catch (error) {
+                console.error(`Error parsing criteria_met for persona ${primary.persona_type}:`, error);
+                return [];
+              }
+            })(),
+          } : null,
+          secondary: secondary ? {
+            type: secondary.persona_type,
+            score: Number(secondary.score) || 0,
+            criteria_met: (() => {
+              try {
+                if (!secondary.criteria_met) return [];
+                return JSON.parse(secondary.criteria_met);
+              } catch (error) {
+                console.error(`Error parsing criteria_met for persona ${secondary.persona_type}:`, error);
+                return [];
+              }
+            })(),
+          } : null,
+        };
+      } catch (error) {
+        console.error(`Error formatting personas for user ${userId}:`, error);
+        return { primary: null, secondary: null };
+      }
     };
 
     // Get user consent status

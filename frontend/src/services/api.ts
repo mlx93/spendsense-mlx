@@ -140,6 +140,7 @@ export const articlesApi = {
 };
 
 export const operatorApi = {
+  resetConsent: () => api.post('/operator/reset-consent'),
   getDashboard: () => api.get('/operator/dashboard'),
   getReviewQueue: () => api.get('/operator/review'),
   getUsers: (page: number = 1, limit: number = 20, persona?: string) => {

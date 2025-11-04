@@ -18,114 +18,158 @@ const prisma = new PrismaClient();
 // Helper function to generate all user data (signals, personas, recommendations)
 // Can be called when consent is granted or when refresh is requested
 export async function generateUserData(userId: string): Promise<void> {
-  // Clear existing signals and personas for this user
-  await prisma.signal.deleteMany({
-    where: { user_id: userId },
-  });
+  console.log(`[generateUserData] Starting data generation for user ${userId}`);
   
-  await prisma.persona.deleteMany({
-    where: { user_id: userId },
-  });
+  try {
+    // Generate signals for both time windows first (regenerate before deleting old ones)
+    // This ensures signals are available during the refresh process
+    const newSignals: Array<{
+      user_id: string;
+      signal_type: string;
+      window_days: number;
+      data: string;
+    }> = [];
 
-  // Generate signals for both time windows and save them
-  for (const windowDays of [30, 180]) {
-    try {
-      // Subscription signals
-      const subscriptionSignal = await detectSubscriptions(userId, windowDays as 30 | 180);
-      await prisma.signal.create({
-        data: {
+    for (const windowDays of [30, 180]) {
+      try {
+        // Subscription signals
+        const subscriptionSignal = await detectSubscriptions(userId, windowDays as 30 | 180);
+        newSignals.push({
           user_id: userId,
           signal_type: 'subscription',
           window_days: windowDays,
           data: JSON.stringify(subscriptionSignal),
-        },
-      });
+        });
 
-      // Savings signals
-      const savingsSignal = await analyzeSavings(userId, windowDays as 30 | 180);
-      await prisma.signal.create({
-        data: {
+        // Savings signals
+        const savingsSignal = await analyzeSavings(userId, windowDays as 30 | 180);
+        newSignals.push({
           user_id: userId,
           signal_type: 'savings',
           window_days: windowDays,
           data: JSON.stringify(savingsSignal),
-        },
-      });
+        });
 
-      // Credit signals
-      const creditSignal = await analyzeCredit(userId, windowDays as 30 | 180);
-      await prisma.signal.create({
-        data: {
+        // Credit signals
+        const creditSignal = await analyzeCredit(userId, windowDays as 30 | 180);
+        newSignals.push({
           user_id: userId,
           signal_type: 'credit',
           window_days: windowDays,
           data: JSON.stringify(creditSignal),
-        },
-      });
+        });
 
-      // Income signals
-      const incomeSignal = await analyzeIncomeStability(userId, windowDays as 30 | 180);
-      await prisma.signal.create({
-        data: {
+        // Income signals
+        const incomeSignal = await analyzeIncomeStability(userId, windowDays as 30 | 180);
+        newSignals.push({
           user_id: userId,
           signal_type: 'income',
           window_days: windowDays,
           data: JSON.stringify(incomeSignal),
-        },
-      });
-    } catch (error: any) {
-      console.error(`Error generating signals for user ${userId}, window ${windowDays}:`, error);
-      // Continue with other signals even if one fails
+        });
+      } catch (error: any) {
+        console.error(`[generateUserData] Error generating signals for user ${userId}, window ${windowDays}:`, error);
+        console.error(`[generateUserData] Error stack:`, error?.stack);
+        // Continue with other signals even if one fails
+      }
     }
-  }
 
-  // Assign personas and save them to the database
-  for (const windowDays of [30, 180]) {
-    const assignment = await assignPersonas(userId, windowDays as 30 | 180);
+    console.log(`[generateUserData] Generated ${newSignals.length} signals for user ${userId}`);
+
+    // Now delete old signals and personas, then create new ones atomically
+    // This minimizes the window where signals don't exist
+    await prisma.signal.deleteMany({
+      where: { user_id: userId },
+    });
     
-    if (assignment.primary) {
-      await prisma.persona.create({
-        data: {
-          user_id: userId,
-          persona_type: assignment.primary.personaType,
-          score: assignment.primary.score,
-          rank: 1,
-          window_days: windowDays,
-          criteria_met: JSON.stringify(assignment.primary.criteriaMet),
-        },
+    // Create all new signals at once
+    if (newSignals.length > 0) {
+      await prisma.signal.createMany({
+        data: newSignals,
       });
+      console.log(`[generateUserData] Created ${newSignals.length} signals for user ${userId}`);
+    } else {
+      console.warn(`[generateUserData] No signals generated for user ${userId} - this may cause issues`);
+    }
+    
+    await prisma.persona.deleteMany({
+      where: { user_id: userId },
+    });
+
+    // Assign personas and save them to the database
+    for (const windowDays of [30, 180]) {
+      try {
+        const assignment = await assignPersonas(userId, windowDays as 30 | 180);
+        
+        if (assignment.primary) {
+          await prisma.persona.create({
+            data: {
+              user_id: userId,
+              persona_type: assignment.primary.personaType,
+              score: assignment.primary.score,
+              rank: 1,
+              window_days: windowDays,
+              criteria_met: JSON.stringify(assignment.primary.criteriaMet),
+            },
+          });
+          console.log(`[generateUserData] Created primary persona ${assignment.primary.personaType} for user ${userId}, window ${windowDays}`);
+        } else {
+          console.warn(`[generateUserData] No primary persona assigned for user ${userId}, window ${windowDays}`);
+        }
+
+        if (assignment.secondary) {
+          await prisma.persona.create({
+            data: {
+              user_id: userId,
+              persona_type: assignment.secondary.personaType,
+              score: assignment.secondary.score,
+              rank: 2,
+              window_days: windowDays,
+              criteria_met: JSON.stringify(assignment.secondary.criteriaMet),
+            },
+          });
+        }
+      } catch (error: any) {
+        console.error(`[generateUserData] Error assigning personas for user ${userId}, window ${windowDays}:`, error);
+        console.error(`[generateUserData] Error stack:`, error?.stack);
+        throw error; // Re-throw to prevent continuing without personas
+      }
     }
 
-    if (assignment.secondary) {
-      await prisma.persona.create({
-        data: {
-          user_id: userId,
-          persona_type: assignment.secondary.personaType,
-          score: assignment.secondary.score,
-          rank: 2,
-          window_days: windowDays,
-          criteria_met: JSON.stringify(assignment.secondary.criteriaMet),
-        },
+    // Get personas for recommendation generation
+    const personas = await prisma.persona.findMany({
+      where: { user_id: userId, window_days: 30, rank: { lte: 2 } },
+      orderBy: { rank: 'asc' },
+    });
+
+    console.log(`[generateUserData] Found ${personas.length} personas for user ${userId}`);
+
+    const primaryPersona = personas.find(p => p.rank === 1);
+    if (!primaryPersona) {
+      console.error(`[generateUserData] No primary persona found for user ${userId} - cannot generate recommendations`);
+      console.error(`[generateUserData] This usually means user has no accounts/transactions or signals are all empty`);
+      // No primary persona means no recommendations can be generated
+      // Mark existing recommendations as hidden instead of deleting them
+      await prisma.recommendation.updateMany({
+        where: { user_id: userId, status: 'active' },
+        data: { status: 'hidden' },
       });
+      // Don't throw error - user might not have enough data yet
+      // Return gracefully so consent/profile endpoints don't fail
+      return;
     }
-  }
 
-      // Clear existing recommendations
-      await prisma.recommendation.deleteMany({
-        where: { user_id: userId },
-      });
+    console.log(`[generateUserData] Using primary persona ${primaryPersona.persona_type} for user ${userId}`);
 
-  // Get personas for recommendation generation
-      const personas = await prisma.persona.findMany({
-        where: { user_id: userId, window_days: 30, rank: { lte: 2 } },
-        orderBy: { rank: 'asc' },
-      });
-
-      const primaryPersona = personas.find(p => p.rank === 1);
-  if (!primaryPersona) {
-    // No primary persona means no recommendations can be generated
-    return;
-  }
+  // Mark existing active recommendations as hidden (don't delete yet - prevents empty state)
+  // We'll delete old hidden ones after new ones are successfully created
+  await prisma.recommendation.updateMany({
+    where: { 
+      user_id: userId,
+      status: 'active',
+    },
+    data: { status: 'hidden' },
+  });
 
   // Get signals for recommendation matching
         const signals = await prisma.signal.findMany({
@@ -251,146 +295,187 @@ export async function generateUserData(userId: string): Promise<void> {
           }
         }
 
-  // Create education recommendations
-        for (const match of selectedMatches) {
-          if (!match) continue;
+    // Create education recommendations
+    console.log(`[generateUserData] Creating ${selectedMatches.length} education recommendations for user ${userId}`);
+    let educationCount = 0;
+    for (const match of selectedMatches) {
+      if (!match) continue;
 
-          const rationaleResult = await generateRationale(
-            'education',
-            match,
-            signalsMap,
-            primaryPersona.persona_type,
-            userId
-          );
-
-          const reviewResult = await reviewRecommendation({
-            rationale: rationaleResult.rationale,
-            type: 'education',
-            personaType: primaryPersona.persona_type,
-          });
-
-          // Build complete decision trace
-          const decisionTrace = {
-            signals_snapshot: {
-              credit: signalsMap['credit'] || null,
-              subscription: signalsMap['subscription'] || null,
-              savings: signalsMap['savings'] || null,
-              income: signalsMap['income'] || null,
-            },
-            persona_scores: {
-              primary: {
-                type: primaryPersona.persona_type,
-                score: Number(primaryPersona.score),
-              },
-              secondary: secondaryPersona ? {
-                type: secondaryPersona.persona_type,
-                score: Number(secondaryPersona.score),
-              } : null,
-            },
-            rule_path: [
-              `content_filter:persona_fit=${match.personaFit}`,
-              `content_filter:signal_overlap=${match.signalOverlap.toFixed(2)}`,
-              `content_filter:relevance_score=${match.relevanceScore.toFixed(2)}`,
-            ],
-            eligibility_results: {
-              passed: true,
-              failed_rules: [],
-            },
-            rationale_template_id: rationaleResult.templateId,
-            generated_at: new Date().toISOString(),
-          };
-
-          await prisma.recommendation.create({
-            data: {
-              user_id: userId,
-              type: 'education',
-              content_id: match.contentId,
-              rationale: rationaleResult.rationale,
-              persona_type: primaryPersona.persona_type,
-              signals_used: JSON.stringify(match.signalsUsed || []),
-              decision_trace: JSON.stringify(decisionTrace),
-              status: reviewResult.approved ? 'active' : 'hidden',
-              agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
-              agentic_review_reason: reviewResult.reason || null,
-            },
-          });
-        }
-
-  // Match and create offer recommendations
-        const offerMatches = await matchOffersToUser(
-          userId,
+      try {
+        const rationaleResult = await generateRationale(
+          'education',
+          match,
+          signalsMap,
           primaryPersona.persona_type,
-          signalsMap
+          userId
         );
 
-        for (let i = 0; i < Math.min(offerMatches.length, 3); i++) {
-          const match = offerMatches[i];
-          if (!match || !match.eligible) continue;
+        const reviewResult = await reviewRecommendation({
+          rationale: rationaleResult.rationale,
+          type: 'education',
+          personaType: primaryPersona.persona_type,
+        });
 
-          const rationaleResult = await generateRationale(
-            'offer',
-            match,
-            signalsMap,
-            primaryPersona.persona_type,
-            userId
-          );
+        // Build complete decision trace
+        const decisionTrace = {
+          signals_snapshot: {
+            credit: signalsMap['credit'] || null,
+            subscription: signalsMap['subscription'] || null,
+            savings: signalsMap['savings'] || null,
+            income: signalsMap['income'] || null,
+          },
+          persona_scores: {
+            primary: {
+              type: primaryPersona.persona_type,
+              score: Number(primaryPersona.score),
+            },
+            secondary: secondaryPersona ? {
+              type: secondaryPersona.persona_type,
+              score: Number(secondaryPersona.score),
+            } : null,
+          },
+          rule_path: [
+            `content_filter:persona_fit=${match.personaFit}`,
+            `content_filter:signal_overlap=${match.signalOverlap.toFixed(2)}`,
+            `content_filter:relevance_score=${match.relevanceScore.toFixed(2)}`,
+          ],
+          eligibility_results: {
+            passed: true,
+            failed_rules: [],
+          },
+          rationale_template_id: rationaleResult.templateId,
+          generated_at: new Date().toISOString(),
+        };
 
-          const reviewResult = await reviewRecommendation({
+        await prisma.recommendation.create({
+          data: {
+            user_id: userId,
+            type: 'education',
+            content_id: match.contentId,
             rationale: rationaleResult.rationale,
-            type: 'offer',
-            personaType: primaryPersona.persona_type,
-          });
-
-          // Build complete decision trace
-          const decisionTrace = {
-            signals_snapshot: {
-              credit: signalsMap['credit'] || null,
-              subscription: signalsMap['subscription'] || null,
-              savings: signalsMap['savings'] || null,
-              income: signalsMap['income'] || null,
-            },
-            persona_scores: {
-              primary: {
-                type: primaryPersona.persona_type,
-                score: Number(primaryPersona.score),
-              },
-              secondary: secondaryPersona ? {
-                type: secondaryPersona.persona_type,
-                score: Number(secondaryPersona.score),
-              } : null,
-            },
-            rule_path: [
-              `offer_filter:persona_fit=${match.personaFit}`,
-              `offer_filter:required_signals=${(match.signalsUsed || []).join(',')}`,
-              `eligibility:passed=${match.eligible}`,
-              ...(match.failedRules && match.failedRules.length > 0
-                ? [`eligibility:failed_rules=${match.failedRules.map((r: any) => `${r.field}${r.operator}${r.value}`).join(',')}`]
-                : []),
-            ],
-            eligibility_results: {
-              passed: match.eligible,
-              failed_rules: match.failedRules || [],
-            },
-            rationale_template_id: rationaleResult.templateId,
-            generated_at: new Date().toISOString(),
-          };
-
-          await prisma.recommendation.create({
-            data: {
-              user_id: userId,
-              type: 'offer',
-              offer_id: match.offerId,
-              rationale: rationaleResult.rationale,
-              persona_type: primaryPersona.persona_type,
-              signals_used: JSON.stringify(match.signalsUsed || []),
-              decision_trace: JSON.stringify(decisionTrace),
-              status: reviewResult.approved ? 'active' : 'hidden',
-              agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
-              agentic_review_reason: reviewResult.reason || null,
-            },
-          });
-        }
+            persona_type: primaryPersona.persona_type,
+            signals_used: JSON.stringify(match.signalsUsed || []),
+            decision_trace: JSON.stringify(decisionTrace),
+            status: reviewResult.approved ? 'active' : 'hidden',
+            agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
+            agentic_review_reason: reviewResult.reason || null,
+          },
+        });
+        educationCount++;
+      } catch (error: any) {
+        console.error(`[generateUserData] Error creating education recommendation for user ${userId}:`, error);
+        console.error(`[generateUserData] Error stack:`, error?.stack);
+        // Continue with other recommendations even if one fails
       }
+    }
+    console.log(`[generateUserData] Created ${educationCount} education recommendations for user ${userId}`);
+
+    // Match and create offer recommendations
+    const offerMatches = await matchOffersToUser(
+      userId,
+      primaryPersona.persona_type,
+      signalsMap
+    );
+
+    console.log(`[generateUserData] Found ${offerMatches.length} offer matches for user ${userId}`);
+    let offerCount = 0;
+    for (let i = 0; i < Math.min(offerMatches.length, 3); i++) {
+      const match = offerMatches[i];
+      if (!match || !match.eligible) continue;
+
+      try {
+        const rationaleResult = await generateRationale(
+          'offer',
+          match,
+          signalsMap,
+          primaryPersona.persona_type,
+          userId
+        );
+
+        const reviewResult = await reviewRecommendation({
+          rationale: rationaleResult.rationale,
+          type: 'offer',
+          personaType: primaryPersona.persona_type,
+        });
+
+        // Build complete decision trace
+        const decisionTrace = {
+          signals_snapshot: {
+            credit: signalsMap['credit'] || null,
+            subscription: signalsMap['subscription'] || null,
+            savings: signalsMap['savings'] || null,
+            income: signalsMap['income'] || null,
+          },
+          persona_scores: {
+            primary: {
+              type: primaryPersona.persona_type,
+              score: Number(primaryPersona.score),
+            },
+            secondary: secondaryPersona ? {
+              type: secondaryPersona.persona_type,
+              score: Number(secondaryPersona.score),
+            } : null,
+          },
+          rule_path: [
+            `offer_filter:persona_fit=${match.personaFit}`,
+            `offer_filter:required_signals=${(match.signalsUsed || []).join(',')}`,
+            `eligibility:passed=${match.eligible}`,
+            ...(match.failedRules && match.failedRules.length > 0
+              ? [`eligibility:failed_rules=${match.failedRules.map((r: any) => `${r.field}${r.operator}${r.value}`).join(',')}`]
+              : []),
+          ],
+          eligibility_results: {
+            passed: match.eligible,
+            failed_rules: match.failedRules || [],
+          },
+          rationale_template_id: rationaleResult.templateId,
+          generated_at: new Date().toISOString(),
+        };
+
+        await prisma.recommendation.create({
+          data: {
+            user_id: userId,
+            type: 'offer',
+            offer_id: match.offerId,
+            rationale: rationaleResult.rationale,
+            persona_type: primaryPersona.persona_type,
+            signals_used: JSON.stringify(match.signalsUsed || []),
+            decision_trace: JSON.stringify(decisionTrace),
+            status: reviewResult.approved ? 'active' : 'hidden',
+            agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
+            agentic_review_reason: reviewResult.reason || null,
+          },
+        });
+        offerCount++;
+      } catch (error: any) {
+        console.error(`[generateUserData] Error creating offer recommendation for user ${userId}:`, error);
+        console.error(`[generateUserData] Error stack:`, error?.stack);
+        // Continue with other offers even if one fails
+      }
+    }
+    console.log(`[generateUserData] Created ${offerCount} offer recommendations for user ${userId}`);
+    
+    // After successfully creating new recommendations, delete old hidden ones
+    // This cleanup ensures we don't accumulate hidden recommendations over time
+    // Only delete recommendations older than 1 minute to avoid race conditions
+    await prisma.recommendation.deleteMany({
+      where: {
+        user_id: userId,
+        status: 'hidden',
+        created_at: {
+          lt: new Date(Date.now() - 60000), // 1 minute ago
+        },
+      },
+    });
+    
+    console.log(`[generateUserData] Successfully completed data generation for user ${userId} - ${educationCount} education, ${offerCount} offers`);
+  } catch (error: any) {
+    console.error(`[generateUserData] Fatal error generating user data for user ${userId}:`, error);
+    console.error(`[generateUserData] Error stack:`, error?.stack);
+    // Re-throw so caller knows generation failed
+    throw error;
+  }
+}
 
 // POST /api/feedback - Record user action on recommendation
 router.post('/feedback', authenticateToken, async (req: AuthRequest, res: Response) => {
@@ -515,13 +600,13 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
     }> = [];
     try {
       recommendations = await prisma.recommendation.findMany({
-        where: whereClause,
-        include: {
-          content: true,
-          offer: true,
-        },
-        orderBy: { created_at: 'desc' },
-      });
+      where: whereClause,
+      include: {
+        content: true,
+        offer: true,
+      },
+      orderBy: { created_at: 'desc' },
+    });
     } catch (dbError: any) {
       console.error('Error fetching recommendations from database:', dbError);
       // If database query fails, return empty array rather than failing the entire request
@@ -530,32 +615,32 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
 
     const formatted = recommendations.map(rec => {
       try {
-        const base = {
-          id: rec.id,
-          type: rec.type,
+      const base = {
+        id: rec.id,
+        type: rec.type,
           rationale: rec.rationale || '',
-          personaType: rec.persona_type,
-          status: rec.status,
-          createdAt: rec.created_at,
-        };
+        personaType: rec.persona_type,
+        status: rec.status,
+        createdAt: rec.created_at,
+      };
 
-        if (rec.type === 'education' && rec.content) {
-          return {
-            ...base,
+      if (rec.type === 'education' && rec.content) {
+        return {
+          ...base,
             title: rec.content.title || 'Untitled',
             excerpt: rec.content.excerpt || '',
             url: rec.content.url || '',
-          };
-        } else if (rec.type === 'offer' && rec.offer) {
-          return {
-            ...base,
+        };
+      } else if (rec.type === 'offer' && rec.offer) {
+        return {
+          ...base,
             title: rec.offer.title || 'Untitled Offer',
             description: rec.offer.description || '',
             url: rec.offer.url || '',
-          };
-        }
+        };
+      }
 
-        return base;
+      return base;
       } catch (formatError: any) {
         console.error(`Error formatting recommendation ${rec.id}:`, formatError);
         // Return a minimal valid recommendation object

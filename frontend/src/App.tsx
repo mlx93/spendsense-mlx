@@ -10,6 +10,7 @@ import SettingsPage from './pages/SettingsPage';
 import OperatorPage from './pages/OperatorPage';
 import ArticlePage from './pages/ArticlePage';
 import ConsentModal from './components/ConsentModal';
+import { ToastContainer } from './utils/toast';
 
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
   const { user, loading } = useAuth();
@@ -18,8 +19,14 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
 
   useEffect(() => {
     // Show consent modal immediately after login if user hasn't consented
-    if (user && !loading && user.consentStatus === false && !consentHandled) {
+    // Check both null/undefined and false for consent status
+    // Block access to dashboard until consent is granted
+    if (user && !loading && (user.consentStatus === false || user.consentStatus === null || user.consentStatus === undefined) && !consentHandled) {
       setShowConsentModal(true);
+    } else if (user && user.consentStatus === true) {
+      // User has consented, ensure modal is closed
+      setShowConsentModal(false);
+      setConsentHandled(true);
     }
   }, [user, loading, consentHandled]);
 
@@ -28,17 +35,19 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
     setConsentHandled(true);
     // Consent modal handles token update internally via useAuth hook
     // No need to reload page - token is updated in auth context
+    // If user skipped, they can still see the page but won't have personalized data
   };
 
   if (loading) return <div className="text-center py-12">Loading...</div>;
   if (!user) return <Navigate to="/login" />;
   
-  return (
-    <>
-      {showConsentModal && <ConsentModal onConsent={handleConsent} />}
-      {children}
-    </>
-  );
+  // Block rendering children if consent modal is showing (requires user interaction)
+  // Only show children if user has consented OR has explicitly skipped (consentHandled = true)
+  if (showConsentModal) {
+    return <ConsentModal onConsent={handleConsent} />;
+  }
+  
+  return <>{children}</>;
 }
 
 function AppRoutes() {
@@ -119,6 +128,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <ToastContainer />
       </AuthProvider>
     </BrowserRouter>
   );

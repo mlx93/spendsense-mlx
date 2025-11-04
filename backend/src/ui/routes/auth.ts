@@ -17,35 +17,59 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 router.get('/example-users', async (req: Request, res: Response) => {
   try {
     console.log('[example-users] Route called');
-    console.log('[example-users] DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
     
-    // Get 5 random regular users (exclude operator)
-    console.log('[example-users] Querying database...');
-    const users = await prisma.user.findMany({
-      where: {
-        role: 'user',
-      },
-      select: {
-        email: true,
-      },
-      take: 5,
-      orderBy: {
-        created_at: 'asc', // Deterministic order (seeded users created in order)
-      },
-    });
-
-    // If we have fewer than 5 users, return all we have
-    const exampleEmails = users.map(u => u.email);
+    // Use hardcoded mapping based on seed 1337
+    // This allows us to show personas without needing to calculate them
+    const { EXAMPLE_USERS_MAPPING } = await import('../../utils/exampleUsersMapping');
     
-    console.log('[example-users] Found', users.length, 'users');
-    console.log('[example-users] Returning', exampleEmails.length, 'emails');
-
-    res.json({
-      exampleEmails,
-      password: 'password123', // All seeded users have the same password
-      operatorEmail: 'operator@spendsense.com',
-      operatorPassword: 'operator123',
-    });
+    const personaTypes = ['high_utilization', 'variable_income', 'subscription_heavy', 'savings_builder', 'net_worth_maximizer'];
+    const exampleUsers: Array<{ email: string; persona: string }> = [];
+    
+    // Build example users from hardcoded mapping
+    for (const personaType of personaTypes) {
+      const email = Object.keys(EXAMPLE_USERS_MAPPING).find(
+        email => EXAMPLE_USERS_MAPPING[email] === personaType
+      );
+      if (email) {
+        exampleUsers.push({ email, persona: personaType });
+      }
+    }
+    
+    // Verify these users exist in database (optional check)
+    // But don't fail if they don't - we're showing hardcoded personas for demo purposes
+    if (exampleUsers.length > 0) {
+      const emails = exampleUsers.map(u => u.email);
+      const existingUsers = await prisma.user.findMany({
+        where: {
+          email: { in: emails },
+          role: 'user',
+        },
+        select: { email: true },
+      });
+      const existingEmails = new Set(existingUsers.map(u => u.email));
+      
+      // Filter to only show users that exist in database
+      const validExampleUsers = exampleUsers.filter(u => existingEmails.has(u.email));
+      
+      console.log('[example-users] Found', validExampleUsers.length, 'example users from hardcoded mapping');
+      console.log('[example-users] Personas:', validExampleUsers.map(u => `${u.email}: ${u.persona}`).join(', '));
+      
+      res.json({
+        exampleUsers: validExampleUsers,
+        password: 'password123', // All seeded users have the same password
+        operatorEmail: 'operator@spendsense.com',
+        operatorPassword: 'operator123',
+      });
+    } else {
+      // Fallback: return empty array if mapping is not populated
+      console.log('[example-users] No hardcoded mapping found, returning empty array');
+      res.json({
+        exampleUsers: [],
+        password: 'password123',
+        operatorEmail: 'operator@spendsense.com',
+        operatorPassword: 'operator123',
+      });
+    }
   } catch (error: any) {
     console.error('Error fetching example users:', error);
     console.error('Error message:', error.message);
@@ -53,7 +77,7 @@ router.get('/example-users', async (req: Request, res: Response) => {
     console.error('Error stack:', error.stack);
     // Return fallback if database query fails
     res.json({
-      exampleEmails: [],
+      exampleUsers: [],
       password: 'password123',
       operatorEmail: 'operator@spendsense.com',
       operatorPassword: 'operator123',

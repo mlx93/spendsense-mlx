@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { seedUserData } from '../../utils/seedUserData';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -49,6 +50,13 @@ router.post('/', async (req: Request, res: Response) => {
         consent_status: false,
         role: 'user',
       },
+    });
+
+    // Seed fake transaction data for the new user (accounts, transactions, liabilities)
+    // This happens in background so registration doesn't wait
+    seedUserData(user.id).catch((error) => {
+      console.error(`[users] Error seeding data for new user ${user.id}:`, error);
+      // Don't fail registration if seeding fails - user can still register
     });
 
     // Generate JWT token

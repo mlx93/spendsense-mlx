@@ -8,27 +8,80 @@ interface ConsentModalProps {
 
 export default function ConsentModal({ onConsent }: ConsentModalProps) {
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState('');
   const { updateToken } = useAuth();
 
   const handleAllow = async () => {
     setLoading(true);
+    setProgress(0);
+    setStatus('Setting up your account...');
+    
+    // Simulate progress while consent endpoint generates data
+    const progressSteps = [
+      { progress: 15, status: 'Detecting spending patterns...', delay: 600 },
+      { progress: 30, status: 'Analyzing credit utilization...', delay: 800 },
+      { progress: 50, status: 'Identifying savings opportunities...', delay: 1000 },
+      { progress: 70, status: 'Generating personalized recommendations...', delay: 1200 },
+      { progress: 85, status: 'Finalizing insights...', delay: 800 },
+      { progress: 95, status: 'Almost done...', delay: 600 },
+    ];
+    
+    let currentStep = 0;
+    const runProgressStep = () => {
+      if (currentStep < progressSteps.length) {
+        setProgress(progressSteps[currentStep].progress);
+        setStatus(progressSteps[currentStep].status);
+        currentStep++;
+        if (currentStep < progressSteps.length) {
+          setTimeout(runProgressStep, progressSteps[currentStep].delay);
+        }
+      }
+    };
+    runProgressStep();
+    
     try {
+      // This will now wait for generateUserData to complete (3-5 seconds)
       const response = await profileApi.updateConsent(true);
+      
+      // Update progress to 100%
+      setProgress(100);
+      setStatus('Complete!');
+      
       // Update token and user in auth context with new consent status
       if (response.data.token && response.data.user) {
         updateToken(response.data.token, response.data.user);
       }
-      onConsent(true);
+      
+      // Small delay to show "Complete!" message
+      setTimeout(() => {
+        onConsent(true);
+      }, 500);
     } catch (error) {
       console.error('Error updating consent:', error);
+      setProgress(0);
+      setStatus('');
       alert('Failed to update consent. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    onConsent(false);
+  const handleSkip = async () => {
+    setLoading(true);
+    try {
+      // Set consent to false - user can enable later in Settings
+      const response = await profileApi.updateConsent(false);
+      if (response.data.token && response.data.user) {
+        updateToken(response.data.token, response.data.user);
+      }
+      onConsent(false);
+    } catch (error) {
+      console.error('Error updating consent:', error);
+      // Still proceed - user wants to skip
+      onConsent(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,18 +112,32 @@ export default function ConsentModal({ onConsent }: ConsentModalProps) {
             <li>Analysis happens automatically - no manual review</li>
           </ul>
         </div>
+        {loading && progress > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">{status || 'Setting up...'}</span>
+              <span className="text-sm text-gray-500">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
         <div className="flex gap-3">
           <button
             onClick={handleAllow}
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium min-w-[140px]"
           >
             {loading ? 'Enabling...' : 'Allow Analysis'}
           </button>
           <button
             onClick={handleSkip}
             disabled={loading}
-            className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed font-medium min-w-[140px]"
           >
             Skip for Now
           </button>

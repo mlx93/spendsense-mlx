@@ -543,4 +543,35 @@ router.post('/user/:userId/persona-override', async (req: AuthRequest, res: Resp
   }
 });
 
+// POST /api/operator/reset-consent - Reset consent for all users (operator only)
+router.post('/reset-consent', async (req: AuthRequest, res: Response) => {
+  try {
+    // Reset consent_status to false for all regular users (not operators)
+    const result = await prisma.user.updateMany({
+      where: {
+        role: 'user',
+      },
+      data: {
+        consent_status: false,
+        consent_date: null,
+      },
+    });
+
+    console.log(`[operator] Reset consent for ${result.count} users`);
+
+    res.json({
+      success: true,
+      message: `Reset consent for ${result.count} users`,
+      usersAffected: result.count,
+    });
+  } catch (error) {
+    console.error('Operator reset consent error:', error);
+    res.status(500).json({
+      error: 'Failed to reset consent',
+      code: 'INTERNAL_ERROR',
+      details: {},
+    });
+  }
+});
+
 export default router;
