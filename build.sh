@@ -60,7 +60,8 @@ else
 fi
 
 echo "Building frontend..."
-cd ../frontend
+cd frontend
 npm run build
+cd ..
 
 echo "Build complete!"
