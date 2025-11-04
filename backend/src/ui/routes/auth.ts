@@ -2,6 +2,10 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+// Ensure env vars are loaded before Prisma Client initialization
+dotenv.config();
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -77,13 +81,13 @@ router.post('/login', async (req: Request, res: Response) => {
     // PostgreSQL: Use case-insensitive query
     // Find user by email (case-insensitive match)
     const user = await prisma.user.findFirst({
-      where: {
-        email: {
+        where: {
+          email: {
           equals: normalizedEmail,
           mode: 'insensitive', // PostgreSQL case-insensitive comparison
+          },
         },
-      },
-    });
+      });
 
     if (!user) {
       return res.status(401).json({
