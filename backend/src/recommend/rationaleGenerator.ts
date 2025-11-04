@@ -175,18 +175,25 @@ export async function generateRationale(
     if (personaType === 'high_utilization' && creditSignal && userId) {
       // Already handled above if content is credit-related
       // If we get here, content isn't credit-related but user has high utilization persona
-      // Use generic template with credit context
+      // Use generic template with credit context and content title
+      const contentTitle = content?.title || 'financial planning';
+      const utilPercent = creditSignal.max_utilization ? Math.round(creditSignal.max_utilization * 100) : 0;
       return {
-        rationale: `Based on your credit utilization patterns, this article might help you understand ${content?.title || 'financial planning'} better.`,
+        rationale: `Based on your credit utilization (${utilPercent}%), "${contentTitle}" might help you understand how to better manage your finances.`,
         templateId: 'education_v1',
       };
     }
 
-    // Fallback generic template
+    // Fallback generic template - include content title for variation
+    const contentTitle = content?.title || 'financial planning';
+    const topicFromTitle = contentTitle.toLowerCase().includes('credit') ? 'credit management' :
+                           contentTitle.toLowerCase().includes('savings') ? 'savings strategies' :
+                           contentTitle.toLowerCase().includes('budget') ? 'budgeting' :
+                           contentTitle.toLowerCase().includes('debt') ? 'debt management' :
+                           'financial planning';
+    
     return {
-      rationale: rationaleTemplates.education_v1
-        .replace('{topic}', 'financial planning')
-        .replace('{aspect}', 'your financial situation'),
+      rationale: `Based on your spending patterns, "${contentTitle}" might help you understand ${topicFromTitle} better.`,
       templateId: 'education_v1',
     };
   } else {
