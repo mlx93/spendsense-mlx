@@ -66,14 +66,19 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`[api/[...path]] Extracted path: ${path}${queryString}`);
   
   // Update request properties for Express routing
-  // Include query string in url so Express can parse it
-  (req as any).url = path + queryString;
-  (req as any).originalUrl = path + queryString;
-  (req as any).path = path;
+  // Express uses url and originalUrl for routing and parsing params
+  // Include query string so Express can parse query params
+  const fullPath = path + queryString;
+  (req as any).url = fullPath;
+  (req as any).originalUrl = fullPath;
+  // Don't set path - let Express parse it from url
   (req as any).baseUrl = '';
+  // Ensure method is set
+  (req as any).method = req.method;
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
+  // Express will parse params from the URL automatically
   return app(req as any, res as any);
 }
 
