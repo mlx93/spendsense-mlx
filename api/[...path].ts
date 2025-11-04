@@ -5,11 +5,12 @@
 // Set VERCEL env before importing server (so routes mount correctly)
 process.env.VERCEL = '1';
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import app from '../backend/src/server';
 
 // Vercel serverless function handler
 // Vercel passes the path segments as a query parameter when using [...path]
-export default function handler(req: any, res: any) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle OPTIONS preflight requests
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -21,7 +22,7 @@ export default function handler(req: any, res: any) {
   
   // Vercel's catch-all route: /api/auth/login
   // The path is available in req.url, but might include query string
-  let fullPath = req.url || req.originalUrl || '';
+  let fullPath = req.url || '';
   
   // Remove query string if present
   const queryIndex = fullPath.indexOf('?');
@@ -37,16 +38,22 @@ export default function handler(req: any, res: any) {
   }
   
   // Update request properties for Express routing
-  req.url = path;
-  req.originalUrl = path;
-  req.path = path;
-  
-  // Ensure method is preserved (should already be set by Vercel)
-  if (!req.method) {
-    req.method = 'GET';
-  }
+  (req as any).url = path;
+  (req as any).originalUrl = path;
+  (req as any).path = path;
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
-  return app(req, res);
+  return app(req as any, res as any);
 }
+
+// Export the handler with explicit configuration
+export default handler;
+
+// Export config to ensure all HTTP methods are allowed
+export const config = {
+  api: {
+    bodyParser: false, // Let Express handle body parsing
+    externalResolver: true, // Tell Vercel we're using an external resolver (Express)
+  },
+};
