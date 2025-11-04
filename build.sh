@@ -9,10 +9,13 @@ cd backend
 npx prisma generate
 
 echo "Copying Prisma Client to root for api/ directory..."
-# Prisma generates to backend/node_modules/@prisma/client
-# We need it in root node_modules for api/ serverless functions
+# Prisma generates to backend/node_modules/@prisma/client and backend/node_modules/.prisma/client
+# We need both in root node_modules for api/ serverless functions
 mkdir -p ../node_modules/@prisma
-cp -r node_modules/@prisma/client ../node_modules/@prisma/ 2>/dev/null || echo "Note: Prisma Client copy may have failed, but backend generation succeeded"
+mkdir -p ../node_modules/.prisma
+cp -r node_modules/@prisma/client ../node_modules/@prisma/ 2>/dev/null || echo "Warning: @prisma/client copy failed"
+cp -r node_modules/.prisma/client ../node_modules/.prisma/ 2>/dev/null || echo "Warning: .prisma/client copy failed"
+echo "✅ Prisma Client copied to root"
 
 # Only run migrations and seed in production if DATABASE_URL is set
 if [ -n "$DATABASE_URL" ]; then
