@@ -12,7 +12,11 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 // GET /api/auth/example-users - Get example user emails for demo (no auth required)
 router.get('/example-users', async (req: Request, res: Response) => {
   try {
+    console.log('[example-users] Route called');
+    console.log('[example-users] DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+    
     // Get 5 random regular users (exclude operator)
+    console.log('[example-users] Querying database...');
     const users = await prisma.user.findMany({
       where: {
         role: 'user',
@@ -28,6 +32,9 @@ router.get('/example-users', async (req: Request, res: Response) => {
 
     // If we have fewer than 5 users, return all we have
     const exampleEmails = users.map(u => u.email);
+    
+    console.log('[example-users] Found', users.length, 'users');
+    console.log('[example-users] Returning', exampleEmails.length, 'emails');
 
     res.json({
       exampleEmails,
@@ -35,14 +42,18 @@ router.get('/example-users', async (req: Request, res: Response) => {
       operatorEmail: 'operator@spendsense.com',
       operatorPassword: 'operator123',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching example users:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     // Return fallback if database query fails
     res.json({
       exampleEmails: [],
       password: 'password123',
       operatorEmail: 'operator@spendsense.com',
       operatorPassword: 'operator123',
+      _error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
