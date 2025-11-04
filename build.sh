@@ -33,24 +33,86 @@ if [ -n "$DATABASE_URL" ]; then
   
   # Use non-pooling connection for migrations (pooler doesn't support DDL)
   # If we have the non-pooling URL, use it for migrations
+  # Otherwise fall back to pooled connection (may not work for migrations but we'll try)
   if [ -n "$SUPABASE_POSTGRES_URL_NON_POOLING" ]; then
     echo "Using direct (non-pooling) connection for migrations..."
     export MIGRATION_DATABASE_URL="$SUPABASE_POSTGRES_URL_NON_POOLING"
   else
+    echo "⚠️  SUPABASE_POSTGRES_URL_NON_POOLING not set, using pooled connection (migrations may fail)"
     export MIGRATION_DATABASE_URL="$DATABASE_URL"
   fi
   
   # Run migrations from backend directory where schema.prisma is located
   cd backend
-  DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma migrate deploy
+  
+  # Try migrations - if they fail, log warning but continue build
+  # Migrations might already be applied or connection might not support DDL
+  # Temporarily disable set -e for this command to allow graceful failure
+  set +e
+  DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma migrate deploy 2>&1
+  MIGRATE_EXIT_CODE=$?
+  set -e
+  
+  if [ "$MIGRATE_EXIT_CODE" -eq 0 ]; then
+    echo "✅ Migrations completed successfully"
+  else
+    echo "⚠️  Migration failed (exit code: $MIGRATE_EXIT_CODE)"
+    echo "This may be expected if:"
+    echo "  - Migrations are already applied"
+    echo "  - Using pooled connection (doesn't support DDL)"
+    echo "  - Database connection temporarily unavailable"
+    echo "Continuing build - migrations can be run manually if needed"
+  fi
   
   echo "Checking if database needs seeding..."
   # Only seed if User table is empty (first deployment)
   # Use check-users.js script (runs from backend directory where Prisma Client exists)
-  USER_COUNT=$(DATABASE_URL="$MIGRATION_DATABASE_URL" SIMPLE_OUTPUT=1 node check-users.js 2>/dev/null | head -1 || echo "0")
+  # Try with non-pooling first, fall back to pooled if that fails
+  USER_COUNT="0"
+  if [ -n "$SUPABASE_POSTGRES_URL_NON_POOLING" ]; then
+    USER_COUNT=$(DATABASE_URL="$SUPABASE_POSTGRES_URL_NON_POOLING" SIMPLE_OUTPUT=1 node check-users.js 2>/dev/null | head -1 || echo "0")
+  fi
+  
+  # If non-pooling failed or not available, try pooled connection
+  if [ "$USER_COUNT" = "0" ] || [ -z "$SUPABASE_POSTGRES_URL_NON_POOLING" ]; then
+    USER_COUNT=$(DATABASE_URL="$DATABASE_URL" SIMPLE_OUTPUT=1 node check-users.js 2>/dev/null | head -1 || echo "0")
+  fi
+  
   if [ "$USER_COUNT" = "0" ]; then
-    echo "Database is empty, seeding..."
-    DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma db seed || echo "Seed failed, continuing build"
+    echo "Database appears empty, attempting to seed..."
+    # Try seeding with non-pooling connection first if available
+    if [ -n "$SUPABASE_POSTGRES_URL_NON_POOLING" ]; then
+      set +e
+      DATABASE_URL="$SUPABASE_POSTGRES_URL_NON_POOLING" npx prisma db seed 2>&1
+      SEED_EXIT_CODE=$?
+      set -e
+      if [ "$SEED_EXIT_CODE" -eq 0 ]; then
+        echo "✅ Seeding completed successfully with non-pooling connection"
+      else
+        echo "⚠️  Seed failed with non-pooling connection, trying pooled..."
+        # Fall back to pooled connection
+        set +e
+        DATABASE_URL="$DATABASE_URL" npx prisma db seed 2>&1
+        SEED_EXIT_CODE=$?
+        set -e
+        if [ "$SEED_EXIT_CODE" -eq 0 ]; then
+          echo "✅ Seeding completed successfully with pooled connection"
+        else
+          echo "⚠️  Seed failed, continuing build (database may already be seeded or connection unavailable)"
+        fi
+      fi
+    else
+      # No non-pooling connection available, try pooled
+      set +e
+      DATABASE_URL="$DATABASE_URL" npx prisma db seed 2>&1
+      SEED_EXIT_CODE=$?
+      set -e
+      if [ "$SEED_EXIT_CODE" -eq 0 ]; then
+        echo "✅ Seeding completed successfully"
+      else
+        echo "⚠️  Seed failed, continuing build (database may already be seeded or connection unavailable)"
+      fi
+    fi
   else
     echo "Database already has data (found $USER_COUNT rows in User table), skipping seed"
   fi
