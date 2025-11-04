@@ -27,3 +27,8 @@ export function validateTone(text: string): ToneValidationResult {
   };
 }
 
+// Export convenience function for agenticReview
+export function checkToneViolations(text: string): string[] {
+  const result = validateTone(text);
+  return result.issues;
+}

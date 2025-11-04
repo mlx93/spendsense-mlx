@@ -1,18 +1,91 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './lib/authContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './lib/authContext';
+import Layout from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import InsightsPage from './pages/InsightsPage';
+import LibraryPage from './pages/LibraryPage';
+import SettingsPage from './pages/SettingsPage';
+import OperatorPage from './pages/OperatorPage';
+
+function ProtectedRoute({ children }: { children: React.ReactElement }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="text-center py-12">Loading...</div>;
+  if (!user) return <Navigate to="/login" />;
+  return children;
+}
+
+function AppRoutes() {
+  const { user } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DashboardPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/insights"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <InsightsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/library"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <LibraryPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <SettingsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      {user?.role === 'operator' && (
+        <Route
+          path="/operator"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <OperatorPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+      )}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* TODO: Add routes for Dashboard, Insights, Library, Settings, Operator */}
-          <Route path="/" element={<div>SpendSense Frontend</div>} />
-        </Routes>
+        <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
   );
 }
 
 export default App;
-

@@ -2,20 +2,28 @@
 
 import { Request, Response, NextFunction } from 'express';
 
+export interface ApiError extends Error {
+  statusCode?: number;
+  code?: string;
+  details?: any;
+}
+
 export function errorHandler(
-  err: Error,
+  err: ApiError | Error,
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  // TODO: Implement comprehensive error handling
-  // - Log error
-  // - Format error response per Architecture PRD API section
-  console.error(err);
-  res.status(500).json({
-    error: err.message || 'Internal server error',
-    code: 'INTERNAL_ERROR',
-    details: {},
+  console.error('Error:', err);
+
+  const statusCode = (err as ApiError).statusCode || 500;
+  const code = (err as ApiError).code || 'INTERNAL_ERROR';
+  const message = err.message || 'Internal server error';
+  const details = (err as ApiError).details || {};
+
+  res.status(statusCode).json({
+    error: message,
+    code,
+    details,
   });
 }
-
