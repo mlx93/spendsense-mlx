@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { recommendationsApi, profileApi, Recommendation } from '../services/api';
@@ -28,9 +28,9 @@ export default function DashboardPage() {
       setRecommendations([]);
       setAlerts([]);
     }
-  }, [user?.id, user?.consentStatus]); // More specific dependencies to catch consent changes
+  }, [user?.id, user?.consentStatus, loadDataWithProgress]); // Include loadDataWithProgress in dependencies
 
-  const loadDataWithProgress = async () => {
+  const loadDataWithProgress = useCallback(async () => {
     if (!user) return;
     
     // Show progress bar during initial load
@@ -95,7 +95,7 @@ export default function DashboardPage() {
       setRefreshing(false);
       setLoading(false); // Ensure loading is cleared even on error
     }
-  };
+  }, [user]);
 
   const loadData = async (skipLoadingState = false) => {
     if (!user) return;
