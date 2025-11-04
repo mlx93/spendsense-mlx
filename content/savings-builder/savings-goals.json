@@ -1,0 +1,13 @@
+{
+  "id": "edu_savings_goals",
+  "title": "How to Set and Achieve Savings Goals",
+  "source": "Bankrate",
+  "url": "https://www.bankrate.com/banking/savings/how-to-set-savings-goals/",
+  "excerpt": "Create realistic savings goals and develop a plan to reach them.",
+  "tags": ["savings", "goals", "planning", "strategy", "personal_finance"],
+  "persona_fit": ["savings_builder"],
+  "signals": ["low_savings", "savings_growth"],
+  "editorial_summary": "This guide helps readers set SMART (Specific, Measurable, Achievable, Relevant, Time-bound) savings goals and create actionable plans to achieve them. It covers short-term goals (emergency fund, vacation) and long-term goals (home down payment, retirement), provides goal-setting worksheets, and explains how to track progress and stay motivated.",
+  "editorial_priority": 7
+}
+

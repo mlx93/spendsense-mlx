@@ -1,0 +1,13 @@
+{
+  "id": "edu_automated_savings",
+  "title": "Automate Your Savings: Set It and Forget It",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/banking/automate-savings",
+  "excerpt": "Learn how automatic transfers can help you build savings without thinking about it.",
+  "tags": ["savings", "automation", "budgeting", "planning", "strategy"],
+  "persona_fit": ["savings_builder"],
+  "signals": ["savings_growth", "low_savings"],
+  "editorial_summary": "This article explains how to set up automated savings transfers to build emergency funds and reach financial goals effortlessly. It covers direct deposit splits, recurring transfers, round-up apps, and how automation removes the mental friction of saving. Includes tips for choosing savings accounts, setting realistic transfer amounts, and gradually increasing savings over time.",
+  "editorial_priority": 9
+}
+

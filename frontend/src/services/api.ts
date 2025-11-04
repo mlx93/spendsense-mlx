@@ -53,6 +53,8 @@ export const profileApi = {
     api.get<Profile>(`/profile/${userId}`),
   updateConsent: (consentStatus: boolean) =>
     api.post('/profile/consent', { consentStatus }),
+  updateAccount: (data: { email?: string; currentPassword?: string; newPassword?: string }) =>
+    api.put('/profile/account', data),
 };
 
 // Recommendations APIs

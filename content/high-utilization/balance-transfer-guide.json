@@ -1,0 +1,13 @@
+{
+  "id": "edu_balance_transfer_guide",
+  "title": "Balance Transfer Credit Cards: A Complete Guide",
+  "source": "Bankrate",
+  "url": "https://www.bankrate.com/finance/credit-cards/balance-transfer-guide/",
+  "excerpt": "Learn how balance transfer cards can help you pay off debt faster and save on interest.",
+  "tags": ["credit", "debt", "balance_transfer", "interest", "strategy"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "interest_charges"],
+  "editorial_summary": "This comprehensive guide explains balance transfer credit cards, including how they work, when they make sense, and what to watch out for. It covers 0% APR offers, balance transfer fees, credit score requirements, and how to use balance transfers effectively as part of a debt payoff strategy. The article includes tips for choosing the right card and avoiding common pitfalls.",
+  "editorial_priority": 8
+}
+

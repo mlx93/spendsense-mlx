@@ -1,0 +1,13 @@
+{
+  "id": "edu_cancel_subscriptions",
+  "title": "How to Cancel Subscriptions: A Step-by-Step Guide",
+  "source": "CNET",
+  "url": "https://www.cnet.com/personal-finance/how-to-cancel-subscriptions/",
+  "excerpt": "Learn how to identify and cancel subscriptions you no longer use or need.",
+  "tags": ["subscriptions", "budgeting", "savings", "expenses", "strategy"],
+  "persona_fit": ["subscription_heavy"],
+  "signals": ["subscription_heavy"],
+  "editorial_summary": "This practical guide shows readers how to find all their subscriptions, evaluate which ones are worth keeping, and cancel the rest. It covers canceling subscriptions for streaming services, apps, software, gyms, and other recurring services. Includes tips for negotiating better rates, using cancellation tools, and avoiding cancellation fees.",
+  "editorial_priority": 9
+}
+

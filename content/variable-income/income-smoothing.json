@@ -1,0 +1,13 @@
+{
+  "id": "edu_income_smoothing",
+  "title": "Income Smoothing: Managing Irregular Pay Cycles",
+  "source": "CFPB",
+  "url": "https://www.consumerfinance.gov/consumer-tools/managing-your-money/income-smoothing/",
+  "excerpt": "Strategies to smooth out income fluctuations and create more predictable cash flow.",
+  "tags": ["income", "variable_income", "cash_flow", "planning", "strategy"],
+  "persona_fit": ["variable_income"],
+  "signals": ["variable_income"],
+  "editorial_summary": "This guide from the CFPB explains income smoothing techniques including averaging income over time, building cash reserves, using savings accounts as buffers, and adjusting spending to match income cycles. It helps readers create more predictable monthly budgets despite irregular income patterns.",
+  "editorial_priority": 7
+}
+

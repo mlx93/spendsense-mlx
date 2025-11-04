@@ -1,0 +1,13 @@
+{
+  "id": "edu_expense_prioritization",
+  "title": "How to Prioritize Expenses When Income Is Unpredictable",
+  "source": "The Balance",
+  "url": "https://www.thebalance.com/how-to-prioritize-expenses-4154841",
+  "excerpt": "Learn which expenses to pay first when money is tight and income is irregular.",
+  "tags": ["budgeting", "variable_income", "expenses", "planning", "strategy"],
+  "persona_fit": ["variable_income"],
+  "signals": ["variable_income", "low_savings"],
+  "editorial_summary": "This article explains how to prioritize expenses when dealing with irregular income, covering essential vs. non-essential expenses, payment due dates, and how to negotiate with creditors during lean months. It provides a framework for deciding what to pay first and strategies for managing cash flow gaps.",
+  "editorial_priority": 8
+}
+

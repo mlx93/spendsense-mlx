@@ -8,10 +8,26 @@ process.env.VERCEL = '1';
 import app from '../backend/src/server';
 
 // Vercel serverless function handler
+// Vercel passes the path segments as a query parameter when using [...path]
 export default function handler(req: any, res: any) {
-  // Vercel's catch-all route provides the full path in req.url
-  // Example: /api/auth/login -> req.url = '/api/auth/login'
-  const fullPath = req.url || req.originalUrl || '';
+  // Handle OPTIONS preflight requests
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    return res.status(200).end();
+  }
+  
+  // Vercel's catch-all route: /api/auth/login
+  // The path is available in req.url, but might include query string
+  let fullPath = req.url || req.originalUrl || '';
+  
+  // Remove query string if present
+  const queryIndex = fullPath.indexOf('?');
+  if (queryIndex !== -1) {
+    fullPath = fullPath.substring(0, queryIndex);
+  }
   
   // Strip /api prefix to match our route mounting
   // /api/auth/login -> /auth/login
@@ -25,12 +41,12 @@ export default function handler(req: any, res: any) {
   req.originalUrl = path;
   req.path = path;
   
-  // Ensure method is preserved
+  // Ensure method is preserved (should already be set by Vercel)
   if (!req.method) {
-    req.method = req.method || 'GET';
+    req.method = 'GET';
   }
   
   // Handle the request with Express app
   // Express handles all HTTP methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
-  app(req, res);
+  return app(req, res);
 }

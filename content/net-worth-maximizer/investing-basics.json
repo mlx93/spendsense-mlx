@@ -1,0 +1,13 @@
+{
+  "id": "edu_investing_basics",
+  "title": "Investing 101: A Beginner's Guide",
+  "source": "Investopedia",
+  "url": "https://www.investopedia.com/investing-4427685",
+  "excerpt": "Learn the fundamentals of investing, from stocks and bonds to ETFs and retirement accounts.",
+  "tags": ["investing", "retirement", "portfolio", "stocks", "bonds"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth", "low_savings"],
+  "editorial_summary": "This comprehensive beginner's guide covers investing fundamentals including asset classes, risk vs. return, diversification, and how to get started with investing. It explains stocks, bonds, mutual funds, ETFs, and retirement accounts in accessible language. The article includes guidance on determining your risk tolerance, building a portfolio, and avoiding common beginner mistakes.",
+  "editorial_priority": 10
+}
+

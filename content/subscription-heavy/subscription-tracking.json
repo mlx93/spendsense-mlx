@@ -1,0 +1,13 @@
+{
+  "id": "edu_track_subscriptions",
+  "title": "Track Your Subscriptions: Tools and Methods",
+  "source": "PCMag",
+  "url": "https://www.pcmag.com/how-to/how-to-track-your-subscriptions",
+  "excerpt": "Use apps and spreadsheets to monitor all your recurring subscriptions in one place.",
+  "tags": ["subscriptions", "tracking", "budgeting", "tools", "planning"],
+  "persona_fit": ["subscription_heavy"],
+  "signals": ["subscription_heavy"],
+  "editorial_summary": "This article reviews tools and methods for tracking subscriptions, including dedicated apps (Truebill, Mint), spreadsheet templates, and credit card features. It explains how to organize subscription information, set up alerts for price increases, and review subscriptions regularly. Helps readers get a complete picture of their recurring expenses.",
+  "editorial_priority": 8
+}
+

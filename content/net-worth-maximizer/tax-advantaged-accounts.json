@@ -1,0 +1,13 @@
+{
+  "id": "edu_tax_advantaged_accounts",
+  "title": "Tax-Advantaged Accounts: HSA, 401k, and IRA Explained",
+  "source": "Vanguard",
+  "url": "https://investor.vanguard.com/investor-resources-education/online-trading/tax-advantaged-accounts",
+  "excerpt": "Maximize your savings by understanding tax-advantaged investment accounts.",
+  "tags": ["tax", "retirement", "hsa", "401k", "ira", "savings"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth"],
+  "editorial_summary": "This article explains tax-advantaged accounts including 401(k)s, IRAs (Traditional and Roth), HSAs, and 529 plans. It covers contribution limits, tax benefits, withdrawal rules, and strategies for maximizing tax savings while building wealth. The content helps readers understand which accounts to prioritize based on their income, tax bracket, and financial goals.",
+  "editorial_priority": 8
+}
+

@@ -1,0 +1,13 @@
+{
+  "id": "edu_lower_credit_utilization",
+  "title": "How to Lower Your Credit Utilization Ratio",
+  "source": "Experian",
+  "url": "https://www.experian.com/blogs/ask-experian/how-to-lower-your-credit-utilization-ratio/",
+  "excerpt": "Practical strategies to reduce your credit card balances and improve your credit score.",
+  "tags": ["credit", "utilization", "credit_score", "debt", "strategy"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "minimum_payment_only"],
+  "editorial_summary": "This article provides actionable steps to lower credit utilization, including paying more than the minimum, making multiple payments per month, requesting credit limit increases, and avoiding closing old accounts. It explains the immediate and long-term benefits of reducing utilization below 30% and includes a credit utilization calculator to help readers understand their current ratio.",
+  "editorial_priority": 9
+}
+

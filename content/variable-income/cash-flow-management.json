@@ -1,0 +1,13 @@
+{
+  "id": "edu_cash_flow_management",
+  "title": "Cash Flow Management for Irregular Income",
+  "source": "QuickBooks",
+  "url": "https://quickbooks.intuit.com/r/cash-flow/cash-flow-management/",
+  "excerpt": "Master cash flow management strategies when your income varies month to month.",
+  "tags": ["cash_flow", "variable_income", "budgeting", "planning", "strategy"],
+  "persona_fit": ["variable_income"],
+  "signals": ["variable_income"],
+  "editorial_summary": "This guide provides cash flow management strategies for freelancers, contractors, and others with irregular income. It covers calculating average monthly income, creating cash flow forecasts, building cash reserves, and timing expenses to match income cycles. Includes templates and tools for tracking cash flow.",
+  "editorial_priority": 9
+}
+

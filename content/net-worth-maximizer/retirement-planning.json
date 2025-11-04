@@ -1,0 +1,13 @@
+{
+  "id": "edu_retirement_planning",
+  "title": "Retirement Planning: How Much Do You Need?",
+  "source": "Fidelity",
+  "url": "https://www.fidelity.com/learning-center/personal-finance/retirement-planning",
+  "excerpt": "Calculate your retirement needs and create a plan to build long-term wealth.",
+  "tags": ["retirement", "401k", "ira", "planning", "savings"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth"],
+  "editorial_summary": "This retirement planning guide helps readers calculate how much they need to save for retirement, understand different retirement account types (401k, IRA, Roth), and create a long-term savings strategy. It covers the power of compound interest, employer matching, tax advantages, and how to maximize retirement contributions. Includes retirement calculators and age-based savings benchmarks.",
+  "editorial_priority": 9
+}
+

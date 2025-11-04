@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import { AuthRequest, authenticateToken } from '../middleware/auth.middleware';
 import { requireConsent } from '../middleware/consent.middleware';
 
@@ -184,6 +185,92 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
     console.error('Profile error:', error);
     res.status(500).json({
       error: 'Failed to fetch profile',
+      code: 'INTERNAL_ERROR',
+      details: {},
+    });
+  }
+});
+
+// PUT /api/profile/account - Update email or password
+router.put('/account', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const { email, currentPassword, newPassword } = req.body;
+
+    const updateData: any = {};
+
+    // Update email if provided
+    if (email) {
+      const normalizedEmail = email.toLowerCase().trim();
+      
+      // Check if email is already taken by another user
+      const existingUser = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+      
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({
+          error: 'Email already in use',
+          code: 'EMAIL_EXISTS',
+          details: {},
+        });
+      }
+      
+      updateData.email = normalizedEmail;
+    }
+
+    // Update password if provided
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          error: 'Current password required to change password',
+          code: 'VALIDATION_ERROR',
+          details: {},
+        });
+      }
+
+      // Verify current password
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          error: 'User not found',
+          code: 'NOT_FOUND',
+          details: {},
+        });
+      }
+
+      const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!passwordMatch) {
+        return res.status(401).json({
+          error: 'Current password is incorrect',
+          code: 'UNAUTHORIZED',
+          details: {},
+        });
+      }
+
+      // Hash new password
+      updateData.password_hash = await bcrypt.hash(newPassword, 10);
+    }
+
+    // Update user
+    if (Object.keys(updateData).length > 0) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Account updated successfully',
+    });
+  } catch (error) {
+    console.error('Account update error:', error);
+    res.status(500).json({
+      error: 'Failed to update account',
       code: 'INTERNAL_ERROR',
       details: {},
     });

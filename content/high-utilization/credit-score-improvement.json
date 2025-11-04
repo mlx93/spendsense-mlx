@@ -1,0 +1,13 @@
+{
+  "id": "edu_improve_credit_score",
+  "title": "How to Improve Your Credit Score: 7 Steps",
+  "source": "Credit Karma",
+  "url": "https://www.creditkarma.com/credit/i/how-to-improve-credit-score",
+  "excerpt": "Actionable steps to boost your credit score, from paying down balances to building positive payment history.",
+  "tags": ["credit_score", "credit", "utilization", "planning", "strategy"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "is_overdue"],
+  "editorial_summary": "This step-by-step guide covers seven proven ways to improve your credit score, with a focus on reducing credit utilization as a key factor. It explains the five factors that determine credit scores, provides timelines for seeing improvements, and offers tips for maintaining good credit long-term. The article includes checklists and action items readers can implement immediately.",
+  "editorial_priority": 9
+}
+

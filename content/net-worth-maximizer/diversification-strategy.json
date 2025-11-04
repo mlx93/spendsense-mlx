@@ -1,0 +1,13 @@
+{
+  "id": "edu_diversification",
+  "title": "Investment Diversification: Don't Put All Your Eggs in One Basket",
+  "source": "Charles Schwab",
+  "url": "https://www.schwab.com/learn/story/investment-diversification-strategy",
+  "excerpt": "Learn how diversification reduces risk and helps protect your portfolio.",
+  "tags": ["investing", "diversification", "portfolio", "risk", "strategy"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth"],
+  "editorial_summary": "This article explains investment diversification principles, including asset allocation, geographic diversification, and sector diversification. It covers how to build a diversified portfolio across stocks, bonds, and other asset classes, and explains why diversification matters for long-term wealth building. Includes examples of well-diversified portfolios and common diversification mistakes to avoid.",
+  "editorial_priority": 7
+}
+

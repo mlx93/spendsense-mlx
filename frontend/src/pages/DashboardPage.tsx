@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { recommendationsApi, profileApi, Recommendation } from '../services/api';
 import ConsentModal from '../components/ConsentModal';
@@ -161,12 +162,12 @@ export default function DashboardPage() {
                 {alert.message}
               </div>
               {learnMoreTopic && (
-                <a
-                  href={`/library?topic=${learnMoreTopic}`}
+                <Link
+                  to={`/library?topic=${learnMoreTopic}`}
                   className="ml-4 text-sm font-medium underline hover:no-underline whitespace-nowrap"
                 >
                   Learn more →
-                </a>
+                </Link>
               )}
             </div>
           </div>

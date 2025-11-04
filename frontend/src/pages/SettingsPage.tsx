@@ -3,6 +3,147 @@ import { useAuth } from '../lib/authContext';
 import { profileApi } from '../services/api';
 import { recommendationsApi } from '../services/api';
 
+function AccountPreferences({ user }: { user: any }) {
+  const [email, setEmail] = useState(user?.email || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleUpdateEmail = async () => {
+    if (!email || email === user?.email) {
+      setMessage({ type: 'error', text: 'Please enter a new email address' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+    try {
+      await profileApi.updateAccount({ email });
+      setMessage({ type: 'success', text: 'Email updated successfully' });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to update email',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!currentPassword || !newPassword) {
+      setMessage({ type: 'error', text: 'Please fill in all password fields' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match' });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Password must be at least 8 characters' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+    try {
+      await profileApi.updateAccount({ currentPassword, newPassword });
+      setMessage({ type: 'success', text: 'Password updated successfully' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to update password',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Email Update */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleUpdateEmail}
+            disabled={loading || email === user?.email}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Update
+          </button>
+        </div>
+      </div>
+
+      {/* Password Update */}
+      <div className="border-t pt-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button
+            onClick={handleUpdatePassword}
+            disabled={loading || !currentPassword || !newPassword || !confirmPassword}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Update Password
+          </button>
+        </div>
+      </div>
+
+      {/* Message Display */}
+      {message && (
+        <div
+          className={`p-3 rounded-md ${
+            message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const [consentStatus, setConsentStatus] = useState(false);
@@ -91,20 +232,7 @@ export default function SettingsPage() {
       {/* Account Preferences */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Account</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-            />
-          </div>
-          <p className="text-sm text-gray-500">
-            Account management features coming soon.
-          </p>
-        </div>
+        <AccountPreferences user={user} />
       </div>
 
       {/* Dismissed Items */}

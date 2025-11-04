@@ -1,0 +1,13 @@
+{
+  "id": "edu_compound_interest",
+  "title": "The Power of Compound Interest: Start Investing Early",
+  "source": "The Motley Fool",
+  "url": "https://www.fool.com/investing/how-to-invest/stocks/compound-interest/",
+  "excerpt": "See how compound interest can turn small, regular investments into significant wealth over time.",
+  "tags": ["investing", "compound_interest", "savings", "planning", "strategy"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth"],
+  "editorial_summary": "This article demonstrates the power of compound interest with real examples showing how starting early can dramatically increase wealth over decades. It explains how compound interest works, provides calculators to show potential growth, and emphasizes the importance of time in the market. The content motivates readers to start investing early, even with small amounts.",
+  "editorial_priority": 9
+}
+

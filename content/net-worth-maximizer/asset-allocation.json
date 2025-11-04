@@ -1,0 +1,13 @@
+{
+  "id": "edu_asset_allocation",
+  "title": "Asset Allocation: The Foundation of Portfolio Strategy",
+  "source": "Morningstar",
+  "url": "https://www.morningstar.com/investing-definitions/asset-allocation",
+  "excerpt": "Understand how to allocate your investments across different asset classes based on your goals and risk tolerance.",
+  "tags": ["investing", "asset_allocation", "portfolio", "strategy", "planning"],
+  "persona_fit": ["net_worth_maximizer"],
+  "signals": ["savings_growth"],
+  "editorial_summary": "This article explains asset allocation fundamentals, including how to determine the right mix of stocks, bonds, and other assets based on age, risk tolerance, and time horizon. It covers age-based allocation rules (like the 100-minus-age rule), rebalancing strategies, and how asset allocation affects portfolio returns and volatility. Includes allocation models for different investor profiles.",
+  "editorial_priority": 8
+}
+

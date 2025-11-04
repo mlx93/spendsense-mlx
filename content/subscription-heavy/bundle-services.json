@@ -1,0 +1,13 @@
+{
+  "id": "edu_bundle_services",
+  "title": "How to Save Money by Bundling Subscriptions",
+  "source": "Wirecutter",
+  "url": "https://www.nytimes.com/wirecutter/money/best-subscription-bundles/",
+  "excerpt": "Learn how to get more value from your subscriptions by bundling services.",
+  "tags": ["subscriptions", "savings", "bundling", "strategy", "budgeting"],
+  "persona_fit": ["subscription_heavy"],
+  "signals": ["subscription_heavy"],
+  "editorial_summary": "This article explains how to save money by bundling subscription services (like streaming, software, or telecommunications). It covers common bundle options, how to evaluate if bundling saves money, and strategies for negotiating better rates. Includes examples of popular bundles and tips for avoiding bundle bloat.",
+  "editorial_priority": 7
+}
+

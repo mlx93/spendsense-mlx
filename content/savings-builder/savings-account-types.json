@@ -1,0 +1,13 @@
+{
+  "id": "edu_savings_account_types",
+  "title": "Types of Savings Accounts: Which One Is Right for You?",
+  "source": "Investopedia",
+  "url": "https://www.investopedia.com/banking/types-of-savings-accounts/",
+  "excerpt": "Compare traditional savings, high-yield savings, money market accounts, and CDs.",
+  "tags": ["savings", "banking", "accounts", "interest", "planning"],
+  "persona_fit": ["savings_builder"],
+  "signals": ["low_savings", "savings_growth"],
+  "editorial_summary": "This article compares different types of savings accounts including traditional savings, high-yield savings accounts, money market accounts, and certificates of deposit (CDs). It explains interest rates, minimum balance requirements, withdrawal restrictions, and helps readers choose the right account type for their savings goals and access needs.",
+  "editorial_priority": 8
+}
+

@@ -52,8 +52,34 @@ export async function generateRationale(
   const incomeSignal = signals['income'];
 
   if (recommendationType === 'education') {
-    // Generate rationale for education content
-    if (personaType === 'high_utilization' && creditSignal && userId) {
+    // Match rationale to content topic/signals, not just persona
+    // Check content signals to determine which rationale template to use
+    const contentSignals = match.signalsUsed || [];
+    const contentId = match.contentId;
+    
+    // Try to get content to check its tags/signals
+    let content = null;
+    if (contentId) {
+      try {
+        content = await prisma.content.findUnique({
+          where: { id: contentId },
+        });
+      } catch (e) {
+        // Content might not exist, continue with signal-based matching
+      }
+    }
+    
+    const contentTags = content ? JSON.parse(content.tags || '[]') : [];
+    const contentSignalsParsed = content ? JSON.parse(content.signals || '[]') : contentSignals;
+    
+    // Match rationale based on content topic/signals, not just persona
+    // Priority: content signals > content tags > persona type
+    
+    // Check if content is about credit/utilization
+    if ((contentSignalsParsed.includes('high_utilization') || 
+         contentSignalsParsed.includes('interest_charges') ||
+         contentTags.some((tag: string) => tag.includes('credit') || tag.includes('utilization') || tag.includes('debt'))) &&
+        creditSignal && userId) {
       // Get highest utilization credit card for this user
       const accounts = await prisma.account.findMany({
         where: { 
@@ -95,7 +121,10 @@ export async function generateRationale(
       }
     }
 
-    if (personaType === 'subscription_heavy' && subscriptionSignal) {
+    // Check if content is about subscriptions
+    if ((contentSignalsParsed.includes('subscription_heavy') ||
+         contentTags.some((tag: string) => tag.includes('subscription') || tag.includes('budgeting'))) &&
+        subscriptionSignal) {
       const count = subscriptionSignal.count || 0;
       const monthlyTotal = subscriptionSignal.monthly_spend || 0;
       const potentialSavings = monthlyTotal * 0.4; // Assume 40% could be canceled
@@ -113,7 +142,10 @@ export async function generateRationale(
       };
     }
 
-    if (personaType === 'savings_builder' && savingsSignal) {
+    // Check if content is about savings/emergency fund
+    if ((contentSignalsParsed.includes('savings_growth') ||
+         contentTags.some((tag: string) => tag.includes('savings') || tag.includes('emergency'))) &&
+        savingsSignal) {
       const growthRate = Math.round((savingsSignal.growth_rate || 0) * 100);
       return {
         rationale: rationaleTemplates.savings_v1
@@ -123,12 +155,26 @@ export async function generateRationale(
       };
     }
 
-    if (personaType === 'variable_income' && incomeSignal) {
+    // Check if content is about variable income/budgeting
+    if ((contentSignalsParsed.includes('variable_income') ||
+         contentTags.some((tag: string) => tag.includes('income') || tag.includes('budgeting'))) &&
+        incomeSignal) {
       const cashBuffer = (incomeSignal.cash_flow_buffer || 0).toFixed(1);
       return {
         rationale: rationaleTemplates.income_v1
           .replace('{cash_buffer}', cashBuffer),
         templateId: 'income_v1',
+      };
+    }
+    
+    // Fallback: use persona-based rationale if content doesn't match specific topics
+    if (personaType === 'high_utilization' && creditSignal && userId) {
+      // Already handled above if content is credit-related
+      // If we get here, content isn't credit-related but user has high utilization persona
+      // Use generic template with credit context
+      return {
+        rationale: `Based on your credit utilization patterns, this article might help you understand ${content?.title || 'financial planning'} better.`,
+        templateId: 'education_v1',
       };
     }
 

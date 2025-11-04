@@ -1,0 +1,13 @@
+{
+  "id": "edu_debt_payoff_methods",
+  "title": "Debt Snowball vs. Debt Avalanche: Which Method Works Best?",
+  "source": "NerdWallet",
+  "url": "https://www.nerdwallet.com/article/finance/debt-snowball-vs-debt-avalanche",
+  "excerpt": "Compare two popular debt payoff strategies to find the approach that fits your situation.",
+  "tags": ["debt", "strategy", "payoff", "credit", "planning"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["high_utilization", "minimum_payment_only"],
+  "editorial_summary": "This article compares the debt snowball method (paying smallest balances first) with the debt avalanche method (paying highest interest first). It explains the psychology and math behind each approach, provides calculators to estimate payoff timelines, and helps readers choose the method that aligns with their personality and financial situation. Real-world examples show the differences in total interest paid.",
+  "editorial_priority": 8
+}
+

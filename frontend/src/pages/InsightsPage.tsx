@@ -240,6 +240,65 @@ export default function InsightsPage() {
       {creditSignal && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Credit Health</h2>
+          
+          {/* Credit Utilization Per Card Chart */}
+          {profile.accounts.filter(acc => acc.type === 'credit_card' && acc.utilization !== null).length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Credit Utilization by Card</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={profile.accounts
+                    .filter(acc => acc.type === 'credit_card' && acc.utilization !== null)
+                    .map(acc => ({
+                      name: `****${acc.id.slice(-4)}`,
+                      utilization: Math.round((acc.utilization || 0) * 100),
+                      balance: acc.balance,
+                      limit: acc.limit || 0,
+                    }))
+                    .sort((a, b) => b.utilization - a.utilization)}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 100]} label={{ value: 'Utilization %', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip
+                    formatter={(value: number, name: string, props: any) => {
+                      if (name === 'utilization') {
+                        return [`${value}%`, 'Utilization'];
+                      }
+                      return [`$${value.toFixed(2)}`, name === 'balance' ? 'Balance' : 'Limit'];
+                    }}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
+                  />
+                  <Bar dataKey="utilization" fill="#8884d8">
+                    {profile.accounts
+                      .filter(acc => acc.type === 'credit_card' && acc.utilization !== null)
+                      .map((acc, index) => {
+                        const util = (acc.utilization || 0) * 100;
+                        let color = '#82ca9d'; // Green for low
+                        if (util >= 70) color = '#ff7300'; // Red for high
+                        else if (util >= 30) color = '#ffc658'; // Yellow for medium
+                        return <Cell key={`cell-${index}`} fill={color} />;
+                      })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-4 flex items-center justify-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500"></div>
+                  <span>&lt; 30% (Good)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-yellow-500"></div>
+                  <span>30-70% (Fair)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-orange-500"></div>
+                  <span>&gt; 70% (High)</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Max Utilization</span>
@@ -273,6 +332,46 @@ export default function InsightsPage() {
       {savingsSignal && (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Savings Progress</h2>
+          
+          {/* Savings Balance Trends Chart */}
+          {savingsSignal.savings_balance && savingsSignal.net_inflow && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Savings Balance Trend</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={(() => {
+                    // Generate trend data: current balance and projected future balances
+                    const currentBalance = savingsSignal.savings_balance || 0;
+                    const monthlyInflow = savingsSignal.net_inflow || 0;
+                    const months = ['Current', '1 Month', '2 Months', '3 Months', '6 Months'];
+                    return months.map((month, index) => {
+                      let balance = currentBalance;
+                      if (index > 0) {
+                        balance = currentBalance + (monthlyInflow * index);
+                      }
+                      return {
+                        month,
+                        balance: Math.max(0, balance),
+                      };
+                    });
+                  })()}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis label={{ value: 'Balance ($)', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Balance']}
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
+                  />
+                  <Bar dataKey="balance" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+              <p className="mt-2 text-sm text-gray-600 text-center">
+                Projected based on current monthly net inflow of ${savingsSignal.net_inflow?.toFixed(2) || '0'}
+              </p>
+            </div>
+          )}
+          
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Current Balance</span>

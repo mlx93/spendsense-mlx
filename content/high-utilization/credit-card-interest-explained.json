@@ -1,0 +1,13 @@
+{
+  "id": "edu_credit_card_interest",
+  "title": "How Credit Card Interest Works",
+  "source": "The Balance",
+  "url": "https://www.thebalance.com/how-credit-card-interest-works-4154841",
+  "excerpt": "Understanding APR, daily periodic rates, and how interest charges accumulate on your credit cards.",
+  "tags": ["credit", "interest", "apr", "debt", "education"],
+  "persona_fit": ["high_utilization"],
+  "signals": ["interest_charges", "high_utilization"],
+  "editorial_summary": "This educational article breaks down how credit card interest works in simple terms. It explains APR (Annual Percentage Rate), daily periodic rates, compound interest, and how minimum payments affect total interest paid. The content includes examples showing how much interest you pay over time and strategies to minimize interest charges. It helps readers understand why paying down balances is crucial.",
+  "editorial_priority": 7
+}
+
