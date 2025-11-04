@@ -8,14 +8,24 @@ echo "Generating Prisma Client in backend..."
 cd backend
 npx prisma generate
 
-echo "Copying Prisma Client to root for api/ directory..."
-# Prisma generates to backend/node_modules/@prisma/client and backend/node_modules/.prisma/client
-# We need both in root node_modules for api/ serverless functions
-mkdir -p ../node_modules/@prisma
-mkdir -p ../node_modules/.prisma
-cp -r node_modules/@prisma/client ../node_modules/@prisma/ 2>/dev/null || echo "Warning: @prisma/client copy failed"
-cp -r node_modules/.prisma/client ../node_modules/.prisma/ 2>/dev/null || echo "Warning: .prisma/client copy failed"
-echo "✅ Prisma Client copied to root"
+echo "Generating Prisma Client at root for api/ serverless functions..."
+# Generate Prisma Client at root level pointing to backend schema
+# This ensures api/ functions can import @prisma/client
+cd ..
+npx prisma generate --schema=./backend/prisma/schema.prisma
+
+# Verify Prisma Client was generated
+if [ -d "node_modules/@prisma/client" ]; then
+  echo "✅ Prisma Client generated at root"
+else
+  echo "❌ Warning: Prisma Client not found at root after generation"
+  # Fallback: copy from backend
+  echo "Attempting to copy from backend..."
+  mkdir -p node_modules/@prisma
+  cp -r backend/node_modules/@prisma/client node_modules/@prisma/ 2>/dev/null || echo "Copy failed"
+  mkdir -p node_modules/.prisma
+  cp -r backend/node_modules/.prisma/client node_modules/.prisma/ 2>/dev/null || echo "Copy failed"
+fi
 
 # Only run migrations and seed in production if DATABASE_URL is set
 if [ -n "$DATABASE_URL" ]; then
