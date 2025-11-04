@@ -21,20 +21,36 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   // Vercel's catch-all route: /api/auth/login
-  // The path is available in req.url, but might include query string
-  let fullPath = req.url || '';
+  // Path segments can be in req.query.path (array) or req.url
+  let path = '';
   
-  // Remove query string if present
-  const queryIndex = fullPath.indexOf('?');
-  if (queryIndex !== -1) {
-    fullPath = fullPath.substring(0, queryIndex);
+  // Check if path is in query (catch-all segments)
+  if (req.query && req.query.path) {
+    const pathSegments = Array.isArray(req.query.path) 
+      ? req.query.path 
+      : [req.query.path];
+    path = '/' + pathSegments.join('/');
+  } else {
+    // Fallback to req.url
+    let fullPath = req.url || '';
+    
+    // Remove query string if present
+    const queryIndex = fullPath.indexOf('?');
+    if (queryIndex !== -1) {
+      fullPath = fullPath.substring(0, queryIndex);
+    }
+    
+    path = fullPath;
+    
+    // Strip /api prefix if present
+    if (path.startsWith('/api')) {
+      path = path.substring(4) || '/';
+    }
   }
   
-  // Strip /api prefix to match our route mounting
-  // /api/auth/login -> /auth/login
-  let path = fullPath;
-  if (path.startsWith('/api')) {
-    path = path.substring(4) || '/'; // Remove '/api' prefix
+  // Ensure path starts with /
+  if (!path.startsWith('/')) {
+    path = '/' + path;
   }
   
   // Update request properties for Express routing

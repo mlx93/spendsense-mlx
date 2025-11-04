@@ -9,6 +9,44 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
+// GET /api/auth/example-users - Get example user emails for demo (no auth required)
+router.get('/example-users', async (req: Request, res: Response) => {
+  try {
+    // Get 5 random regular users (exclude operator)
+    const users = await prisma.user.findMany({
+      where: {
+        role: 'user',
+      },
+      select: {
+        email: true,
+      },
+      take: 5,
+      orderBy: {
+        created_at: 'asc', // Deterministic order (seeded users created in order)
+      },
+    });
+
+    // If we have fewer than 5 users, return all we have
+    const exampleEmails = users.map(u => u.email);
+
+    res.json({
+      exampleEmails,
+      password: 'password123', // All seeded users have the same password
+      operatorEmail: 'operator@spendsense.com',
+      operatorPassword: 'operator123',
+    });
+  } catch (error) {
+    console.error('Error fetching example users:', error);
+    // Return fallback if database query fails
+    res.json({
+      exampleEmails: [],
+      password: 'password123',
+      operatorEmail: 'operator@spendsense.com',
+      operatorPassword: 'operator123',
+    });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req: Request, res: Response) => {
   try {

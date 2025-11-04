@@ -1,14 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import api from '../lib/apiClient';
+
+interface ExampleUsers {
+  exampleEmails: string[];
+  password: string;
+  operatorEmail: string;
+  operatorPassword: string;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(true);
+  const [exampleUsers, setExampleUsers] = useState<ExampleUsers | null>(null);
+  const [loadingExamples, setLoadingExamples] = useState(true);
   const { login, register } = useAuth();
   const navigate = useNavigate();
+
+  // Fetch example users on mount
+  useEffect(() => {
+    const fetchExampleUsers = async () => {
+      try {
+        const response = await api.get('/auth/example-users');
+        setExampleUsers(response.data);
+      } catch (err) {
+        console.error('Failed to fetch example users:', err);
+        // Fallback if API call fails
+        setExampleUsers({
+          exampleEmails: [],
+          password: 'password123',
+          operatorEmail: 'operator@spendsense.com',
+          operatorPassword: 'operator123',
+        });
+      } finally {
+        setLoadingExamples(false);
+      }
+    };
+
+    if (isLogin) {
+      fetchExampleUsers();
+    }
+  }, [isLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,10 +131,34 @@ export default function LoginPage() {
             <div className="text-center text-sm text-gray-600 space-y-1">
               <p className="font-semibold">Demo credentials:</p>
               <div className="mt-2 space-y-1">
-                <p><span className="font-medium">Operator:</span> operator@spendsense.com / operator123</p>
-                <p><span className="font-medium">Regular users:</span> Use any seeded email (case-insensitive) + <span className="font-mono">password123</span></p>
-                <p className="text-xs text-gray-400 mt-1">Examples: kellen_effertz45@gmail.com, emmie.leannon@gmail.com</p>
-                <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
+                {exampleUsers && (
+                  <>
+                    <p>
+                      <span className="font-medium">Operator:</span>{' '}
+                      {exampleUsers.operatorEmail} / {exampleUsers.operatorPassword}
+                    </p>
+                    <p>
+                      <span className="font-medium">Regular users:</span> Use any seeded email (case-insensitive) +{' '}
+                      <span className="font-mono">{exampleUsers.password}</span>
+                    </p>
+                    {exampleUsers.exampleEmails.length > 0 && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        <p className="font-medium mb-1">Example emails:</p>
+                        <div className="space-y-0.5">
+                          {exampleUsers.exampleEmails.map((exampleEmail, idx) => (
+                            <p key={idx} className="font-mono">
+                              {exampleEmail}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">Or register a new account below</p>
+                  </>
+                )}
+                {loadingExamples && (
+                  <p className="text-xs text-gray-400">Loading example users...</p>
+                )}
               </div>
             </div>
           )}
