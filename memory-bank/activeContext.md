@@ -190,11 +190,132 @@
 4. Seed if empty (first deployment only)
 5. Build frontend
 
+## Recent Changes (Last 3 Commits - Nov 2025)
+
+### 1. Database Connection & Environment Setup
+**Issue:** Backend couldn't connect to Supabase database in local dev
+**Solution:**
+- Fixed `.env` file to use correct Supabase connection (port 6543 pooled connection)
+- Created `backend/fix-env.sh` script to automate DATABASE_URL fixes
+- Added `pgbouncer=true` parameter for pooled connections
+- Changed connection from `postgres://` to `postgresql://` protocol
+
+**Files Added:**
+- `backend/fix-env.sh` - Script to fix DATABASE_URL configuration
+- `backend/.env.backup` - Backup of original .env
+
+**Files Changed:**
+- `backend/.env` - Updated to use port 6543 with pgbouncer
+
+### 2. Hardcoded Example Users with Personas
+**Feature:** Login page now displays 5 example users with their persona types
+**Implementation:**
+- Created hardcoded mapping based on seed 1337 (deterministic emails)
+- One user per persona type: high_utilization, variable_income, subscription_heavy, savings_builder, net_worth_maximizer
+- Personas displayed on login page without needing to calculate them
+- Users must exist in database, but personas are "remembered" from seed
+
+**Files Added:**
+- `backend/src/utils/exampleUsersMapping.ts` - Hardcoded email → persona mapping
+- `reset_consent.sql` - SQL script to reset all user consent to false
+
+**Files Changed:**
+- `backend/src/ui/routes/auth.ts` - Uses hardcoded mapping instead of querying personas
+- `frontend/src/pages/LoginPage.tsx` - Displays users with color-coded persona badges
+
+**Example Users (Seed 1337):**
+- `Kellen_Effertz45@gmail.com` → high_utilization
+- `Carrie87@hotmail.com` → variable_income
+- `Jaiden.Heidenreich@gmail.com` → subscription_heavy
+- `Lenna_Stiedemann73@hotmail.com` → savings_builder
+- `Aimee_Oberbrunner@gmail.com` → net_worth_maximizer
+
+### 3. User Data Seeding for New Users
+**Feature:** New users automatically get fake transaction data
+**Implementation:**
+- `seedUserData()` function creates accounts, transactions, and liabilities
+- Runs asynchronously after user registration (doesn't block registration)
+- Consent endpoint waits up to 5 seconds for seeding to complete before generating insights
+- Ensures new users have data to analyze when they consent
+
+**Files Added:**
+- `backend/src/utils/seedUserData.ts` - Generates fake accounts, transactions, liabilities
+
+**Files Changed:**
+- `backend/src/ui/routes/users.ts` - Calls `seedUserData()` after user creation
+- `backend/src/ui/routes/profile.ts` - Waits for accounts before generating data on consent
+
+### 4. Consent Modal & Data Generation Flow
+**Feature:** Modal blocks dashboard access until user consents
+**Implementation:**
+- Consent modal appears immediately after login if `consentStatus === false`
+- Modal shows progress bar during data generation (happens synchronously on consent)
+- After consent, `generateUserData()` runs synchronously before returning response
+- Dashboard only loads after consent is granted and data is generated
+
+**Files Changed:**
+- `frontend/src/components/ConsentModal.tsx`:
+  - Added progress bar with status messages
+  - Fixed button sizing (added `min-width` to prevent resizing)
+  - Button text stays "Enabling..." instead of showing status
+  - Handles both "Allow" and "Skip" actions
+- `frontend/src/App.tsx`:
+  - `ProtectedRoute` explicitly renders `ConsentModal` when consent is false
+  - Blocks children rendering until consent is handled
+- `backend/src/ui/routes/profile.ts`:
+  - `/consent` endpoint now `await`s `generateUserData()` when consent granted
+  - Added retry loop to wait for accounts if user just registered
+  - Returns new JWT token with updated consent status
+
+### 5. Dashboard Loading & Progress Bar Improvements
+**Feature:** Better UX during initial dashboard load
+**Implementation:**
+- Progress bar now updates dynamically based on actual API call progress
+- Prevents hanging at 95% - progress increases gradually up to 90% while waiting
+- Status messages rotate while waiting for API responses
+- Fixed "Cannot read properties of undefined (reading 'signals')" error
+- Improved error handling with toast notifications
+
+**Files Changed:**
+- `frontend/src/pages/DashboardPage.tsx`:
+  - `loadDataWithProgress()` uses intervals to update progress dynamically
+  - Fixed signal access errors (changed `profileResponse.data.signals` to `profile.signals`)
+  - Added `useCallback` to prevent initialization errors
+  - Moved function definition before `useEffect` to fix reference errors
+  - Better error handling with toast notifications
+  - Ensures loading state is properly cleared
+
+**Files Added:**
+- `frontend/src/utils/toast.tsx` - Toast notification system for user feedback
+
+### 6. Operator Dashboard Enhancements
+**Feature:** Operator can reset all user consent
+**Implementation:**
+- Added `POST /api/operator/reset-consent` endpoint
+- Sets all users' `consent_status` to `false` and `consent_date` to `null`
+- Useful for demos and testing consent flow
+
+**Files Changed:**
+- `backend/src/ui/routes/operator.ts` - Added reset consent endpoint
+- `frontend/src/pages/OperatorPage.tsx` - Added "Reset All User Consent" button
+
+### 7. Build Process Improvements
+**Enhancement:** Migrations now optional during build
+**Implementation:**
+- Migrations skipped by default (dev and prod share database)
+- Can enable with `RUN_MIGRATIONS_IN_BUILD=true` environment variable
+- Build script uses `set +e` to allow graceful failures
+- Prioritizes pooled connection for seeding, falls back to non-pooling
+
+**Files Changed:**
+- `build.sh` - Made migrations optional, improved error handling
+
 ## Next Steps
 1. ✅ Database migration to Supabase complete
 2. ✅ Login and example users endpoint working
-3. ⏳ Awaiting production seed completion (in progress)
-4. ⏳ Verify example users display on login page after seed completes
+3. ✅ Example users display with personas on login page
+4. ✅ Consent modal and data generation flow working
+5. ⏳ Monitor progress bar performance - should now be smoother
 
 ## Known Issues Resolved
 - ✅ Vercel 405 errors on login routes

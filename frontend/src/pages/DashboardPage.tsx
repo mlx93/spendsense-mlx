@@ -23,38 +23,52 @@ export default function DashboardPage() {
     setRefreshProgress(0);
     setRefreshStatus('Loading your dashboard...');
     
-    // Simulate progress while data loads/generates
-    const progressSteps = [
-      { progress: 20, status: 'Checking your data...', delay: 400 },
-      { progress: 40, status: 'Analyzing transactions...', delay: 600 },
-      { progress: 60, status: 'Generating insights...', delay: 800 },
-      { progress: 80, status: 'Preparing recommendations...', delay: 600 },
-      { progress: 95, status: 'Almost ready...', delay: 400 },
-    ];
+    // Start API calls immediately and update progress based on actual progress
+    // This prevents the progress bar from hanging at 95% while waiting for generateUserData
+    if (!user) return;
     
-    let currentStep = 0;
-    const runProgressStep = () => {
-      if (currentStep < progressSteps.length) {
-        setRefreshProgress(progressSteps[currentStep].progress);
-        setRefreshStatus(progressSteps[currentStep].status);
-        currentStep++;
-        if (currentStep < progressSteps.length) {
-          setTimeout(runProgressStep, progressSteps[currentStep].delay);
+    // Set initial progress
+    setRefreshProgress(10);
+    setRefreshStatus('Connecting to server...');
+    
+    // Start API calls in parallel - they will trigger generateUserData if needed
+    const profilePromise = profileApi.getProfile(user.id);
+    const recommendationsPromise = recommendationsApi.getRecommendations(user.id, 'active');
+    
+    // Update progress as we wait for responses
+    const progressInterval = setInterval(() => {
+      setRefreshProgress(prev => {
+        // Gradually increase progress up to 90% while waiting
+        if (prev < 90) {
+          return Math.min(prev + 5, 90);
         }
+        return prev;
+      });
+    }, 500);
+    
+    // Update status messages while waiting
+    const statusMessages = [
+      'Checking your data...',
+      'Analyzing transactions...',
+      'Generating insights...',
+      'Preparing recommendations...',
+    ];
+    let statusIndex = 0;
+    const statusInterval = setInterval(() => {
+      if (statusIndex < statusMessages.length) {
+        setRefreshStatus(statusMessages[statusIndex]);
+        statusIndex++;
       }
-    };
-    runProgressStep();
+    }, 1500);
     
     try {
-      // Load data - profile endpoint will generate if missing
-      // loadData is defined below, but we need to reference it here
-      // We'll call it directly without the skipLoadingState check since we're managing loading state ourselves
-      if (!user) return;
+      // Wait for both API calls to complete
+      setRefreshProgress(90);
+      setRefreshStatus('Finalizing...');
       
-      // Load profile and recommendations in parallel
       const [profileResponse, recsResponse] = await Promise.allSettled([
-        profileApi.getProfile(user.id),
-        recommendationsApi.getRecommendations(user.id, 'active'),
+        profilePromise,
+        recommendationsPromise,
       ]);
       
       // Extract data or handle errors
@@ -110,6 +124,10 @@ export default function DashboardPage() {
         setAlerts(newAlerts.slice(0, 2));
       }
       
+      // Clear intervals once we have responses
+      clearInterval(progressInterval);
+      clearInterval(statusInterval);
+      
       const loadedCount = recommendations.length;
       
       setRefreshProgress(100);
@@ -131,6 +149,10 @@ export default function DashboardPage() {
         setLoading(false); // Ensure loading is cleared
       }, 500);
     } catch (error) {
+      // Clear intervals on error
+      clearInterval(progressInterval);
+      clearInterval(statusInterval);
+      
       console.error('Error loading dashboard:', error);
       showToast(
         'Failed to load dashboard',
