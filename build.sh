@@ -40,6 +40,8 @@ if [ -n "$DATABASE_URL" ]; then
     export MIGRATION_DATABASE_URL="$DATABASE_URL"
   fi
   
+  # Run migrations from backend directory where schema.prisma is located
+  cd backend
   DATABASE_URL="$MIGRATION_DATABASE_URL" npx prisma migrate deploy
   
   echo "Checking if database needs seeding..."
@@ -52,6 +54,7 @@ if [ -n "$DATABASE_URL" ]; then
   else
     echo "Database already has data (found $USER_COUNT rows in User table), skipping seed"
   fi
+  cd ..
 else
   echo "DATABASE_URL not set, skipping database setup"
 fi
