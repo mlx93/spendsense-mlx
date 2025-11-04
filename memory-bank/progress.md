@@ -40,11 +40,13 @@
 - [x] Chat API (`/api/chat`)
 - [x] Operator API (`/api/operator/*`)
 - [x] Content API (`/api/content`)
-- [x] Transactions API (`/api/transactions`) - **NEW**
+- [x] Transactions API (`/api/transactions`)
+- [x] Articles API (`/api/articles/:recommendationId`) - **NEW - Dynamic article generation**
 - [x] Dashboard page with alerts and recommendations
-- [x] Insights page with spending patterns and charts - **ENHANCED**
+- [x] Insights page with spending patterns and charts
 - [x] Library page (browse content)
-- [x] Settings page (consent management)
+- [x] Settings page (consent management + account preferences)
+- [x] Article page (`/article/:recommendationId`) - **NEW - Dynamic articles**
 - [x] Operator dashboard
 
 ### Phase 6: Guardrails ✅
@@ -52,7 +54,8 @@
 - [x] Eligibility checker (rule-based evaluation)
 - [x] Tone validator (blocklist + optional LLM review)
 - [x] Consent middleware (blocks non-consenting users)
-- [x] Consent modal on first login - **NEW**
+- [x] Consent modal on first login
+- [x] Article generation compliance validation - **NEW - Function calling for tone/advice/disclaimer checks**
 
 ### Phase 7: Interactive Features ✅
 - [x] Chat sidebar with OpenAI integration
@@ -88,21 +91,28 @@
 - [x] Calculator "Take Action" buttons
 - [x] Calculator formula transparency
 
-### Remaining Items (Lower Priority)
-- [ ] Content count (only 7 articles, PRD suggests 30 - 6 per persona)
-- [ ] Account preferences (email/password update - shows "coming soon")
+### Remaining Items (All Completed) ✅
+- [x] Content count: **32 articles** (exceeds requirement of 30)
+- [x] Account preferences: **Email/password update implemented**
 
 ## Test Status
 - **Total Tests:** 19 tests across 8 test suites
 - **Status:** ✅ All passing
 - **Coverage:** 10.56% overall (expected - routes need integration tests)
 
+## Recent Enhancements (Latest)
+- [x] Dynamic article generation with OpenAI (on-demand, personalized)
+- [x] Function calling compliance validation (tone, advice, disclaimer checks)
+- [x] Rationale personalization improvements (content/offer-specific text)
+- [x] Card number display fix (numeric digits only, e.g., "1234" not "Z7S2")
+- [x] Content count increased to 32 articles (exceeds requirement)
+
 ## Current Blockers
 None - all critical features complete and working.
 
-## Next Milestones
+## Next Milestones (Optional Enhancements)
 1. Add integration tests for API routes
-2. Add more content items (target 30 total)
-3. Implement account preferences (email/password update)
-4. Optimize email lookup for scale (use COLLATE NOCASE or normalize)
+2. Optimize email lookup for scale (use COLLATE NOCASE or normalize)
+3. Add caching for article generation (reduce OpenAI API calls)
+4. Enhance operator dashboard with more analytics
 

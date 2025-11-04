@@ -1,7 +1,7 @@
 # Active Context - Recent Development
 
 ## Current Focus
-Completing gap analysis items and fixing Vercel production deployment issues.
+✅ **All PRD requirements complete** - System is production-ready. Recent focus on dynamic article generation and compliance validation.
 
 ## Recent Changes (Post-Memory Bank Update)
 
@@ -82,12 +82,45 @@ Completing gap analysis items and fixing Vercel production deployment issues.
 **Files Changed:**
 - `backend/tests/recommend/rationaleGenerator.test.ts`
 
+### 7. Dynamic Article Generation (Latest)
+**New Feature:** On-demand article generation with OpenAI
+- User clicks "Learn More" → navigates to `/article/:recommendationId`
+- Backend generates personalized 800-1200 word article using GPT-4o-mini
+- Articles tailored to user's specific signals and recommendation context
+- Function calling for compliance validation:
+  - `validate_tone()` - Checks for prohibited phrases and shaming language
+  - `check_financial_advice()` - Detects advice-giving language
+  - `verify_disclaimer()` - Ensures required disclaimer present
+- Iterative refinement (up to 3 attempts) until all checks pass
+- Auto-appends disclaimer if missing
+- Markdown rendering with ReactMarkdown
+
+**Files Added:**
+- `backend/src/services/articleGenerator.ts` - Article generation with compliance tools
+- `backend/src/ui/routes/articles.ts` - API endpoint for article generation
+- `frontend/src/pages/ArticlePage.tsx` - Article display page
+
+**Files Changed:**
+- `frontend/src/pages/DashboardPage.tsx` - Single "Learn More" link per recommendation
+- `frontend/src/App.tsx` - Added article route
+- `frontend/src/services/api.ts` - Added articlesApi
+
+### 8. Rationale Personalization Improvements
+**Enhancement:** Better variation in recommendation rationales
+- Rationales now include content/offer titles for uniqueness
+- Offer rationales fetch and mention specific offer details
+- Category-specific templates (credit, savings, subscription offers)
+- Card numbers display as 4-digit numbers (extracted from account IDs)
+
+**Files Changed:**
+- `backend/src/recommend/rationaleGenerator.ts` - Enhanced personalization logic
+
 ## Next Steps
-1. ✅ All gap analysis items completed
-2. Test all changes locally
-3. Deploy to Vercel and verify production fixes
-4. Update memory bank documentation
-5. Git commit and push
+1. ✅ All PRD requirements completed
+2. ✅ Dynamic article generation implemented
+3. ✅ Compliance validation added
+4. ✅ Memory bank updated
+5. Ready for production deployment
 
 ## Known Issues Resolved
 - ✅ Vercel 405 errors on login routes
@@ -97,4 +130,7 @@ Completing gap analysis items and fixing Vercel production deployment issues.
 - ✅ Missing consent modal on first login
 - ✅ Missing calculator action buttons
 - ✅ Missing formula transparency
+- ✅ Duplicate rationale text across users
+- ✅ Card numbers showing letters instead of digits
+- ✅ All remaining PRD gaps
 
