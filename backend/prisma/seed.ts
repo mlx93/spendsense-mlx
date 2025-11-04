@@ -757,7 +757,17 @@ async function main() {
 
   // Phase 1: Generate Users
   console.log('Phase 1: Generating users...');
-  const users = [];
+  const users: Array<{
+    id: string;
+    email: string;
+    password_hash: string;
+    consent_status: boolean;
+    consent_date: Date | null;
+    role: string;
+    created_at: Date;
+    updated_at: Date;
+    targetPersona: typeof PERSONAS[number];
+  }> = [];
   for (const persona of PERSONAS) {
     for (let i = 0; i < USERS_PER_PERSONA; i++) {
       const email = seededFaker.internet.email();
@@ -984,16 +994,21 @@ async function main() {
         const match = contentMatches[i];
         if (!match) continue;
 
-        const rationale = await generateRationale('education', match, signalsMap, primaryPersona.persona_type, userData.id);
+        const rationaleResult = await generateRationale('education', match, signalsMap, primaryPersona.persona_type, userData.id);
+        const rationale = rationaleResult.rationale;
         const decisionTrace = {
           signals_snapshot: signalsMap,
           persona_scores: {
             primary: { type: primaryPersona.persona_type, score: Number(primaryPersona.score) },
             secondary: secondaryPersona ? { type: secondaryPersona.persona_type, score: Number(secondaryPersona.score) } : null,
           },
-          rule_path: ['content_filter:persona_fit', 'content_filter:signal_overlap'],
+          rule_path: [
+            `content_filter:persona_fit=${match.personaFit}`,
+            `content_filter:signal_overlap=${match.signalOverlap.toFixed(2)}`,
+            `content_filter:relevance_score=${match.relevanceScore.toFixed(2)}`,
+          ],
           eligibility_results: { passed: true, failed_rules: [] },
-          rationale_template_id: 'education_v1',
+          rationale_template_id: rationaleResult.templateId,
           generated_at: new Date().toISOString(),
         };
 
@@ -1033,16 +1048,27 @@ async function main() {
         const match = offerMatches[i];
         if (!match || !match.eligible) continue;
 
-        const rationale = await generateRationale('offer', match, signalsMap, primaryPersona.persona_type, userData.id);
+        const rationaleResult = await generateRationale('offer', match, signalsMap, primaryPersona.persona_type, userData.id);
+        const rationale = rationaleResult.rationale;
         const decisionTrace = {
           signals_snapshot: signalsMap,
           persona_scores: {
             primary: { type: primaryPersona.persona_type, score: Number(primaryPersona.score) },
             secondary: secondaryPersona ? { type: secondaryPersona.persona_type, score: Number(secondaryPersona.score) } : null,
           },
-          rule_path: ['offer_filter:eligibility', 'offer_filter:persona_fit'],
-          eligibility_results: { passed: true, failed_rules: [] },
-          rationale_template_id: 'offer_v1',
+          rule_path: [
+            `offer_filter:persona_fit=${match.personaFit}`,
+            `offer_filter:required_signals=${(match.signalsUsed || []).join(',')}`,
+            `eligibility:passed=${match.eligible}`,
+            ...(match.failedRules && match.failedRules.length > 0
+              ? [`eligibility:failed_rules=${match.failedRules.map((r: any) => `${r.field}${r.operator}${r.value}`).join(',')}`]
+              : []),
+          ],
+          eligibility_results: {
+            passed: match.eligible,
+            failed_rules: match.failedRules || [],
+          },
+          rationale_template_id: rationaleResult.templateId,
           generated_at: new Date().toISOString(),
         };
 

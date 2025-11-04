@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { operatorApi } from '../services/api';
+import UserDetailView from '../components/Operator/UserDetailView';
 
 interface DashboardStats {
   totalUsers: number;
@@ -20,11 +21,26 @@ interface FlaggedRecommendation {
   flaggedAt: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  consentStatus: boolean;
+  primaryPersona: string | null;
+  primaryPersonaScore: number | null;
+  secondaryPersona: string | null;
+  secondaryPersonaScore: number | null;
+  activeRecommendations: number;
+  flaggedRecommendations: number;
+}
+
 export default function OperatorPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [flaggedRecs, setFlaggedRecs] = useState<FlaggedRecommendation[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRec, setSelectedRec] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadData();
@@ -32,12 +48,14 @@ export default function OperatorPage() {
 
   const loadData = async () => {
     try {
-      const [dashboardResponse, reviewResponse] = await Promise.all([
+      const [dashboardResponse, reviewResponse, usersResponse] = await Promise.all([
         operatorApi.getDashboard(),
         operatorApi.getReviewQueue(),
+        operatorApi.getUsers(1, 100),
       ]);
       setStats(dashboardResponse.data.stats);
       setFlaggedRecs(reviewResponse.data.flaggedRecommendations);
+      setUsers(usersResponse.data.users);
     } catch (error) {
       console.error('Error loading operator data:', error);
     } finally {
@@ -93,6 +111,48 @@ export default function OperatorPage() {
             <p className="text-sm text-gray-700 mt-2">
               {Object.keys(stats.personas).length} unique personas
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* User Search */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">User Search</h2>
+        <input
+          type="text"
+          placeholder="Search by email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+        />
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {users
+            .filter(user => !searchTerm || user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+            .map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
+                onClick={() => setSelectedUserId(user.id)}
+              >
+                <div>
+                  <p className="font-medium text-gray-900">{user.email}</p>
+                  <p className="text-sm text-gray-500">
+                    {user.primaryPersona?.replace(/_/g, ' ') || 'No persona'} • {user.activeRecommendations} recs
+                  </p>
+                </div>
+                <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  View Details →
+                </button>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* User Detail View Modal */}
+      {selectedUserId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <UserDetailView userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
           </div>
         </div>
       )}

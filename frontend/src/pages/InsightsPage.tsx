@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/authContext';
 import { profileApi, Profile } from '../services/api';
+import EmergencyFundCalculator from '../components/Calculators/EmergencyFundCalculator';
+import DebtPayoffSimulator from '../components/Calculators/DebtPayoffSimulator';
+import SubscriptionAuditTool from '../components/Calculators/SubscriptionAuditTool';
 
 export default function InsightsPage() {
   const { user } = useAuth();
@@ -224,6 +227,18 @@ export default function InsightsPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Interactive Calculators */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Interactive Calculators</h2>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <EmergencyFundCalculator profile={profile} />
+          <DebtPayoffSimulator profile={profile} />
+        </div>
+        
+        <SubscriptionAuditTool profile={profile} />
       </div>
     </div>
   );

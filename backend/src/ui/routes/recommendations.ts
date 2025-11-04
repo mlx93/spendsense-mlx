@@ -147,7 +147,7 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
           const match = contentMatches[i];
           if (!match) continue;
 
-          const rationale = await generateRationale(
+          const rationaleResult = await generateRationale(
             'education',
             match,
             signalsMap,
@@ -156,20 +156,52 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
           );
 
           const reviewResult = await reviewRecommendation({
-            rationale,
+            rationale: rationaleResult.rationale,
             type: 'education',
             personaType: primaryPersona.persona_type,
           });
+
+          // Build complete decision trace
+          const secondaryPersona = personas.find(p => p.rank === 2);
+          const decisionTrace = {
+            signals_snapshot: {
+              credit: signalsMap['credit'] || null,
+              subscription: signalsMap['subscription'] || null,
+              savings: signalsMap['savings'] || null,
+              income: signalsMap['income'] || null,
+            },
+            persona_scores: {
+              primary: {
+                type: primaryPersona.persona_type,
+                score: Number(primaryPersona.score),
+              },
+              secondary: secondaryPersona ? {
+                type: secondaryPersona.persona_type,
+                score: Number(secondaryPersona.score),
+              } : null,
+            },
+            rule_path: [
+              `content_filter:persona_fit=${match.personaFit}`,
+              `content_filter:signal_overlap=${match.signalOverlap.toFixed(2)}`,
+              `content_filter:relevance_score=${match.relevanceScore.toFixed(2)}`,
+            ],
+            eligibility_results: {
+              passed: true,
+              failed_rules: [],
+            },
+            rationale_template_id: rationaleResult.templateId,
+            generated_at: new Date().toISOString(),
+          };
 
           await prisma.recommendation.create({
             data: {
               user_id: userId,
               type: 'education',
               content_id: match.contentId,
-              rationale,
+              rationale: rationaleResult.rationale,
               persona_type: primaryPersona.persona_type,
               signals_used: JSON.stringify(match.signalsUsed || []),
-              decision_trace: JSON.stringify({ generated_at: new Date().toISOString() }),
+              decision_trace: JSON.stringify(decisionTrace),
               status: reviewResult.approved ? 'active' : 'hidden',
               agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
               agentic_review_reason: reviewResult.reason || null,
@@ -188,7 +220,7 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
           const match = offerMatches[i];
           if (!match || !match.eligible) continue;
 
-          const rationale = await generateRationale(
+          const rationaleResult = await generateRationale(
             'offer',
             match,
             signalsMap,
@@ -197,20 +229,55 @@ router.get('/:userId', authenticateToken, requireConsent, async (req: AuthReques
           );
 
           const reviewResult = await reviewRecommendation({
-            rationale,
+            rationale: rationaleResult.rationale,
             type: 'offer',
             personaType: primaryPersona.persona_type,
           });
+
+          // Build complete decision trace
+          const secondaryPersona = personas.find(p => p.rank === 2);
+          const decisionTrace = {
+            signals_snapshot: {
+              credit: signalsMap['credit'] || null,
+              subscription: signalsMap['subscription'] || null,
+              savings: signalsMap['savings'] || null,
+              income: signalsMap['income'] || null,
+            },
+            persona_scores: {
+              primary: {
+                type: primaryPersona.persona_type,
+                score: Number(primaryPersona.score),
+              },
+              secondary: secondaryPersona ? {
+                type: secondaryPersona.persona_type,
+                score: Number(secondaryPersona.score),
+              } : null,
+            },
+            rule_path: [
+              `offer_filter:persona_fit=${match.personaFit}`,
+              `offer_filter:required_signals=${(match.signalsUsed || []).join(',')}`,
+              `eligibility:passed=${match.eligible}`,
+              ...(match.failedRules && match.failedRules.length > 0
+                ? [`eligibility:failed_rules=${match.failedRules.map((r: any) => `${r.field}${r.operator}${r.value}`).join(',')}`]
+                : []),
+            ],
+            eligibility_results: {
+              passed: match.eligible,
+              failed_rules: match.failedRules || [],
+            },
+            rationale_template_id: rationaleResult.templateId,
+            generated_at: new Date().toISOString(),
+          };
 
           await prisma.recommendation.create({
             data: {
               user_id: userId,
               type: 'offer',
               offer_id: match.offerId,
-              rationale,
+              rationale: rationaleResult.rationale,
               persona_type: primaryPersona.persona_type,
               signals_used: JSON.stringify(match.signalsUsed || []),
-              decision_trace: JSON.stringify({ generated_at: new Date().toISOString() }),
+              decision_trace: JSON.stringify(decisionTrace),
               status: reviewResult.approved ? 'active' : 'hidden',
               agentic_review_status: reviewResult.approved ? 'approved' : 'flagged',
               agentic_review_reason: reviewResult.reason || null,

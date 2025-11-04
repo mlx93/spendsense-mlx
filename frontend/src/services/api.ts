@@ -73,6 +73,28 @@ export const chatApi = {
     api.post('/chat', { message, conversationHistory }),
 };
 
+// Content APIs
+export interface ContentItem {
+  id: string;
+  title: string;
+  source: string;
+  url: string;
+  excerpt: string;
+  tags: string[];
+  personaFit: string[];
+  signals: string[];
+  createdAt: string;
+}
+
+export const contentApi = {
+  getAll: (topic?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (topic) params.append('topic', topic);
+    if (search) params.append('search', search);
+    return api.get<{ content: ContentItem[]; total: number }>(`/content?${params.toString()}`);
+  },
+};
+
 // Operator APIs
 export const operatorApi = {
   getDashboard: () => api.get('/operator/dashboard'),

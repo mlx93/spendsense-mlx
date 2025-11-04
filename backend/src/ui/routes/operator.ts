@@ -272,9 +272,24 @@ router.get('/user/:userId', async (req: AuthRequest, res: Response) => {
     // Get recommendations
     const recommendations = await prisma.recommendation.findMany({
       where: { user_id: userId },
-      include: {
-        content: true,
-        offer: true,
+      select: {
+        id: true,
+        type: true,
+        rationale: true,
+        status: true,
+        agentic_review_status: true,
+        agentic_review_reason: true,
+        decision_trace: true,
+        content: {
+          select: {
+            title: true,
+          },
+        },
+        offer: {
+          select: {
+            title: true,
+          },
+        },
       },
       orderBy: { created_at: 'desc' },
     });

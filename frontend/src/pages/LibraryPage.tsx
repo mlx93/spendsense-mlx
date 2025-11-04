@@ -1,42 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { contentApi, ContentItem } from '../services/api';
 
 export default function LibraryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
+  const [content, setContent] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const topics = ['credit', 'savings', 'budgeting', 'debt', 'investing'];
 
-  // Mock content - in real implementation, this would come from API
-  const content = [
-    {
-      id: '1',
-      title: 'Understanding Credit Utilization',
-      source: 'NerdWallet',
-      excerpt: 'Credit utilization is the percentage of your available credit that you\'re using...',
-      url: 'https://www.nerdwallet.com/article/credit-scores/credit-utilization-rate-calculator',
-      tags: ['credit', 'utilization'],
-    },
-    {
-      id: '2',
-      title: 'Emergency Fund Basics',
-      source: 'Investopedia',
-      excerpt: 'An emergency fund is a safety net of money to help you cover unexpected expenses...',
-      url: 'https://www.investopedia.com/terms/e/emergency_fund.asp',
-      tags: ['savings', 'emergency-fund'],
-    },
-    {
-      id: '3',
-      title: 'Budgeting for Irregular Income',
-      source: 'CFPB',
-      excerpt: 'If your income varies from month to month, creating a budget can be challenging...',
-      url: 'https://www.consumerfinance.gov/consumer-tools/money-as-you-grow/make-a-budget/',
-      tags: ['budgeting', 'income'],
-    },
-  ];
+  useEffect(() => {
+    loadContent();
+  }, [selectedTopic, searchTerm]);
+
+  const loadContent = async () => {
+    try {
+      setLoading(true);
+      const response = await contentApi.getAll(selectedTopic || undefined, searchTerm || undefined);
+      setContent(response.data.content);
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredContent = content.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = !searchTerm || 
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesTopic = !selectedTopic || item.tags.includes(selectedTopic);
     return matchesSearch && matchesTopic;
   });
@@ -75,8 +68,11 @@ export default function LibraryPage() {
       </div>
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredContent.map((item) => (
+      {loading ? (
+        <div className="text-center py-12">Loading...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredContent.map((item) => (
           <div key={item.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-500">{item.source}</span>
@@ -99,10 +95,11 @@ export default function LibraryPage() {
               Read More →
             </a>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {filteredContent.length === 0 && (
+      {!loading && filteredContent.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           No articles found matching your search criteria.
         </div>

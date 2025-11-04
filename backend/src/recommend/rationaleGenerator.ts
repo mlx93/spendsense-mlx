@@ -34,13 +34,18 @@ function getAccountDisplayName(accountId: string, type: string): string {
   return `${type} account ending in ${lastFour}`;
 }
 
+export interface RationaleResult {
+  rationale: string;
+  templateId: string;
+}
+
 export async function generateRationale(
   recommendationType: 'education' | 'offer',
   match: any,
   signals: any,
   personaType: string,
   userId?: string
-): Promise<string> {
+): Promise<RationaleResult> {
   const creditSignal = signals['credit'];
   const subscriptionSignal = signals['subscription'];
   const savingsSignal = signals['savings'];
@@ -78,12 +83,15 @@ export async function generateRationale(
         const utilization = Math.round((balance / limit) * 100);
         const interestMonthly = creditSignal.interest_charges || 0;
 
-        return rationaleTemplates.credit_utilization_v1
-          .replace('{card_name}', cardName)
-          .replace('{utilization}', utilization.toString())
-          .replace('${balance}', balance.toFixed(0))
-          .replace('${limit}', limit.toFixed(0))
-          .replace('${interest_monthly}', interestMonthly.toFixed(2));
+        return {
+          rationale: rationaleTemplates.credit_utilization_v1
+            .replace('{card_name}', cardName)
+            .replace('{utilization}', utilization.toString())
+            .replace('${balance}', balance.toFixed(0))
+            .replace('${limit}', limit.toFixed(0))
+            .replace('${interest_monthly}', interestMonthly.toFixed(2)),
+          templateId: 'credit_utilization_v1',
+        };
       }
     }
 
@@ -95,30 +103,42 @@ export async function generateRationale(
         ? 'emergency fund'
         : 'other goals';
 
-      return rationaleTemplates.subscription_v1
-        .replace('{count}', count.toString())
-        .replace('${monthly_total}', monthlyTotal.toFixed(2))
-        .replace('${potential_savings}', potentialSavings.toFixed(2))
-        .replace('{goal}', goal);
+      return {
+        rationale: rationaleTemplates.subscription_v1
+          .replace('{count}', count.toString())
+          .replace('${monthly_total}', monthlyTotal.toFixed(2))
+          .replace('${potential_savings}', potentialSavings.toFixed(2))
+          .replace('{goal}', goal),
+        templateId: 'subscription_v1',
+      };
     }
 
     if (personaType === 'savings_builder' && savingsSignal) {
       const growthRate = Math.round((savingsSignal.growth_rate || 0) * 100);
-      return rationaleTemplates.savings_v1
-        .replace('{growth_rate}', growthRate.toString())
-        .replace('{window_days}', '180');
+      return {
+        rationale: rationaleTemplates.savings_v1
+          .replace('{growth_rate}', growthRate.toString())
+          .replace('{window_days}', '180'),
+        templateId: 'savings_v1',
+      };
     }
 
     if (personaType === 'variable_income' && incomeSignal) {
       const cashBuffer = (incomeSignal.cash_flow_buffer || 0).toFixed(1);
-      return rationaleTemplates.income_v1
-        .replace('{cash_buffer}', cashBuffer);
+      return {
+        rationale: rationaleTemplates.income_v1
+          .replace('{cash_buffer}', cashBuffer),
+        templateId: 'income_v1',
+      };
     }
 
     // Fallback generic template
-    return rationaleTemplates.education_v1
-      .replace('{topic}', 'financial planning')
-      .replace('{aspect}', 'your financial situation');
+    return {
+      rationale: rationaleTemplates.education_v1
+        .replace('{topic}', 'financial planning')
+        .replace('{aspect}', 'your financial situation'),
+      templateId: 'education_v1',
+    };
   } else {
     // Generate rationale for offers
     let signalDescription = '';
@@ -135,9 +155,12 @@ export async function generateRationale(
       ? 'reduce interest charges'
       : 'improve your financial situation';
 
-    return rationaleTemplates.offer_v1
-      .replace('{signal_description}', signalDescription)
-      .replace('{offer_type}', offerType)
-      .replace('{benefit}', benefit);
+    return {
+      rationale: rationaleTemplates.offer_v1
+        .replace('{signal_description}', signalDescription)
+        .replace('{offer_type}', offerType)
+        .replace('{benefit}', benefit),
+      templateId: 'offer_v1',
+    };
   }
 }
