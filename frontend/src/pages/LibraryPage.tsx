@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { contentApi, ContentItem } from '../services/api';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 export default function LibraryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,8 +46,10 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Education Library</h1>
+    <>
+      <LoadingOverlay isLoading={loading} message="Loading library..." />
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Education Library</h1>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-6">
@@ -120,5 +123,6 @@ export default function LibraryPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { recommendationsApi, profileApi, Recommendation } from '../services/api';
 import { showToast } from '../utils/toast';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -398,7 +399,12 @@ export default function DashboardPage() {
   });
 
   if (loading) {
-    return <div className="text-center py-12">Loading...</div>;
+    return (
+      <>
+        <LoadingOverlay isLoading={true} message="Loading your dashboard..." />
+        <div className="text-center py-12">Loading...</div>
+      </>
+    );
   }
 
   if (!user?.consentStatus) {
