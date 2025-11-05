@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { AuthRequest, authenticateToken } from '../middleware/auth.middleware';
 import { requireConsent } from '../middleware/consent.middleware';
 import { generateUserData } from './recommendations';

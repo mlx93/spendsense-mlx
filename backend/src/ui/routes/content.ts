@@ -1,22 +1,57 @@
 // Content API endpoint for Library page
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken, AuthRequest } from '../middleware/auth.middleware';
+import { Response } from 'express';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // GET /api/content - Get all educational content (for Library page)
-router.get('/', authenticateToken, async (req, res) => {
+// Operators see all content; regular users only see articles recommended to them
+router.get('/', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { topic, search } = req.query;
+    const userId = req.userId!;
+    const userRole = req.userRole || 'user';
 
+    // If operator, return all content (no filtering)
+    // If regular user, only show content that has been recommended to them
+    let contentIds: string[] | null = null;
+    
+    if (userRole !== 'operator') {
+      // Get all content IDs that have been recommended to this user
+      // Include all statuses (active, dismissed, completed, saved, hidden) 
+      // to show articles they've seen before
+      const recommendations = await prisma.recommendation.findMany({
+        where: {
+          user_id: userId,
+          type: 'education',
+          content_id: { not: null },
+        },
+        select: {
+          content_id: true,
+        },
+      });
+      
+      // Get unique content IDs
+      contentIds = Array.from(
+        new Set(
+          recommendations
+            .map(r => r.content_id)
+            .filter((id): id is string => id !== null)
+        )
+      );
+    }
+
+    // Build where clause
     let whereClause: any = {};
+    if (contentIds !== null) {
+      // Filter to only recommended content for regular users
+      whereClause.id = { in: contentIds };
+    }
 
-    // Note: SQLite doesn't support array_contains directly
-    // We'll filter manually after fetching
-
-    // Get all content
+    // Get content (filtered by recommendations if regular user)
     const allContent = await prisma.content.findMany({
       where: whereClause,
       orderBy: { created_at: 'desc' },

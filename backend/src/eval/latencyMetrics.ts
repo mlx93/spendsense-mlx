@@ -2,7 +2,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000/api';

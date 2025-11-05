@@ -1,7 +1,7 @@
 // JWT authentication middleware
 
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
   userId?: string;
