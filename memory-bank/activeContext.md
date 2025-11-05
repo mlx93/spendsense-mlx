@@ -13,23 +13,23 @@
 **Previous Work (December 2024):**
 - ✅ **Comprehensive Requirements Evaluation Completed** - Verified 100% compliance with all requirements across Sections 2-14
 - ✅ **Created Evaluation Enhancement Plan** - Detailed 5-phase plan to add relevance metrics, CSV export, and trace export
-- ✅ **Requirements Documentation** - Updated `REQUIREMENTS_EVALUATION.md` with complete evaluations for:
+- ✅ **Requirements Documentation** - Updated `docs/analysis/REQUIREMENTS_EVALUATION.md` with complete evaluations for:
   - Section 11: Operator View Requirements (100% compliant)
   - Section 12: Core Principles (100% compliant)
   - Section 13: Evaluation Metrics (100% compliant - all targets met)
   - Section 14: Additional Requirements (100% compliant)
-- ✅ **Agent Handoff Documentation** - Created `AGENT_HANDOFF.md` and `EVAL_ENHANCEMENT_PLAN.md` for next agent implementation
+- ✅ **Agent Handoff Documentation** - Created `docs/planning/AGENT_HANDOFF.md` and `docs/planning/EVAL_ENHANCEMENT_PLAN.md` for next agent implementation
 
 **Remaining Enhancements (Optional):**
 - ⏳ **Evaluation Harness Enhancements** - Three features to complete:
   1. Relevance metrics aggregation (scores computed but not stored/aggregated)
   2. CSV export functionality (currently only JSON exists)
   3. Per-user decision trace export (traces in DB but not exported as files)
-- 📋 **Implementation Plan Ready** - `EVAL_ENHANCEMENT_PLAN.md` contains detailed 5-phase plan with code examples
+- 📋 **Implementation Plan Ready** - `docs/planning/EVAL_ENHANCEMENT_PLAN.md` contains detailed 5-phase plan with code examples
 
 **Recent Organization:**
 - Reorganized documentation into `specs/` (PRDs + SpendSense.md) and `docs/` (all other MD files)
-- `DETERMINISTIC_BEHAVIOR.md` and `MANUAL_TEST_PLAN.md` kept in root for active use
+- Documentation organized into `docs/` with subdirectories: `analysis/`, `planning/`, `testing/`
 - Updated memory bank to reflect new structure
 
 **Latest Fixes (November 2024):**
@@ -524,7 +524,7 @@
 5. ✅ Latency measurement fixed (auto-auth, server check)
 6. ✅ Deterministic behavior verified and documented
 7. ✅ All success criteria passing (100% coverage, explainability, auditability; <5s latency)
-8. ⏳ **Manual testing phase** - Using `MANUAL_TEST_PLAN.md` for comprehensive testing
+8. ⏳ **Manual testing phase** - Using `docs/testing/MANUAL_TEST_PLAN.md` for comprehensive testing
 9. ⏳ **Chatbot testing** - Will enable OpenAI API key for chat functionality testing
 
 ## Known Issues Resolved

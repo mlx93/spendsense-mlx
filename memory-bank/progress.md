@@ -3,7 +3,7 @@
 ## Implementation Status: ✅ Complete
 
 ## Requirements Evaluation Status ✅
-- **Comprehensive Evaluation Completed:** `REQUIREMENTS_EVALUATION.md` now includes complete analysis for all sections
+- **Comprehensive Evaluation Completed:** `docs/analysis/REQUIREMENTS_EVALUATION.md` now includes complete analysis for all sections
 - **Sections 2-10:** Behavioral signals, personas, recommendations, guardrails, technical architecture, code quality, data ingestion - **100% compliant**
 - **Sections 11-14:** Operator view, core principles, evaluation metrics, additional requirements - **100% compliant**
 - **Overall Compliance:** ✅ **100% COMPLIANT** across all requirements
@@ -16,7 +16,7 @@
 - ⏳ **Relevance Metrics:** Scores computed but not aggregated/reported (planned enhancement)
 - ⏳ **CSV Export:** Not implemented (planned enhancement)
 - ⏳ **Trace Export:** Traces exist in DB but not exported per-user (planned enhancement)
-- 📋 **Enhancement Plan:** `EVAL_ENHANCEMENT_PLAN.md` contains detailed 5-phase implementation plan
+- 📋 **Enhancement Plan:** `docs/planning/EVAL_ENHANCEMENT_PLAN.md` contains detailed 5-phase implementation plan
 
 ### Phase 1: Data Generation ✅
 - [x] Synthetic data generator (`backend/prisma/seed.ts`)
@@ -197,8 +197,8 @@ None - all critical features complete and working.
   - `SpendSense.md` - Original prompt/specification
 - **`docs/`** - All other documentation (analysis, setup, deployment, etc.)
 - **Root** - Active working documents:
-  - `DETERMINISTIC_BEHAVIOR.md` - Deterministic behavior documentation
-  - `MANUAL_TEST_PLAN.md` - Manual testing guide
+  - `docs/DETERMINISTIC_BEHAVIOR.md` - Deterministic behavior documentation
+  - `docs/testing/MANUAL_TEST_PLAN.md` - Manual testing guide
   - `README.md` - Project overview
 
 ## Next Milestones (Optional Enhancements)
