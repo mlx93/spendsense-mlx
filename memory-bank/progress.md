@@ -128,7 +128,12 @@
 - **Auditability:** 598/598 recommendations (100.0%) ✅ PASS
 - **All Success Criteria:** ✅ PASSING
 
-## Recent Enhancements (Latest)
+## Recent Enhancements (Latest - November 2024)
+- [x] **Library Filtering** - Regular users only see articles recommended to them; operators see all articles
+- [x] **TypeScript Fixes** - Fixed jsonwebtoken import errors (changed from default to namespace import across 5 files)
+- [x] **Submission Materials** - Created `submissionMaterials/` folder with all required documentation and evaluation artifacts
+- [x] **Technical Writeup** - Created `TECHNICAL_WRITEUP.md` covering tech stack, architecture, key decisions, and AI to-dos
+- [x] **AI Tools Documentation** - Created `AI_TOOLS_AND_PROMPTS.md` documenting OpenAI tool calling (built but not yet tested/production-ready)
 - [x] Dynamic article generation with OpenAI (on-demand, personalized)
 - [x] Function calling compliance validation (tone, advice, disclaimer checks)
 - [x] Rationale personalization improvements (content/offer-specific text)

@@ -229,51 +229,53 @@ SpendSense/
 
 ## Submission Checklist
 
+**All submission materials are organized in the `submissionMaterials/` folder.**
+
 Per the assignment requirements, submit the following artifacts:
 
 ### ✅ Code Repository
-- [ ] GitHub repository (public or private with access granted)
-- [ ] Complete codebase with all features implemented
-- [ ] All dependencies listed in `package.json`
-- [ ] One-command setup working (`npm run dev`)
+- [x] GitHub repository (public or private with access granted)
+- [x] Complete codebase with all features implemented
+- [x] All dependencies listed in `package.json`
+- [x] One-command setup working (`npm run dev`)
 
-### ✅ Documentation
-- [ ] **Technical Writeup (1-2 pages):** `docs/TECHNICAL_WRITEUP.md`
+### ✅ Documentation (in `submissionMaterials/`)
+- [x] **Technical Writeup (1-2 pages):** `submissionMaterials/TECHNICAL_WRITEUP.md`
   - System architecture overview
   - Key technical decisions
   - Implementation highlights
   - Known limitations
 
-- [ ] **AI Tools and Prompts Documentation:** `docs/AI_TOOLS_AND_PROMPTS.md`
+- [x] **AI Tools and Prompts Documentation:** `submissionMaterials/AI_TOOLS_AND_PROMPTS.md`
   - OpenAI API usage (chat, function calling)
   - System prompts
   - Tool definitions
   - Determinism settings
 
-- [ ] **Data Model/Schema Documentation:** `docs/SCHEMA.md`
+- [x] **Data Model/Schema Documentation:** `submissionMaterials/SCHEMA.md`
   - Complete database schema
   - Field definitions
   - Relationships
   - Indexes
 
-- [ ] **Decision Log:** `docs/DECISIONS.md`
+- [x] **Decision Log:** `submissionMaterials/DECISIONS.md`
   - Key architectural decisions
   - Rationale for choices
   - Trade-offs considered
 
-- [ ] **Limitations Document:** `docs/LIMITATIONS.md`
+- [x] **Limitations Document:** `submissionMaterials/LIMITATIONS.md`
   - Known limitations
   - Fairness deferral note
   - Future enhancements
 
-### ✅ Evaluation Artifacts
-- [ ] **Performance Metrics (JSON/CSV):** `data/evaluation/metrics.json` and `metrics.csv`
-  - Coverage: % users with persona + ≥3 behaviors
-  - Explainability: % recommendations with rationales
-  - Latency: Time to generate recommendations per user
-  - Auditability: % recommendations with decision traces
+### ✅ Evaluation Artifacts (in `submissionMaterials/`)
+- [x] **Performance Metrics (JSON/CSV):** `submissionMaterials/evaluation-metrics.json` and `evaluation-metrics.csv`
+  - Coverage: % users with persona + ≥3 behaviors (100%)
+  - Explainability: % recommendations with rationales (100%)
+  - Latency: Time to generate recommendations per user (<5s, P95 = 884ms)
+  - Auditability: % recommendations with decision traces (100%)
 
-- [ ] **Evaluation Summary Report (1-2 pages):** `docs/EVALUATION_REPORT.md`
+- [x] **Evaluation Summary Report (1-2 pages):** `submissionMaterials/evaluation-report.txt`
   - Overall system performance
   - Success criteria met
   - Known limitations

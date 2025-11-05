@@ -1,0 +1,11 @@
+Metric,Value,Target,Status
+Coverage (Users with Persona),100/100 (100.0%),100%,PASS
+Coverage (Users with ≥3 Signals),99/100 (99.0%),100%,FAIL
+Explainability (Rationales),632/632 (100.0%),100%,PASS
+Relevance (Avg Score),0.851,≥0.7,PASS
+Relevance (P50),0.850,≥0.7,PASS
+Relevance (P95),1.000,≥0.7,PASS
+Latency (Average ms),459,<5000,PASS
+Latency (P50 ms),359,<5000,PASS
+Latency (P95 ms),752,<5000,PASS
+Auditability (Traces),632/632 (100.0%),100%,PASS
