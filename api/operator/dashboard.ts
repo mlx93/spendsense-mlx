@@ -1,17 +1,16 @@
 // Vercel serverless function for /api/operator/dashboard
-
 process.env.VERCEL = '1';
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import app from '../../backend/src/server';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Update request for Express routing
-  (req as any).url = '/operator/dashboard' + (req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
-  (req as any).originalUrl = (req as any).url;
+  // Set the URL to /operator/dashboard (Express expects this path)
+  (req as any).url = '/operator/dashboard';
+  (req as any).originalUrl = '/operator/dashboard';
   (req as any).path = '/operator/dashboard';
-  (req as any).baseUrl = '';
-
+  
+  // Pass to Express app
   return app(req as any, res as any);
 }
 
