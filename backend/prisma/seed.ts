@@ -474,24 +474,25 @@ async function generateTransactionsForAccount(
       let currentDate = new Date(startDate);
       while (currentDate <= endDate) {
         if ((persona === 'savings_builder' || persona === 'net_worth_maximizer') && random() < 0.3) {
-        const transferAmount = persona === 'net_worth_maximizer' 
-          ? randomFloat(500, 3000)
-          : randomFloat(100, 1000);
-        transactions.push({
-          transaction_id: generateTransactionId(),
-          account_id: account.account_id,
-          date: new Date(currentDate),
-          amount: new Prisma.Decimal(-transferAmount),
-          merchant_name: 'Savings Transfer',
-          merchant_entity_id: null,
-          payment_channel: 'other',
-          personal_finance_category_primary: 'TRANSFER',
-          personal_finance_category_detailed: 'TRANSFER.SAVINGS',
-          pending: false,
-        });
-      }
+          const transferAmount = persona === 'net_worth_maximizer' 
+            ? randomFloat(500, 3000)
+            : randomFloat(100, 1000);
+          transactions.push({
+            transaction_id: generateTransactionId(),
+            account_id: account.account_id,
+            date: new Date(currentDate),
+            amount: new Prisma.Decimal(-transferAmount),
+            merchant_name: 'Savings Transfer',
+            merchant_entity_id: null,
+            payment_channel: 'other',
+            personal_finance_category_primary: 'TRANSFER',
+            personal_finance_category_detailed: 'TRANSFER.SAVINGS',
+            pending: false,
+          });
+        }
 
-      currentDate = new Date(currentDate.getTime() + payFrequency * 24 * 60 * 60 * 1000);
+        currentDate = new Date(currentDate.getTime() + payFrequency * 24 * 60 * 60 * 1000);
+      }
     }
   } else if (isCreditCard) {
     // Credit card transactions: spending and payments

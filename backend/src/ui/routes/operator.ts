@@ -41,6 +41,7 @@ router.get('/review', async (req: AuthRequest, res: Response) => {
         agenticReviewStatus: rec.agentic_review_status,
         agenticReviewReason: rec.agentic_review_reason,
         flaggedAt: rec.created_at,
+        status: rec.status, // Include status to show if hidden
       })),
       total: flaggedRecs.length,
     });

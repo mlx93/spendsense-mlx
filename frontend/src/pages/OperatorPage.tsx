@@ -23,6 +23,7 @@ interface FlaggedRecommendation {
   agenticReviewStatus: string;
   agenticReviewReason: string | null;
   flaggedAt: string;
+  status: string; // 'active', 'hidden', etc.
 }
 
 interface User {
@@ -107,6 +108,18 @@ export default function OperatorPage() {
     } catch (error) {
       console.error('Error hiding:', error);
       showToast('Failed to hide recommendation', 'error', 'Please try again');
+    }
+  };
+
+  const handleUnhide = async (recId: string) => {
+    try {
+      await operatorApi.approveRecommendation(recId, 'Unhidden by operator');
+      showToast('Recommendation unhidden', 'success', 'The recommendation is now active again');
+      loadData();
+      setSelectedRec(null);
+    } catch (error) {
+      console.error('Error unhiding:', error);
+      showToast('Failed to unhide recommendation', 'error', 'Please try again');
     }
   };
 
@@ -283,11 +296,16 @@ export default function OperatorPage() {
           <p className="text-gray-500">No flagged recommendations</p>
         ) : (
           <div className="space-y-4">
-            {flaggedRecs.map((rec) => (
+            {flaggedRecs.map((rec) => {
+              const isHidden = rec.status === 'hidden';
+              
+              return (
               <div
                 key={rec.id}
                 className={`border rounded-lg p-4 ${
-                  selectedRec === rec.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  selectedRec === rec.id ? 'border-blue-500 bg-blue-50' : 
+                  isHidden ? 'border-gray-300 bg-gray-50' :
+                  'border-gray-200'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -296,6 +314,11 @@ export default function OperatorPage() {
                       <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
                         FLAGGED
                       </span>
+                      {isHidden && (
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                          HIDDEN FROM USER
+                        </span>
+                      )}
                       <span className="text-sm text-gray-500">{rec.userEmail}</span>
                     </div>
                     <h3 className="font-semibold text-gray-900 mb-1">{rec.title}</h3>
@@ -308,18 +331,29 @@ export default function OperatorPage() {
                   </div>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => handleApprove(rec.id)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={() => handleHide(rec.id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium"
-                  >
-                    Hide
-                  </button>
+                  {!isHidden ? (
+                    <>
+                      <button
+                        onClick={() => handleApprove(rec.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleHide(rec.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium"
+                      >
+                        Hide
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleUnhide(rec.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium"
+                    >
+                      Unhide
+                    </button>
+                  )}
                   <button
                     onClick={() => setSelectedRec(selectedRec === rec.id ? null : rec.id)}
                     className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium"
@@ -330,11 +364,13 @@ export default function OperatorPage() {
                 {selectedRec === rec.id && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <p className="text-xs text-gray-500">User ID: {rec.userId}</p>
+                    <p className="text-xs text-gray-500">Status: {rec.status}</p>
                     <p className="text-xs text-gray-500">Flagged At: {new Date(rec.flaggedAt).toLocaleString()}</p>
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
