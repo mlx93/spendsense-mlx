@@ -432,24 +432,35 @@ router.post('/recommendation/:recommendationId/approve', async (req: AuthRequest
       agentic_review_status: recommendation.agentic_review_status,
     };
 
+    // If unhiding a flagged recommendation (status='hidden', agentic_review_status='flagged'),
+    // keep it flagged so it remains in the review queue with Accept/Hide buttons
+    // Otherwise, approve it (set to operator_approved) which removes it from the flagged queue
+    const isUnhiding = recommendation.status === 'hidden' && recommendation.agentic_review_status === 'flagged';
+    
     await prisma.recommendation.update({
       where: { id: recommendationId },
       data: {
         status: 'active',
-        agentic_review_status: 'operator_approved',
+        agentic_review_status: isUnhiding ? 'flagged' : 'operator_approved',
       },
     });
 
     // Log audit entry
+    const actionType = isUnhiding ? 'unhide' : 'approve';
+    const afterState = {
+      status: 'active',
+      agentic_review_status: isUnhiding ? 'flagged' : 'operator_approved',
+    };
+    
     await prisma.operatorAuditLog.create({
       data: {
         operator_id: req.userId!,
-        action_type: 'approve',
+        action_type: actionType,
         target_type: 'recommendation',
         target_id: recommendationId,
-        reason: notes || 'Approved by operator',
+        reason: notes || (isUnhiding ? 'Unhidden by operator' : 'Approved by operator'),
         before_state: JSON.stringify(beforeState),
-        after_state: JSON.stringify({ status: 'active', agentic_review_status: 'operator_approved' }),
+        after_state: JSON.stringify(afterState),
       },
     });
 
@@ -458,7 +469,7 @@ router.post('/recommendation/:recommendationId/approve', async (req: AuthRequest
       recommendation: {
         id: recommendationId,
         status: 'active',
-        agenticReviewStatus: 'operator_approved',
+        agenticReviewStatus: isUnhiding ? 'flagged' : 'operator_approved',
         approvedBy: req.userId,
         approvalNotes: notes,
         approvedAt: new Date(),
