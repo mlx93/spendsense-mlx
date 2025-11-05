@@ -72,11 +72,12 @@ npm run dev:frontend
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the `backend/` directory:
 
 ```env
-# Database
-DATABASE_URL="file:./spendsense.db"
+# Database (PostgreSQL/Supabase)
+# Replace with your actual Supabase connection string from Supabase dashboard
+DATABASE_URL="postgresql://postgres.USER:PASSWORD@aws-REGION.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true"
 
 # Authentication
 JWT_SECRET="your-secret-key-change-in-production"
@@ -93,6 +94,13 @@ DATA_SEED="1337"          # Fixed seed for deterministic data generation
 PORT=3000
 NODE_ENV="development"
 ```
+
+**Note:** 
+- The `.env` file should be created in the `backend/` directory (not project root)
+- **Never commit `.env` files to git** - they contain sensitive credentials
+- Get your Supabase connection string from: Supabase Dashboard → Project Settings → Database → Connection String
+- For local development with Supabase, use the pooled connection (port 6543)
+- For migrations, use the non-pooling connection (port 5432)
 
 **Local Run Mode (Required by Assignment):**
 - Set `USE_LLM_STUB=true` to run without external API dependencies
@@ -113,7 +121,7 @@ SpendSense/
 │   │   ├── guardrails/       # Consent, eligibility, tone checks
 │   │   ├── ui/               # API routes and middleware
 │   │   ├── eval/             # Evaluation harness
-│   │   └── docs/             # Decision log and schema docs
+│   │   └── services/         # External service integrations
 │   ├── prisma/
 │   │   ├── schema.prisma     # Database schema
 │   │   └── seed.ts           # Synthetic data generator
@@ -124,14 +132,22 @@ SpendSense/
 │   │   ├── pages/            # Page-level components
 │   │   └── lib/              # API client and utilities
 │   └── public/
+├── api/                      # Vercel serverless functions
 ├── content/                  # Pre-tagged educational content (JSON)
 ├── data/
 │   ├── offers/               # Partner offer JSON files
-│   └── synthetic-users/     # Generated user data (CSV/JSON)
+│   ├── synthetic-users/     # Generated user data (CSV/JSON)
+│   └── analytics/            # Evaluation metrics and reports
 ├── docs/                     # Documentation
+│   ├── analysis/             # Analysis documents
+│   ├── planning/             # Planning documents
+│   ├── testing/              # Testing documentation
 │   ├── DECISIONS.md          # Key architectural decisions
 │   ├── SCHEMA.md             # Data model documentation
 │   └── LIMITATIONS.md        # Known limitations
+├── specs/                    # PRDs and specifications
+├── memory-bank/              # Project memory and context
+├── submissionMaterials/      # Submission documentation and artifacts
 └── README.md                 # This file
 ```
 
@@ -281,7 +297,7 @@ Per the assignment requirements, submit the following artifacts:
   - Known limitations
   - Future improvements
 
-- [ ] **Per-User Decision Traces:** `data/evaluation/decision_traces/` (JSON files per user)
+- [ ] **Per-User Decision Traces:** `backend/data/analytics/decision_traces/` (JSON files per user)
   - User ID
   - Detected signals
   - Persona assignments with scores
@@ -391,10 +407,10 @@ npm run eval:report
 ```
 
 **Output Files:**
-- `data/evaluation/metrics.json`
-- `data/evaluation/metrics.csv`
-- `data/evaluation/summary_report.md`
-- `data/evaluation/decision_traces/*.json` (per-user traces)
+- `backend/data/analytics/evaluation-metrics.json`
+- `backend/data/analytics/evaluation-metrics.csv`
+- `backend/data/analytics/evaluation-report.txt`
+- `backend/data/analytics/decision_traces/*.json` (per-user traces)
 
 ---
 
@@ -445,7 +461,7 @@ See `SS_Architecture_PRD.md` for complete API documentation.
 - Node.js 20+ with TypeScript
 - Express.js
 - Prisma ORM
-- SQLite
+- PostgreSQL (Supabase)
 - date-fns
 - Zod
 
@@ -464,7 +480,6 @@ See `SS_Architecture_PRD.md` for complete API documentation.
 See `docs/LIMITATIONS.md` for complete list of known limitations.
 
 **Key Limitations:**
-- SQLite database (not production-scale)
 - Static synthetic data (no live Plaid integration)
 - No OAuth (JWT-only authentication)
 - No email/push notifications
@@ -481,7 +496,7 @@ See `docs/DECISIONS.md` for prioritized roadmap.
 - Real Plaid API integration
 - Email notifications
 - Enhanced security (2FA, rate limiting)
-- PostgreSQL migration
+- Performance optimizations
 
 **Phase 3:**
 - Real-time transaction streaming
@@ -539,14 +554,15 @@ vercel --prod
    - After import, go to **Project Settings** → **Environment Variables**
    - Add the following variables (click "Add" for each):
    
-   **Required Variables:**
-   ```
-   DATABASE_URL=/tmp/spendsense.db
-   JWT_SECRET=<generate-secure-random-string-here>
-   JWT_EXPIRES_IN=24h
-   USE_LLM_STUB=true
-   DATA_SEED=1337
-   ```
+**Required Variables:**
+  ```
+  # Replace USER, PASSWORD, and REGION with your actual Supabase credentials
+  DATABASE_URL=postgresql://postgres.USER:PASSWORD@aws-REGION.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
+  JWT_SECRET=<generate-secure-random-string-here>
+  JWT_EXPIRES_IN=24h
+  USE_LLM_STUB=true
+  DATA_SEED=1337
+  ```
    
    **Optional (if using OpenAI API):**
    ```
@@ -558,7 +574,7 @@ vercel --prod
 6. Click **"Deploy"**
 
 **Important Notes:**
-- **SQLite on Vercel:** For Vercel serverless functions, use `DATABASE_URL=/tmp/spendsense.db` (not `file:./`). SQLite files in `/tmp` reset on redeploy. For production persistence, consider Vercel Postgres or an external PostgreSQL database.
+- **Database:** This project uses Supabase PostgreSQL. Set `DATABASE_URL` to your Supabase connection string (use pooled connection for runtime, non-pooling for migrations).
 - **Generate JWT_SECRET:** Use a secure random string. You can generate one with:
   ```bash
   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"

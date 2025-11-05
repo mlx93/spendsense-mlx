@@ -67,3 +67,4 @@ temp/
 *.sqlite3
 backend/prisma/*.db
 backend/prisma/backend/
+.env.backup
